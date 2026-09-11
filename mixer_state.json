@@ -3,7 +3,7 @@
     {
       "id": 0,
       "name": "Entrada",
-      "volume": 0.0,
+      "volume": 70.4,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -71,10 +71,10 @@
     },
     {
       "id": 1,
-      "name": "Vocal",
-      "volume": 0.0,
+      "name": "Ch 1",
+      "volume": 65.2,
       "gain": 0.0,
-      "mute": true,
+      "mute": false,
       "eqEnabled": true,
       "hpf": {
         "enabled": false,
@@ -88,7 +88,7 @@
           "color": "#00FFFF",
           "freq": 80,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "LShv"
         },
         {
@@ -97,7 +97,7 @@
           "color": "#00FF00",
           "freq": 160,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
@@ -106,14 +106,14 @@
           "color": "#FFFF00",
           "freq": 500,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
           "id": 4,
           "name": "High Mid",
           "color": "#FF00FF",
-          "freq": 1720,
+          "freq": 1736.58127388313,
           "gain": 0,
           "q": 1.4,
           "mode": "PEQ"
@@ -124,7 +124,7 @@
           "color": "#FF0000",
           "freq": 4370,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
@@ -133,7 +133,7 @@
           "color": "#FF8800",
           "freq": 10000,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "HShv"
         }
       ]
@@ -141,7 +141,7 @@
     {
       "id": 2,
       "name": "Ch 2",
-      "volume": 0.0,
+      "volume": 76.8,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -210,7 +210,7 @@
     {
       "id": 3,
       "name": "Ch 3",
-      "volume": 0.0,
+      "volume": 56.1,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -279,7 +279,7 @@
     {
       "id": 4,
       "name": "Ch 4",
-      "volume": 0.0,
+      "volume": 45.2,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -348,7 +348,7 @@
     {
       "id": 5,
       "name": "Guitarra",
-      "volume": 0.0,
+      "volume": 77.0,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -417,7 +417,7 @@
     {
       "id": 6,
       "name": "Ch 6",
-      "volume": 0.0,
+      "volume": 59.2,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -486,7 +486,7 @@
     {
       "id": 7,
       "name": "Ch 7",
-      "volume": 0.0,
+      "volume": 77.7,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -555,7 +555,7 @@
     {
       "id": 8,
       "name": "Ch 8",
-      "volume": 0.0,
+      "volume": 80.8,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -624,7 +624,7 @@
     {
       "id": 9,
       "name": "Ch 9",
-      "volume": 0.0,
+      "volume": 76.8,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -693,7 +693,7 @@
     {
       "id": 10,
       "name": "Ch 10",
-      "volume": 0.0,
+      "volume": 62.6,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
