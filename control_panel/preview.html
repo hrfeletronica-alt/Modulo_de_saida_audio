@@ -431,11 +431,78 @@
             border-color: #FF0055 !important;
             box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
         }
+        /* Barra de Navegação Rápida entre Canais (Idêntica ao seletor de canais do EQ) */
+        .channel-nav-ribbon {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 6px;
+            padding: 8px 10px;
+            background: #161718;
+            border-bottom: 1px solid #111;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #161718;
+            flex-shrink: 0;
+            z-index: 50;
+        }
+        .channel-nav-ribbon::-webkit-scrollbar {
+            height: 4px;
+        }
+        .channel-nav-ribbon::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 2px;
+        }
+        .ribbon-pill {
+            flex: 0 0 auto;
+            min-width: 44px;
+            height: 40px;
+            padding: 0 10px;
+            background: #303135;
+            border: 1.5px solid #555;
+            border-radius: 6px;
+            color: #FFF;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: transform 0.05s, background 0.1s, border-color 0.1s, box-shadow 0.1s;
+            outline: none;
+            font-family: inherit;
+        }
+        .ribbon-pill:hover {
+            background: #3a3b42;
+            border-color: #777;
+        }
+        .ribbon-pill:active {
+            transform: scale(0.95);
+            background: #555;
+        }
+        .ribbon-pill.active {
+            background: #FF9900;
+            color: #000;
+            border-color: #FF9900;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.6);
+            font-weight: 800;
+        }
+        .ribbon-pill .ribbon-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: transparent;
+            display: none;
+        }
         .ribbon-pill.pink-noise-active {
             border-color: #FF0055 !important;
             color: #FF0055 !important;
         }
         .ribbon-pill.pink-noise-active .ribbon-dot {
+            display: inline-block;
             background-color: #FF0055 !important;
             box-shadow: 0 0 6px #FF0055;
         }
@@ -3364,7 +3431,8 @@
                 pill = document.createElement('button');
                 pill.className = `ribbon-pill ${isInput ? 'active' : ''}`;
                 pill.setAttribute('data-ch', i);
-                pill.innerHTML = `<span class="ribbon-dot"></span><span>${channelNumber}</span>`;
+                const labelText = isInput ? "LR" : `${channelNumber}: ${defaultName}`;
+                pill.innerHTML = `<span class="ribbon-dot"></span><span class="ribbon-text">${labelText}</span>`;
                 pill.onclick = () => {
                     strip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                     document.querySelectorAll('.ribbon-pill').forEach((p, idx) => p.classList.toggle('active', idx === i));
@@ -3465,6 +3533,10 @@
             });
 
             channelInput.addEventListener('input', () => {
+                if (pill) {
+                    const textSpan = pill.querySelector('.ribbon-text') || pill;
+                    textSpan.textContent = isInput ? "LR" : `${channelNumber}: ${channelInput.value}`;
+                }
                 if (modal.style.display === 'flex') {
                     if (activeChannelIdx === i) {
                         modalTitle.textContent = "EQ Eight - " + channelInput.value;
