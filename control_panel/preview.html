@@ -3078,15 +3078,13 @@
                 data.hpfFilter2.Q.setTargetAtTime(0.707, audioCtx.currentTime, 0.01);
             }
 
-            const mode = (typeof channelEQMode !== 'undefined' && channelEQMode[idx]) ? channelEQMode[idx] : 'peq';
-
-            // 2. Modo PEQ: aplica ganhos no PEQ se estiver em 'peq'; se estiver em 'geq', zera PEQ para bypass
+            // 2. Filtros PEQ (Paramétrico 6 Bandas): permanecem ativos e cumulativos com o GEQ
             bands.forEach((b, i) => {
                 const filter = data.eqFilters[i];
                 if (!filter) return;
                 try {
                     const targetFreq = Math.max(20, Math.min(20000, b.freq));
-                    const targetGain = (isEqActive && mode === 'peq') ? b.gain : 0.0;
+                    const targetGain = isEqActive ? b.gain : 0.0;
                     filter.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.01);
                     filter.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.01);
                     if (filter.type === 'peaking') {
@@ -3095,7 +3093,7 @@
                 } catch(e) {}
             });
 
-            // 3. Modo GEQ: aplica ganhos no GEQ de 31 bandas se estiver em 'geq'; se estiver em 'peq', zera GEQ para bypass
+            // 3. Filtros GEQ (Gráfico 31 Bandas ISO): permanecem ativos e cumulativos com o PEQ
             if (data.geqFilters) {
                 const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[idx])
                     ? channelGEQState[idx]
@@ -3104,7 +3102,7 @@
                     const f = data.geqFilters[k];
                     if (!f) continue;
                     try {
-                        const targetGain = (isEqActive && mode === 'geq' && geqBands) ? geqBands[k] : 0.0;
+                        const targetGain = (isEqActive && geqBands) ? geqBands[k] : 0.0;
                         f.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.01);
                     } catch(e) {}
                 }
@@ -3830,6 +3828,19 @@
             if (peqView) {
                 if (mode === 'peq') {
                     peqView.classList.remove('hidden');
+                    currentBands = (typeof channelEQState !== 'undefined' && channelEQState[ch])
+                        ? channelEQState[ch] : defaultBands;
+                    currentBands.forEach((b, k) => {
+                        const freqStr = b.freq >= 1000 ? (b.freq/1000).toFixed(2)+'k' : Math.round(b.freq)+' Hz';
+                        setBoxVal(document.getElementById(`bx-f-${k}`), freqStr);
+                        setBoxVal(document.getElementById(`bx-g-${k}`), b.gain.toFixed(1));
+                        setBoxVal(document.getElementById(`bx-q-${k}`), b.q.toFixed(1));
+                    });
+                    if (typeof updateHPFUI === 'function') updateHPFUI();
+                    if (typeof updateKnobs === 'function') updateKnobs();
+                    if (typeof drawEQGraph === 'function') drawEQGraph();
+                    syncModalGain(ch);
+                    syncModalFader(ch);
                 } else {
                     peqView.classList.add('hidden');
                 }
@@ -4846,6 +4857,25 @@
                         if (hpf && hpf.enabled) {
                             eqDb += getHPFResponseDb(f0, hpf);
                         }
+                        // Inclui resposta do PEQ na frequência f0
+                        const peqBands = (typeof channelEQState !== 'undefined' && channelEQState[activeChannelIdx])
+                            ? channelEQState[activeChannelIdx] : currentBands;
+                        if (peqBands) {
+                            peqBands.forEach(band => {
+                                if (band.gain === 0) return;
+                                if (band.mode === 'HShv') {
+                                    const oct = Math.log2(f0 / band.freq);
+                                    eqDb += band.gain / (1 + Math.exp(-oct * 2.2));
+                                } else if (band.mode === 'LShv') {
+                                    const oct = Math.log2(f0 / band.freq);
+                                    eqDb += band.gain / (1 + Math.exp(oct * 2.2));
+                                } else {
+                                    const octDiff = Math.log2(f0 / band.freq);
+                                    const bw = 1 / Math.max(0.1, band.q);
+                                    eqDb += band.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                                }
+                            });
+                        }
                         if (geqBands) {
                             eqDb += (geqBands[k] || 0);
                         }
@@ -5017,7 +5047,7 @@
 
                     let normLevel = 0;
 
-                    // Resposta da curva do EQ Eight em dB na frequência exata desta barra
+                    // Resposta cumulativa total (PEQ + GEQ + HPF) em dB na frequência exata desta barra
                     let eqDb = 0;
                     if (eqEnabled) {
                         const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[activeChannelIdx])
@@ -5025,22 +5055,38 @@
                         if (hpf && hpf.enabled) {
                             eqDb += getHPFResponseDb(curF, hpf);
                         }
-                        currentBands.forEach(band => {
-                            if (band.gain === 0) return;
-                            if (band.mode === 'HShv') {
-                                const oct = Math.log2(curF / band.freq);
-                                const factor = 1 / (1 + Math.exp(-oct * 2.2));
-                                eqDb += band.gain * factor;
-                            } else if (band.mode === 'LShv') {
-                                const oct = Math.log2(curF / band.freq);
-                                const factor = 1 / (1 + Math.exp(oct * 2.2));
-                                eqDb += band.gain * factor;
-                            } else {
-                                const octDiff = Math.log2(curF / band.freq);
-                                const bw = 1 / Math.max(0.1, band.q);
-                                eqDb += band.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                        // Contribuição do PEQ
+                        const peqBands = (typeof channelEQState !== 'undefined' && channelEQState[activeChannelIdx])
+                            ? channelEQState[activeChannelIdx] : currentBands;
+                        if (peqBands) {
+                            peqBands.forEach(band => {
+                                if (band.gain === 0) return;
+                                if (band.mode === 'HShv') {
+                                    const oct = Math.log2(curF / band.freq);
+                                    eqDb += band.gain / (1 + Math.exp(-oct * 2.2));
+                                } else if (band.mode === 'LShv') {
+                                    const oct = Math.log2(curF / band.freq);
+                                    eqDb += band.gain / (1 + Math.exp(oct * 2.2));
+                                } else {
+                                    const octDiff = Math.log2(curF / band.freq);
+                                    const bw = 1 / Math.max(0.1, band.q);
+                                    eqDb += band.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                                }
+                            });
+                        }
+                        // Contribuição do GEQ
+                        const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[activeChannelIdx])
+                            ? channelGEQState[activeChannelIdx] : null;
+                        if (geqBands) {
+                            const bw = 1 / 4.31;
+                            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                                const g = geqBands[k];
+                                if (!g) continue;
+                                const f0 = ISO_GEQ_FREQS[k];
+                                const octDiff = Math.log2(curF / f0);
+                                eqDb += g * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
                             }
-                        });
+                        }
                     }
 
                     // === 1. RUÍDO ROSA: espectro sintetizado calibrado para RTA ===
@@ -5487,8 +5533,6 @@
             ctx.strokeStyle = "#FF8800";
             ctx.lineWidth = 1.5;
 
-            const curMode = (typeof channelEQMode !== 'undefined' && channelEQMode[chIdx]) ? channelEQMode[chIdx] : 'peq';
-
             ctx.beginPath();
             ctx.moveTo(0, h/2);
             for (let px = 0; px <= w; px++) {
@@ -5496,28 +5540,28 @@
                 const curF = Math.pow(10, curLogF);
                 let totalDb = 0;
                 if (isEqOn) {
+                    // Resposta do HPF
                     if (hpf && hpf.enabled) {
                         totalDb += getHPFResponseDb(curF, hpf);
                     }
-                    if (curMode === 'peq') {
-                        bands.forEach(b => {
-                            if (b.gain === 0) return;
-                            const octDiff = Math.log2(curF / b.freq);
-                            const bw = 1 / b.q;
-                            totalDb += b.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
-                        });
-                    } else if (curMode === 'geq') {
-                        const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[chIdx])
-                            ? channelGEQState[chIdx] : null;
-                        if (geqBands) {
-                            const bw = 1 / 4.31; // Q de 1/3 oitava
-                            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
-                                const g = geqBands[k];
-                                if (!g) continue;
-                                const f0 = ISO_GEQ_FREQS[k];
-                                const octDiff = Math.log2(curF / f0);
-                                totalDb += g * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
-                            }
+                    // Resposta do EQ Paramétrico (PEQ)
+                    bands.forEach(b => {
+                        if (b.gain === 0) return;
+                        const octDiff = Math.log2(curF / b.freq);
+                        const bw = 1 / b.q;
+                        totalDb += b.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                    });
+                    // Resposta do EQ Gráfico (GEQ)
+                    const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[chIdx])
+                        ? channelGEQState[chIdx] : null;
+                    if (geqBands) {
+                        const bw = 1 / 4.31; // Q de 1/3 oitava
+                        for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                            const g = geqBands[k];
+                            if (!g) continue;
+                            const f0 = ISO_GEQ_FREQS[k];
+                            const octDiff = Math.log2(curF / f0);
+                            totalDb += g * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
                         }
                     }
                 }

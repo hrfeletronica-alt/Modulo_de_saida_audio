@@ -3,7 +3,7 @@
     {
       "id": 0,
       "name": "Entrada",
-      "volume": 70.4,
+      "volume": 67.7,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -106,14 +106,14 @@
     {
       "id": 1,
       "name": "Saida 1",
-      "volume": 52.2,
+      "volume": 71.1,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
       "eqMode": "geq",
       "hpf": {
         "enabled": false,
-        "freq": 20,
+        "freq": 23,
         "slope": 12
       },
       "bands": [
@@ -121,9 +121,9 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 79.23614176278403,
-          "gain": 0,
-          "q": 2,
+          "freq": 83.93117833090476,
+          "gain": -0.13761467889908258,
+          "q": 6.960000000000004,
           "mode": "LShv"
         },
         {
@@ -148,7 +148,7 @@
           "id": 4,
           "name": "High Mid",
           "color": "#FF00FF",
-          "freq": 1736.58127388313,
+          "freq": 1720,
           "gain": 0,
           "q": 1.4,
           "mode": "PEQ"
@@ -157,8 +157,8 @@
           "id": 5,
           "name": "High 2",
           "color": "#FF0000",
-          "freq": 4086.154375400143,
-          "gain": -0.13761467889908197,
+          "freq": 4370,
+          "gain": 0,
           "q": 2,
           "mode": "PEQ"
         },
@@ -166,8 +166,8 @@
           "id": 6,
           "name": "High",
           "color": "#FF8800",
-          "freq": 12115.276586285901,
-          "gain": -0.41284403669724773,
+          "freq": 10000,
+          "gain": 0,
           "q": 2,
           "mode": "HShv"
         }
