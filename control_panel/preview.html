@@ -1,0 +1,3639 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Audio Mixer Preview</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            background-color: #141517;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            overscroll-behavior-y: contain;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Top Navigation App Bar */
+        .app-header {
+            height: 48px;
+            background: #1c1d21;
+            border-bottom: 1px solid #2d2e33;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mixer-logo {
+            font-size: 18px;
+        }
+        .mixer-title {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #eeeeee;
+        }
+
+        /* Sync Status Badge (integrado na barra superior) */
+        .sync-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(30, 31, 35, 0.95);
+            border: 1px solid #444;
+            border-radius: 14px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #00ff66;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #00ff66;
+            box-shadow: 0 0 6px #00ff66;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        .sync-badge.disconnected {
+            color: #ff4444;
+            border-color: #772222;
+        }
+        .sync-badge.disconnected .status-dot {
+            background-color: #ff4444;
+            box-shadow: 0 0 6px #ff4444;
+        }
+
+        /* Player de Áudio Provisório (Carregar arquivo do PC) */
+        .audio-player-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #25272d;
+            padding: 3px 8px;
+            border-radius: 8px;
+            border: 1px solid #3d3f47;
+        }
+        .player-load-btn {
+            background: #ff9900;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 9px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+        .player-load-btn:hover {
+            background: #ffaa22;
+        }
+        .player-load-btn:active {
+            transform: scale(0.96);
+        }
+        .player-play-btn {
+            background: #33363f;
+            color: #00ff88;
+            border: 1px solid #484c58;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 700;
+            width: 28px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .player-play-btn:hover:not(:disabled) {
+            background: #3f4350;
+        }
+
+
+        /* Mixer horizontal container & channels */
+        .mixer-wrapper {
+            flex: 1;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: stretch;
+        }
+        .mixer-container {
+            display: inline-flex;
+            background-color: #2B2B2B;
+            padding: 10px;
+            border-radius: 8px;
+            gap: 6px;
+            height: 100%;
+            min-height: 480px;
+        }
+        .channel-strip {
+            width: 84px;
+            flex-shrink: 0;
+            background-color: #B0B0B0;
+            border: 2px solid black;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            position: relative;
+            user-select: none;
+        }
+        .main-strip {
+            background-color: #704422;
+            border-color: #FF5500;
+        }
+        
+        .eq-display {
+            background-color: #1a2200;
+            border: 2px solid black;
+            border-radius: 4px;
+            margin: 4px 4px 0 4px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .eq-display:hover { border-color: white; }
+        .eq-canvas { width: 100%; height: 100%; pointer-events: none; }
+
+        .mute-btn {
+            background-color: #DEDEDE; border: 2px solid black; border-radius: 4px;
+            color: black; font-weight: bold; font-size: 12px; height: 35px;
+            margin: 4px; cursor: pointer;
+            touch-action: manipulation;
+        }
+        .mute-btn.muted { background-color: red; color: white; }
+        
+        .fader-area {
+            background-color: black; border: 1px solid black; border-radius: 4px;
+            margin: 2px 4px; flex-grow: 1; position: relative; height: 250px;
+            display: flex; overflow: hidden; touch-action: none;
+        }
+        .main-strip .fader-area { border: 2px solid #FF5500; }
+        
+        .meter-bg { position: absolute; left: 8px; top: 10px; bottom: 10px; width: 12px; background-color: #1A3300; }
+        .meter-fill { position: absolute; left: 8px; bottom: 10px; width: 12px; height: 0%; background-color: #4C9900; transition: height 0.05s; }
+        .meter-fill.muted { background-color: transparent; }
+        
+        .scale-marks {
+            position: absolute; right: 4px; top: 10px; bottom: 10px; width: 20px;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+            font-size: 8px; color: white; pointer-events: none;
+        }
+        .fader-track { position: absolute; right: 25px; top: 10px; bottom: 10px; width: 4px; background-color: #111; pointer-events: none; }
+        .fader-track-line { position: absolute; left: 1px; top: 0; bottom: 0; width: 2px; background: #222; }
+        .fader-track-mark-0db { position: absolute; left: -3px; right: -3px; bottom: 70%; height: 2px; background: #FF9900; }
+        
+        .fader-cap {
+            position: absolute; right: 8px; width: 38px; height: 26px;
+            background: #E0E0E0; border: 1px solid black; border-radius: 4px;
+            box-shadow: inset 0 0 0 2px #E0E0E0, 0 2px 5px rgba(0,0,0,0.5);
+            background-image: linear-gradient(90deg, transparent 40%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.6) 60%, transparent 60%);
+            cursor: grab; transform: translateY(50%); z-index: 10;
+        }
+        .fader-cap:active { cursor: grabbing; }
+
+        .fader-touch-area {
+            position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+            touch-action: none; cursor: pointer; z-index: 5;
+        }
+        
+        .channel-label-container {
+            height: 52px; background-color: #999999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 2px; border-top: 1px solid black;
+        }
+        .main-strip .channel-label-container { background-color: #552200; }
+        .channel-number { font-size: 10px; font-weight: bold; color: black; margin-bottom: 2px; }
+        .main-strip .channel-number { color: white; }
+        .channel-input {
+            width: 92%; font-size: 11px; font-weight: bold; text-align: center;
+            background-color: rgba(255, 255, 255, 0.9); border: 1px solid #666; border-radius: 2px;
+            padding: 3px 2px; box-sizing: border-box; color: black;
+        }
+        .main-strip .channel-input { background-color: transparent; border: none; color: white; pointer-events: none; }
+        
+        .fader-vol-text {
+            font-size: 10px; font-weight: bold; color: #fff; text-align: center; margin: 2px 0;
+        }
+        
+        .meter-clip.line1 { top: 3px; }
+        .meter-clip.line2 { top: 7px; }
+        
+        /* Cortina escura que desce do TOPO — revela o gradiente fixo abaixo */
+        .meter-fill {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 100%;          /* Começa em 100% (cobre tudo = sem sinal) */
+            background: #0a0a0c;   /* mesma cor do fundo da fader-area */
+            transition: height 0.04s linear;
+        }
+        .meter-fill.muted {
+            height: 100% !important; /* cobre tudo quando mutado */
+        }
+        
+        /* Indicador de Ruído Rosa Ativo no Canal */
+        .channel-strip.pink-noise-active {
+            border-color: #FF0055 !important;
+            box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
+        }
+        .ribbon-pill.pink-noise-active {
+            border-color: #FF0055 !important;
+            color: #FF0055 !important;
+        }
+        .ribbon-pill.pink-noise-active .ribbon-dot {
+            background-color: #FF0055 !important;
+            box-shadow: 0 0 6px #FF0055;
+        }
+        
+        .scale-marks {
+            position: absolute;
+            right: 6px;
+            top: 10px;
+            bottom: 10px;
+            width: 24px;
+            pointer-events: none;
+            font-size: 9px;
+            font-weight: bold;
+            color: #FFFFFF;
+            font-family: monospace, sans-serif;
+            opacity: 0.85;
+        }
+        .scale-marks span {
+            position: absolute;
+            right: 0;
+            transform: translateY(-50%);
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .scale-mark-0u {
+            color: #FF9900 !important;
+            font-weight: 800 !important;
+            text-shadow: 0 0 6px rgba(255, 153, 0, 0.7);
+        }
+        .fader-track-mark-0db {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            height: 2px;
+            background: #FF9900;
+            box-shadow: 0 0 6px rgba(255, 153, 0, 0.8);
+            border-radius: 1px;
+            bottom: 70%; /* 70% do fundo = 0dB exato (Unity Gain) */
+            pointer-events: none;
+            z-index: 2;
+        }
+        .fader-track {
+            position: absolute;
+            right: 32px;
+            top: 10px;
+            bottom: 10px;
+            width: 3px;
+            background-color: #2b2c30;
+            border-radius: 1px;
+            pointer-events: none;
+        }
+        
+        .fader-track-touch {
+            position: absolute;
+            right: 4px;
+            top: 10px;
+            bottom: 10px;
+            width: 50px;
+            cursor: pointer;
+            touch-action: none;
+            user-select: none;
+            z-index: 5;
+        }
+        .fader-track-line {
+            position: absolute;
+            left: 23px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #1e1f24;
+            border-radius: 2px;
+
+            print(f"[ESP32 API] Canal {ch_id}: Volume {val_raw} ({val_pct}%)")
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'OK')
+            return
+
+        if mute_match:
+            ch_id = int(mute_match.group(1))
+            state = bool(data.get('state', 0))
+
+            apply_sync_payload({
+                'type': 'mute',
+                'channel': ch_id,
+                'value': state,
+                'clientId': 'esp32'
+            })
+
+            print(f"[ESP32 API] Canal {ch_id}: Mute alterado para {state}")
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'OK')
+            return
+
+        self.send_response(404)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(b'Not Found')
+
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        super().end_headers()
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+def run():
+    with ThreadedTCPServer(("0.0.0.0", PORT), AudioMixerHandler) as httpd:
+        print("==================================================")
+        print("  Servidor Audio Mixer com WEBSOCKET & SSE")
+        print(f"  URL Local:   http://localhost:{PORT}")
+        print(f"  Celular:     http://192.168.31.236:{PORT}")
+        print(f"  Interface:   http://localhost:{PORT}/preview.html")
+        print("==================================================")
+        sys.stdout.flush()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            border: 1px solid #777;
+            border-radius: 4px;
+            color: #000;
+            font-family: sans-serif;
+            margin-top: 12px;
+            padding: 4px 2px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+            cursor: text;
+        }
+        .main-strip .channel-input {
+            background-color: transparent;
+            border: none;
+            color: #FFF;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        /* Mobile Optimized EQ Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.92); display: none; align-items: flex-start; justify-content: center; z-index: 1000;
+            padding-top: 4vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        }
+        .modal-content {
+            background: #232428; border-radius: 10px; border: 1px solid #111;
+            width: 96%; max-width: 800px; color: #b3b3b3; display: flex; flex-direction: column;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9); font-family: sans-serif;
+            padding: 12px; margin-bottom: 20px; box-sizing: border-box;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; padding: 0 4px;
+        }
+        .close-btn {
+            background: #444; border: 1px solid #222; color: #FFF; height: 42px; padding: 0 20px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 14px;
+            touch-action: manipulation; user-select: none; transition: transform 0.05s, background 0.1s;
+        }
+        .close-btn:active { transform: scale(0.95); background: #555; }
+        
+        /* EQ Graph Area */
+        .eq-graph-container {
+            height: 220px; background-color: #0f1012; border: 1px solid #333;
+            position: relative; margin-bottom: 12px; border-radius: 6px; width: 100%;
+        }
+        .eq-main-canvas { width: 100%; height: 100%; display: block; border-radius: 6px; }
+        
+        /* Band Boxes Row */
+        .eq-bands-row {
+            display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; margin-bottom: 12px;
+        }
+        .band-box {
+            background: #34353a; border: 1.5px solid #1c1c1c; border-radius: 6px; flex: 1 1 30%; min-width: 90px;
+            display: flex; flex-direction: column; padding: 6px; cursor: pointer; position: relative;
+            touch-action: manipulation; user-select: none; transition: transform 0.05s, border-color 0.1s;
+        }
+        .band-box:active { transform: scale(0.97); }
+        .band-box.selected { background: #44464c; border: 2px solid #FF9900; box-shadow: 0 0 8px rgba(255,153,0,0.4); }
+        .band-header {
+            display: flex; align-items: center; margin-bottom: 4px; border-bottom: 2px solid; padding-bottom: 3px;
+        }
+        .band-num {
+            background: #111; color: white; width: 18px; height: 18px; display: inline-flex;
+            align-items: center; justify-content: center; font-size: 12px; margin-right: 5px; border-radius: 3px; font-weight: bold;
+        }
+        .band-name { font-size: 12px; font-weight: bold; color: #FFF; }
+        
+        .band-param { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
+        .param-lbl { font-size: 11px; color: #AAA; }
+        .param-val-box {
+            background: #cfcfcf; color: #000; border: 1px solid #111; border-radius: 3px;
+            font-size: 11px; padding: 2px 5px; min-width: 44px; text-align: right; font-weight: bold;
+        }
+        
+        /* Bottom Controls Row */
+        .step-btn {
+            width: 40px;
+            height: 40px;
+            background: #2f3035;
+            border: 1.5px solid #666;
+            border-radius: 6px;
+            color: #FFF;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.05s, background 0.1s;
+        }
+        .step-btn:active {
+            transform: scale(0.92);
+            background: #555;
+            border-color: #FF9900;
+        }
+
+        .eq-bottom-row {
+            display: flex; flex-wrap: wrap; background: #323338; border: 1px solid #1c1c1c; border-radius: 6px;
+            padding: 10px; gap: 8px; align-items: center; justify-content: space-around;
+        }
+        .knob-container {
+            display: flex; align-items: center; gap: 10px; touch-action: none;
+        }
+        .knob {
+            width: 56px; height: 56px; border-radius: 50%; background: #1c1d20; border: 2.5px solid #111;
+            position: relative; cursor: pointer;
+            box-shadow: inset 0 3px 6px rgba(255,255,255,0.15), 0 4px 8px rgba(0,0,0,0.6);
+        }
+        .knob-indicator {
+            position: absolute; top: 5px; left: 25px; width: 4px; height: 18px; background: #FF9900;
+            transform-origin: center 23px; border-radius: 2px;
+        }
+        .knob-data { display: flex; flex-direction: column; }
+        .channel-input {
+            width: 90%;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            background-color: #FFFFFF;
+            border: 1px solid #777;
+            border-radius: 4px;
+            color: #000;
+            font-family: sans-serif;
+            margin-top: 12px;
+            padding: 4px 2px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+            cursor: text;
+        }
+        .main-strip .channel-input {
+            background-color: transparent;
+            border: none;
+            color: #FFF;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        /* Mobile Optimized EQ Modal Styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.92); display: none; align-items: flex-start; justify-content: center; z-index: 1000;
+            padding-top: 4vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        }
+        .modal-content {
+            background: #232428; border-radius: 10px; border: 1px solid #111;
+            width: 96%; max-width: 800px; color: #b3b3b3; display: flex; flex-direction: column;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9); font-family: sans-serif;
+            padding: 12px; margin-bottom: 20px; box-sizing: border-box;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; padding: 0 4px;
+        }
+        .close-btn {
+            background: #444; border: 1px solid #222; color: #FFF; height: 42px; padding: 0 20px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 14px;
+            touch-action: manipulation; user-select: none; transition: transform 0.05s, background 0.1s;
+        }
+        .close-btn:active { transform: scale(0.95); background: #555; }
+        
+        /* EQ Graph Area + Fader lateral */
+        .eq-graph-wrapper {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: stretch;
+        }
+        .eq-graph-container {
+            height: 220px; background-color: #0f1012; border: 1px solid #333;
+            position: relative; border-radius: 6px; flex: 1;
+        }
+        .eq-main-canvas { width: 100%; height: 100%; display: block; border-radius: 6px; }
+
+        /* Fader Vertical no Modal */
+        .modal-fader-panel {
+            width: 64px;
+            min-height: 220px;
+            background: #0f1012;
+            border: 1px solid #333;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 8px 4px 6px;
+            background: #555;
+            border-color: #FF9900;
+        }
+
+        .eq-bottom-row {
+            display: flex; flex-wrap: wrap; background: #323338; border: 1px solid #1c1c1c; border-radius: 6px;
+            padding: 10px; gap: 8px; align-items: center; justify-content: space-around;
+        }
+        .knob-container {
+            text-align: center;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .modal-fader-val {
+            font-size: 11px;
+            font-weight: bold;
+            color: #FF9900;
+            text-align: center;
+            background: #1a1b1f;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 2px 4px;
+            min-width: 46px;
+            flex-shrink: 0;
+        }
+        .modal-fader-track-area {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            min-height: 100px;
+        }
+        .modal-fader-track-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            margin-left: -2px;
+            background: #1e1f24;
+            border-radius: 2px;
+            border: 1px solid #111;
+        }
+        .modal-fader-mark-0db {
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            height: 2px;
+            background: #FF9900;
+            box-shadow: 0 0 6px rgba(255,153,0,0.8);
+            border-radius: 1px;
+            bottom: 70%; /* 70% do fundo = marca 0dB (Unity Gain) */
+            pointer-events: none;
+            z-index: 2;
+        }
+        .modal-fader-scale {
+            position: absolute;
+            right: 2px;
+            top: 0;
+            bottom: 0;
+            width: 18px;
+            pointer-events: none;
+            font-size: 8px;
+            font-weight: bold;
+            font-family: monospace, sans-serif;
+            color: #777;
+            user-select: none;
+        }
+        .modal-fader-scale span {
+            position: absolute;
+            right: 0;
+            transform: translateY(-50%);
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .modal-fader-scale .mark-0u {
+            color: #FF9900;
+            font-weight: 800;
+            text-shadow: 0 0 6px rgba(255, 153, 0, 0.7);
+        }
+        .modal-fader-cap {
+            position: absolute;
+            left: 50%;
+            width: 44px;
+            height: 36px;
+            margin-left: -22px;
+            margin-bottom: -18px;
+            border-radius: 4px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #D8D8D8 30%, #A0A0A0 50%, #E0E0E0 75%, #B0B0B0 100%);
+            background-image: linear-gradient(180deg, transparent 40%, #444 40%, #444 60%, transparent 60%);
+            border: 1px solid #000;
+            box-shadow: inset 0 1px 0 #FFFFFF, 0 3px 8px rgba(0,0,0,0.85);
+            cursor: grab;
+            transition: box-shadow 0.05s;
+        }
+        .modal-fader-cap:active, .modal-fader-cap.dragging {
+            box-shadow: inset 0 1px 0 #FFFFFF, 0 0 12px rgba(255,153,0,0.9);
+            border-color: #ff9900;
+        }
+        
+        /* Band Boxes Row */
+        .eq-bands-row {
+            display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; margin-bottom: 12px;
+        }
+        .band-box {
+            background: #34353a; border: 1.5px solid #1c1c1c; border-radius: 6px; flex: 1 1 30%; min-width: 90px;
+            display: flex; flex-direction: column; padding: 6px; cursor: pointer; position: relative;
+            touch-action: manipulation; user-select: none; transition: transform 0.05s, border-color 0.1s;
+        }
+        .band-box:active { transform: scale(0.97); }
+        .band-box.selected { background: #44464c; border: 2px solid #FF9900; box-shadow: 0 0 8px rgba(255,153,0,0.4); }
+        .band-header {
+            display: flex; align-items: center; margin-bottom: 4px; border-bottom: 2px solid; padding-bottom: 3px;
+        }
+        .band-num {
+            background: #111; color: white; width: 18px; height: 18px; display: inline-flex;
+            align-items: center; justify-content: center; font-size: 12px; margin-right: 5px; border-radius: 3px; font-weight: bold;
+        }
+        .band-name { font-size: 12px; font-weight: bold; color: #FFF; }
+        
+        .band-param { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
+        .param-lbl { font-size: 11px; color: #AAA; }
+        .param-val-box {
+            background: #cfcfcf; color: #000; border: 1px solid #111; border-radius: 3px;
+            font-size: 11px; padding: 2px 4px; width: 50px; text-align: right; font-weight: bold;
+            outline: none; box-sizing: border-box; font-family: inherit;
+        }
+        .param-val-box:focus {
+            background: #FFF; border-color: #FF9900; box-shadow: 0 0 4px #FF9900;
+        }
+        
+        /* Bottom Controls Row */
+        .step-btn {
+            width: 40px;
+            height: 40px;
+            background: #2f3035;
+            border: 1.5px solid #666;
+            border-radius: 6px;
+            color: #FFF;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.05s, background 0.1s;
+        }
+        .step-btn:active {
+            transform: scale(0.92);
+            background: #555;
+            border-color: #FF9900;
+        }
+
+                /* Toolbar de Ações do EQ (EQ On, RTA, HPF, Ruído Rosa, Reset) */
+        .eq-actions-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .eq-on-btn {
+            height: 38px;
+            min-width: 90px;
+            padding: 0 12px;
+            border-radius: 6px;
+            border: 1px solid #111;
+            background: #FF9900;
+            color: #000;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            transition: transform 0.05s, opacity 0.1s, background 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .eq-on-btn:active { transform: scale(0.95); opacity: 0.9; }
+
+        .eq-bottom-row {
+            display: flex; flex-wrap: wrap; background: #323338; border: 1px solid #1c1c1c; border-radius: 6px;
+            padding: 10px; gap: 12px; align-items: center; justify-content: space-around;
+        }
+        .knob-container {
+            display: flex; flex-direction: column; align-items: center; gap: 6px; touch-action: none; user-select: none;
+        }
+        .knob-lbl { font-size: 12px; color: #CCC; text-align: center; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; }
+        .knob {
+            width: 52px; height: 52px; border-radius: 50%; background: #1c1d20; border: 2.5px solid #111;
+            position: relative; cursor: pointer;
+            box-shadow: inset 0 3px 6px rgba(255,255,255,0.15), 0 4px 8px rgba(0,0,0,0.6);
+        }
+        .knob-indicator {
+            position: absolute; top: 5px; left: 23px; width: 4px; height: 16px; background: #FF9900;
+            transform-origin: center 21px; border-radius: 2px;
+        }
+        .knob-stepper-wrap {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .knob-val {
+            background: white; color: black; font-size: 12px; font-weight: bold; padding: 4px 6px;
+            border-radius: 4px; border: 1px solid #000; text-align: center; min-width: 58px;
+        }
+
+        .ch-selector-row {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 6px;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #161718;
+            border-radius: 6px;
+            border: 1px solid #111;
+            -webkit-overflow-scrolling: touch;
+        }
+        .ch-selector-row::-webkit-scrollbar {
+            height: 4px;
+        }
+        .ch-selector-row::-webkit-scrollbar-thumb {
+            background: #444; border-radius: 2px;
+        }
+        .ch-btn {
+            flex: 0 0 auto;
+            min-width: 44px;
+            height: 40px;
+            padding: 0 10px;
+            background: #303135;
+            border: 1.5px solid #555;
+            border-radius: 6px;
+            color: #FFF;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            transition: transform 0.05s, background 0.1s;
+        }
+        .ch-btn:active  { transform: scale(0.95); background: #555; }
+        .ch-btn.active {
+            background: #FF9900;
+            color: #000;
+            border-color: #FF9900;
+            box-shadow: 0 0 10px rgba(255,153,0,0.6);
+        }
+
+        .b1 .band-header { border-color: #00FFFF; } .b1 .band-num { color: #00FFFF; border: 1px solid #00FFFF;}
+        .b2 .band-header { border-color: #00FF00; } .b2 .band-num { color: #00FF00; border: 1px solid #00FF00;}
+        .b3 .band-header { border-color: #FFFF00; } .b3 .band-num { color: #FFFF00; border: 1px solid #FFFF00;}
+        .b4 .band-header { border-color: #FF00FF; } .b4 .band-num { color: #FF00FF; border: 1px solid #FF00FF;}
+        .b5 .band-header { border-color: #FF0000; } .b5 .band-num { color: #FF0000; border: 1px solid #FF0000;}
+        .b6 .band-header { border-color: #FF8800; } .b6 .band-num { color: #FF8800; border: 1px solid #FF8800;}
+
+        /* Media Queries para Celular (Renderização Otimizada para Mobile) */
+        @media (max-width: 768px) {
+            .channel-strip {
+                width: 88px;
+            }
+            .app-header {
+                padding: 0 10px;
+            }
+            .mixer-title {
+                font-size: 12px;
+                letter-spacing: 1px;
+            }
+            .modal-overlay {
+                padding-top: 0;
+                align-items: stretch;
+            }
+            .modal-content {
+                width: 100%;
+                min-height: 100vh;
+                min-height: 100dvh;
+                height: auto;
+                max-width: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 8px 6px;
+                display: flex;
+                flex-direction: column;
+                box-sizing: border-box;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .modal-header {
+                height: 34px;
+                margin-bottom: 4px;
+                padding: 0 2px;
+            }
+            .modal-header h3 {
+                font-size: 14px !important;
+                font-weight: bold;
+            }
+            .close-btn {
+                height: 32px;
+                padding: 0 12px;
+                font-size: 12px;
+            }
+            .ch-selector-row {
+                padding: 3px 4px;
+                gap: 4px;
+                margin-bottom: 5px;
+            }
+            .ch-btn {
+                min-width: 38px;
+                height: 30px;
+                padding: 0 8px;
+                font-size: 11px;
+            }
+            .eq-graph-wrapper {
+                margin-bottom: 5px;
+                gap: 5px;
+                flex-shrink: 0;
+            }
+            .eq-graph-container {
+                height: 165px;
+                flex-shrink: 0;
+            }
+            .modal-fader-panel {
+                width: 50px;
+                min-height: 165px;
+                padding: 4px 2px 4px;
+                gap: 2px;
+                flex-shrink: 0;
+            }
+            .modal-fader-label {
+                font-size: 8px;
+            }
+            .modal-fader-val {
+                font-size: 9px;
+                min-width: 38px;
+                padding: 1px 2px;
+            }
+            .modal-fader-cap {
+                width: 36px;
+                height: 28px;
+                margin-left: -18px;
+                margin-bottom: -14px;
+            }
+            .modal-fader-scale {
+                font-size: 7px;
+                width: 14px;
+            }
+            /* Toolbar de Ações Rápidas no Celular */
+            .eq-actions-row {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 4px;
+                margin-bottom: 6px;
+                flex-shrink: 0;
+                -webkit-overflow-scrolling: touch;
+            }
+            .eq-actions-row::-webkit-scrollbar { display: none; }
+            .eq-on-btn {
+                flex: 1 0 auto;
+                height: 32px;
+                min-width: 56px;
+                padding: 0 6px;
+                font-size: 11px;
+                border-radius: 5px;
+                margin-right: 0 !important;
+                white-space: nowrap;
+            }
+            .eq-on-btn.reset-btn {
+                flex: 0 0 50px;
+                min-width: 50px;
+            }
+            /* Carrossel Horizontal das Bandas no Celular */
+            .eq-bands-row {
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 6px;
+                margin-bottom: 6px;
+                flex-shrink: 0;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .eq-bands-row::-webkit-scrollbar {
+                height: 3px;
+            }
+            .eq-bands-row::-webkit-scrollbar-thumb {
+                background: #444;
+                border-radius: 2px;
+            }
+            .band-box {
+                flex: 0 0 96px;
+                min-width: 96px;
+                padding: 4px 6px;
+                border-radius: 6px;
+                box-sizing: border-box;
+            }
+            .band-header {
+                margin-bottom: 2px;
+                padding-bottom: 2px;
+            }
+            .band-num {
+                width: 16px;
+                height: 16px;
+                font-size: 10px;
+                margin-right: 3px;
+            }
+            .band-name {
+                font-size: 10px;
+            }
+            .band-param {
+                margin-bottom: 2px;
+            }
+            .param-lbl {
+                font-size: 9px;
+            }
+            .param-val-box {
+                font-size: 10px;
+                width: 44px;
+                padding: 1px 3px;
+            }
+            .hpf-toggle-btn {
+                font-size: 9px;
+                padding: 1px 5px;
+            }
+            .hpf-slope-btn {
+                font-size: 9px;
+                width: 44px;
+                padding: 1px 2px;
+            }
+            /* Controles de Freq, Gain, Q alinhados em 3 colunas no Celular */
+            .eq-bottom-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 4px;
+                padding: 6px 4px;
+                background: #1a1b1f;
+                border: 1px solid #111;
+                border-radius: 6px;
+                flex-shrink: 0;
+            }
+            .knob-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 3px;
+                width: 100%;
+                touch-action: none;
+            }
+            .knob-lbl {
+                font-size: 10px;
+                font-weight: 800;
+                color: #AAA;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 1px;
+            }
+            .knob {
+                width: 38px;
+                height: 38px;
+                border-width: 2px;
+            }
+            .knob-indicator {
+                left: 17px;
+                top: 3px;
+                width: 3px;
+                height: 12px;
+                transform-origin: center 16px;
+            }
+            .knob-stepper-wrap {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                width: 100%;
+            }
+            .step-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 15px;
+                border-radius: 4px;
+                background: #2b2c32;
+                border: 1px solid #444;
+                flex-shrink: 0;
+            }
+            .knob-val {
+                font-size: 10px;
+                font-weight: bold;
+                padding: 3px 2px;
+                min-width: 40px;
+                max-width: 50px;
+                text-align: center;
+                border-radius: 4px;
+                background: #FFF;
+                color: #000;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Superior com Logo e Status de Conexão -->
+    <header class="app-header">
+        <div class="header-brand">
+            <span class="mixer-logo">🎛️</span>
+            <span class="mixer-title">AUDIO MIXER</span>
+        </div>
+
+        <!-- Player Provisório para Carregar Áudio do PC -->
+        <div class="audio-player-bar" id="audio-player-bar" title="Player de Teste: Carregue uma música/áudio do seu computador para testar VU, EQ e RTA">
+            <input type="file" id="local-audio-file" accept="audio/*,video/*,.mp3,.wav,.ogg,.m4a,.aac,.flac" style="display: none;">
+            <label class="player-load-btn" for="local-audio-file" id="player-load-btn" title="Carregar arquivo de áudio do computador">
+                <span>📁</span> Carregar Áudio
+            </label>
+            <button class="player-demo-btn" id="player-demo-btn" title="Gerar música/áudio de teste imediatamente (sem precisar de arquivo)">🎵 Áudio Teste</button>
+            <button class="player-play-btn" id="player-play-btn" title="Reproduzir / Pausar" disabled>▶</button>
+            <div class="player-info-container">
+                <span class="player-track-name" id="player-track-name">Nenhum áudio</span>
+                <span class="player-time" id="player-time">00:00 / 00:00</span>
+            </div>
+            <div class="player-progress-bar" id="player-progress-bar" title="Avançar / Retroceder">
+                <div class="player-progress-fill" id="player-progress-fill"></div>
+            </div>
+            <audio id="local-audio-element" preload="auto"></audio>
+        </div>
+
+        <div id="sync-badge" class="sync-badge" title="Sincronização em tempo real PC/Celular">
+            <span class="status-dot"></span>
+            <span id="sync-text">Sincronizado</span>
+        </div>
+    </header>
+
+    <!-- Barra de Navegação Rápida entre Canais (Celular) -->
+    <nav class="channel-nav-ribbon" id="channel-ribbon">
+        <!-- Injetado via JS: botões [LR] [1] [2] ... [10] -->
+    </nav>
+
+    <div class="mixer-wrapper">
+        <div class="mixer-container" id="mixer">
+            <!-- Channels will be injected by JS -->
+        </div>
+    </div>
+
+    <!-- Parametric EQ Modal -->
+    <div class="modal-overlay" id="eq-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" style="margin:0; font-size: 16px; color: #FFF;">EQ Eight</h3>
+                <button class="close-btn" id="close-modal">Concluído</button>
+            </div>
+
+            <!-- Channel Selector -->
+            <div class="ch-selector-row" id="ch-selector">
+                <!-- Buttons injected by JS -->
+            </div>
+            
+            <div class="eq-graph-wrapper">
+                <div class="eq-graph-container">
+                    <canvas class="eq-main-canvas" id="eqGraph" width="778" height="250"></canvas>
+                </div>
+                <!-- Fader vertical de volume do canal ativo -->
+                <div class="modal-fader-panel" id="modal-fader-panel">
+                    <div class="modal-fader-label">VOL</div>
+                    <div class="modal-fader-val" id="modal-fader-val">+0.0 dB</div>
+                    <div class="modal-fader-track-area" id="modal-fader-track">
+                        <div class="modal-fader-track-line"></div>
+                        <div class="modal-fader-mark-0db"></div>
+                        <div class="modal-fader-scale">
+                            <span style="top: 0%;">+6</span>
+                            <span class="mark-0u" style="top: 30%;">0U</span>
+                            <span style="top: 55%;">-10</span>
+                            <span style="top: 75%;">-20</span>
+                            <span style="top: 100%;">-∞</span>
+                        </div>
+                        <div class="modal-fader-cap" id="modal-fader-cap" style="bottom: 70%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar de Ações Rápidas (EQ, RTA, HPF, Ruído Rosa, Reset) -->
+            <div class="eq-actions-row">
+                <button class="eq-on-btn" id="eq-on-btn">EQ: On</button>
+                <button class="eq-on-btn" id="rta-btn" style="background:#FF9900; color:#000;">RTA: On</button>
+                <button class="eq-on-btn" id="hpf-btn" style="background:#555; color:#FFF;" title="Filtro Passa-Altas (HPF / Low Cut)">HPF: Off</button>
+                <button class="eq-on-btn" id="pink-noise-btn" style="background:#555; color:#FFF;">Ruído Rosa: Off</button>
+                <button class="eq-on-btn reset-btn" id="reset-eq-btn" style="background:#444; color:#FFF;" title="Resetar todas as bandas para Flat (0 dB)">Reset</button>
+            </div>
+
+            <div class="eq-bands-row" id="band-boxes">
+                <!-- Band boxes generated by JS -->
+            </div>
+
+            <div class="eq-bottom-row">
+                <div class="knob-container">
+                    <span class="knob-lbl">Freq</span>
+                    <div class="knob" id="knob-freq"><div class="knob-indicator" id="ind-freq"></div></div>
+                    <div class="knob-stepper-wrap">
+                        <button class="step-btn" onclick="stepParam('freq', -1)">-</button>
+                        <div class="knob-val" id="val-freq">100 Hz</div>
+                        <button class="step-btn" onclick="stepParam('freq', 1)">+</button>
+                    </div>
+                </div>
+                <div class="knob-container">
+                    <span class="knob-lbl">Gain</span>
+                    <div class="knob" id="knob-gain"><div class="knob-indicator" id="ind-gain"></div></div>
+                    <div class="knob-stepper-wrap">
+                        <button class="step-btn" onclick="stepParam('gain', -1)">-</button>
+                        <div class="knob-val" id="val-gain">0.0 dB</div>
+                        <button class="step-btn" onclick="stepParam('gain', 1)">+</button>
+                    </div>
+                </div>
+                <div class="knob-container">
+                    <span class="knob-lbl">Q</span>
+                    <div class="knob" id="knob-q"><div class="knob-indicator" id="ind-q"></div></div>
+                    <div class="knob-stepper-wrap">
+                        <button class="step-btn" onclick="stepParam('q', -1)">-</button>
+                        <div class="knob-val" id="val-q">1.0</div>
+                        <button class="step-btn" onclick="stepParam('q', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = 'client_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+        const channelStripsData = [];
+        let ws = null;
+        let sse = null;
+
+        function setSyncStatus(connected, count = null) {
+            const badge = document.getElementById('sync-badge');
+            const text = document.getElementById('sync-text');
+            if (!badge || !text) return;
+            if (connected) {
+                badge.classList.remove('disconnected');
+                if (count !== null) {
+                    if (count >= 2) {
+                        badge.style.color = '#00ff66';
+                        badge.style.borderColor = '#00ff66';
+                        text.textContent = `🟢 Sincronizado (${count} aparelhos)`;
+                    } else {
+                        badge.style.color = '#ffcc00';
+                        badge.style.borderColor = '#ffcc00';
+                        text.textContent = `🟡 1 aparelho (conecte o outro)`;
+                    }
+                } else {
+                    text.textContent = '🟢 Conectado';
+                }
+            } else {
+                badge.classList.add('disconnected');
+                badge.style.color = '#ff4444';
+                badge.style.borderColor = '#772222';
+                text.textContent = '🔴 Reconectando...';
+            }
+        }
+
+        function sendSync(payload) {
+            payload.clientId = CLIENT_ID;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(payload));
+            } else {
+                fetch('/api/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }).catch(() => setSyncStatus(false));
+            }
+        }
+
+        let eqSyncTimer = null;
+        function notifyEQChanged(immediate = false) {
+            if (typeof drawMiniEQ === 'function') drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') updateChannelEQFilters(activeChannelIdx);
+            if (eqSyncTimer) clearTimeout(eqSyncTimer);
+            const payload = {
+                type: 'eq',
+                channel: activeChannelIdx,
+                bands: currentBands,
+                enabled: eqEnabled,
+                hpf: (typeof channelHPFState !== 'undefined') ? channelHPFState[activeChannelIdx] : undefined
+            };
+            if (immediate) {
+                sendSync(payload);
+            } else {
+                eqSyncTimer = setTimeout(() => sendSync(payload), 40);
+            }
+        }
+
+        const mixerContainer = document.getElementById('mixer');
+        const modal = document.getElementById('eq-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const rtaBtn = document.getElementById('rta-btn');
+        const hpfBtn = document.getElementById('hpf-btn');
+        
+        let currentBands = [];
+        let selectedBandIndex = 3; 
+        let rtaEnabled = true;
+        let eqEnabled = true;
+        let rtaBands = new Array(64).fill(0);
+
+        rtaBtn.onclick = () => {
+            rtaEnabled = !rtaEnabled;
+            rtaBtn.textContent = rtaEnabled ? 'RTA: On' : 'RTA: Off';
+            rtaBtn.style.background = rtaEnabled ? '#FF9900' : '#555';
+            rtaBtn.style.color = rtaEnabled ? '#000' : '#FFF';
+            if(!rtaEnabled) drawEQGraph();
+        };
+
+        if (hpfBtn) {
+            hpfBtn.onclick = () => {
+                if (typeof toggleHPF === 'function') toggleHPF();
+            };
+        }
+
+        // ─── Motor de Áudio: VU Meter Reativo + Ruído Rosa + EQ em Tempo Real ─
+        let audioCtx          = null;
+        let micAnalyser       = null;    // analisa microfone / áudio real
+        let micStream         = null;
+        let micSource         = null;
+        let vuAnimId          = null;
+        let vuSmooth          = new Array(11).fill(0);
+        let sharedNoiseSource = null;    // fonte única compartilhada de ruído rosa
+        let sharedNoiseUsers  = 0;       // contagem de canais com ruído ligado
+        let mixerMasterBus    = null;    // barramento mestre interno do mixer
+        let masterLimiter     = null;    // compressor/limiter de proteção na saída
+
+        function ensureAudioCtx() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            initMixerAudioGraph();
+            return audioCtx;
+        }
+
+        function createAnalyser(ctx) {
+            const an = ctx.createAnalyser();
+            an.fftSize = 1024;
+            an.smoothingTimeConstant = 0.5;
+            return an;
+        }
+
+        // Buffer de Ruído Rosa sintetizado (algoritmo de Voss-McCartney)
+        function buildPinkNoiseBuffer(ctx) {
+            const bufSize = 2 * ctx.sampleRate;
+            const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+            const out = buf.getChannelData(0);
+            let b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0;
+            for (let i = 0; i < bufSize; i++) {
+                const w = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + w * 0.0555179;
+                b1 = 0.99332 * b1 + w * 0.0750759;
+                b2 = 0.96900 * b2 + w * 0.1538520;
+                b3 = 0.86650 * b3 + w * 0.3104856;
+                b4 = 0.55000 * b4 + w * 0.5329522;
+                b5 = -0.7616 * b5 - w * 0.0168980;
+                out[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.04;
+                b6 = w * 0.115926;
+            }
+            return buf;
+        }
+
+        function ensureSharedNoise() {
+            ensureAudioCtx();
+            if (sharedNoiseSource) return;
+            sharedNoiseSource = audioCtx.createBufferSource();
+            sharedNoiseSource.buffer = buildPinkNoiseBuffer(audioCtx);
+            sharedNoiseSource.loop = true;
+            sharedNoiseSource.start();
+
+            // Conecta ruído rosa aos nós de ruído dos canais de saída 1 a 10
+            for (let ch = 1; ch <= 10; ch++) {
+                const data = channelStripsData[ch];
+                if (data && data.noiseGain) {
+                    try { sharedNoiseSource.connect(data.noiseGain); } catch(e) {}
+                }
+            }
+        }
+
+        // Configura a cascata de filtros Web Audio API para o canal (HPF 12/24dB + 6 bandas paramétricas)
+        function setupChannelEQAudioNodes(idx) {
+            const data = channelStripsData[idx];
+            if (!data) return;
+            ensureAudioCtx();
+
+            if (!data.hpfFilter1) {
+                // Filtro Passa-Altas (HPF) com 12 ou 24 dB/oitava (Butterworth)
+                data.hpfFilter1 = audioCtx.createBiquadFilter();
+                data.hpfFilter1.type = 'highpass';
+                data.hpfFilter1.frequency.value = 10;
+                data.hpfFilter1.Q.value = 0.707;
+
+                data.hpfFilter2 = audioCtx.createBiquadFilter();
+                data.hpfFilter2.type = 'highpass';
+                data.hpfFilter2.frequency.value = 10;
+                data.hpfFilter2.Q.value = 0.707;
+
+                data.hpfFilter1.connect(data.hpfFilter2);
+                data.channelInputNode = data.hpfFilter1;
+            }
+
+            if (!data.eqFilters) {
+                const bands = (typeof channelEQState !== 'undefined' && channelEQState[idx]) ? channelEQState[idx] : defaultBands;
+                data.eqFilters = [];
+
+                bands.forEach((b) => {
+                    const filter = audioCtx.createBiquadFilter();
+                    if (b.mode === 'LShv') {
+                        filter.type = 'lowshelf';
+                    } else if (b.mode === 'HShv') {
+                        filter.type = 'highshelf';
+                    } else {
+                        filter.type = 'peaking';
+                        filter.Q.value = b.q || 2.0;
+                    }
+                    filter.frequency.value = b.freq || 1000;
+                    const isEqActive = (typeof channelEQEnabled !== 'undefined' && channelEQEnabled[idx] !== undefined)
+                        ? channelEQEnabled[idx] : true;
+                    filter.gain.value = isEqActive ? b.gain : 0;
+                    data.eqFilters.push(filter);
+                });
+
+                // Conecta HPF -> EQ cascata (hpfFilter2 -> eqFilters[0] -> 1 -> 2 -> 3 -> 4 -> 5)
+                data.hpfFilter2.connect(data.eqFilters[0]);
+                for (let i = 0; i < data.eqFilters.length - 1; i++) {
+                    data.eqFilters[i].connect(data.eqFilters[i + 1]);
+                }
+            }
+        }
+
+        // Configura a cadeia de áudio completa do canal (HPF + EQ + Analyser + Fader Gain + Roteamento)
+        function setupChannelAudioChain(idx) {
+            const data = channelStripsData[idx];
+            if (!data || !audioCtx) return;
+            if (data.audioChainReady) return;
+
+            setupChannelEQAudioNodes(idx);
+            const inputNode   = data.channelInputNode || data.eqFilters[0];
+            const lastFilter  = data.eqFilters[data.eqFilters.length - 1];
+
+            // Analisador RTA pós-EQ exclusivo deste canal
+            if (!data.rtaAnalyser) {
+                data.rtaAnalyser = createAnalyser(audioCtx);
+            }
+
+            // Ganho do canal (controlado pelo fader e mute)
+            if (!data.channelGain) {
+                data.channelGain = audioCtx.createGain();
+                data.channelGain.gain.value = 0.00001;
+            }
+
+            // Encadeamento interno do canal (PÓS-FADER: para o Analyser e RTA refletirem ganho real do potenciômetro):
+            // inputNode(HPF) -> eqFilters[0..5] -> channelGain -> rtaAnalyser
+            lastFilter.connect(data.channelGain);
+            data.channelGain.connect(data.rtaAnalyser);
+
+            if (idx === 0) {
+                // Canal 0 (Entrada LR): alimenta o barramento mestre interno do mixer pós-fader e pós-EQ
+                data.rtaAnalyser.connect(mixerMasterBus);
+            } else {
+                // Canais 1 a 10 (Saídas):
+                // Recebe sinal do barramento mestre e entra no nó de entrada (HPF) do canal
+                mixerMasterBus.connect(inputNode);
+
+                // Entrada de ruído rosa independente
+                data.noiseGain = audioCtx.createGain();
+                data.noiseGain.gain.value = 0.00001;
+                data.noiseGain.connect(inputNode);
+
+                if (sharedNoiseSource) {
+                    try { sharedNoiseSource.connect(data.noiseGain); } catch(e) {}
+                }
+
+                // Saída pós-fader do canal vai para o Master Limiter -> destination (caixas de som)
+                data.rtaAnalyser.connect(masterLimiter);
+            }
+
+            data.audioChainReady = true;
+            updateChannelFaderGain(idx);
+            updateChannelEQFilters(idx);
+        }
+
+        // Inicializa o grafo Web Audio completo do mixer
+        function initMixerAudioGraph() {
+            if (!audioCtx) return;
+            if (mixerMasterBus) return;
+            if (!channelStripsData[0] || !channelStripsData[10]) return; // aguarda criação do DOM
+
+            // Limiter profissional para evitar clipping ou distorção digital
+            masterLimiter = audioCtx.createDynamicsCompressor();
+            masterLimiter.threshold.value = -1.0;
+            masterLimiter.knee.value = 3;
+            masterLimiter.ratio.value = 20;
+            masterLimiter.attack.value = 0.003;
+            masterLimiter.release.value = 0.1;
+            masterLimiter.connect(audioCtx.destination);
+
+            // Barramento mestre interno (liga a saída do Canal 0 à entrada dos Canais 1 a 10)
+            mixerMasterBus = audioCtx.createGain();
+            mixerMasterBus.gain.value = 1.0;
+
+            for (let i = 0; i < 11; i++) {
+                setupChannelAudioChain(i);
+            }
+
+            // Se o player já tiver nó criado, conecta na entrada do Canal 0
+            if (playerAnalyser && channelStripsData[0]) {
+                const targetNode = channelStripsData[0].channelInputNode || (channelStripsData[0].eqFilters && channelStripsData[0].eqFilters[0]);
+                if (targetNode) {
+                    try { playerAnalyser.connect(targetNode); } catch(e) {}
+                }
+            }
+        }
+
+        // Atualiza os parâmetros dos filtros de áudio em tempo real quando o usuário mexe no EQ
+        function updateChannelEQFilters(idx) {
+            const data = channelStripsData[idx];
+            if (!data || !data.eqFilters || !audioCtx) return;
+            const bands = (typeof channelEQState !== 'undefined' && channelEQState[idx]) ? channelEQState[idx] : defaultBands;
+            const isEqActive = (typeof channelEQEnabled !== 'undefined' && channelEQEnabled[idx] !== undefined)
+                ? channelEQEnabled[idx] : true;
+            const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[idx]) 
+                ? channelHPFState[idx] : { enabled: false, freq: 80, slope: 12 };
+
+            // Atualiza os filtros passa-altas (HPF: 12 ou 24 dB/oitava Butterworth)
+            if (data.hpfFilter1 && data.hpfFilter2) {
+                const isHpfActive = isEqActive && hpf.enabled;
+                const targetFreq = isHpfActive ? Math.max(20, Math.min(1000, hpf.freq || 80)) : 10;
+                data.hpfFilter1.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.01);
+                data.hpfFilter1.Q.setTargetAtTime(0.707, audioCtx.currentTime, 0.01);
+
+                const targetFreq2 = (isHpfActive && hpf.slope === 24) ? targetFreq : 10;
+                data.hpfFilter2.frequency.setTargetAtTime(targetFreq2, audioCtx.currentTime, 0.01);
+                data.hpfFilter2.Q.setTargetAtTime(0.707, audioCtx.currentTime, 0.01);
+            }
+
+            bands.forEach((b, i) => {
+                const filter = data.eqFilters[i];
+                if (!filter) return;
+                try {
+                    const targetFreq = Math.max(20, Math.min(20000, b.freq));
+                    const targetGain = isEqActive ? b.gain : 0;
+                    filter.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.01);
+                    filter.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.01);
+                    if (filter.type === 'peaking') {
+                        filter.Q.setTargetAtTime(Math.max(0.1, b.q), audioCtx.currentTime, 0.01);
+                    }
+                } catch(e) {}
+            });
+        }
+
+        // Atualiza o ganho do fader do canal
+        function updateChannelFaderGain(idx) {
+            const data = channelStripsData[idx];
+            if (!data || !data.channelGain || !audioCtx) return;
+
+            const isMuted = data.muteBtn && data.muteBtn.classList.contains('muted');
+            const faderPct = parseFloat(data.faderCap.style.bottom) || 0;
+
+            if (isMuted || faderPct <= 1.0) {
+                data.channelGain.gain.setTargetAtTime(0.00001, audioCtx.currentTime, 0.015);
+                return;
+            }
+
+            // Curva do fader: 70% = 0 dB (ganho 1.0); 100% = +6 dB (~ ganho 2.0); 0% = silêncio
+            let gainVal = 0;
+            if (faderPct <= 70) {
+                gainVal = Math.pow(faderPct / 70, 2);
+            } else {
+                gainVal = 1.0 + ((faderPct - 70) / 30) * 1.0;
+            }
+
+            // Canal 0 (Entrada LR): ganho unitário
+            // Canais 1 a 10 (Saídas): fator 0.7 para folga de mixagem na soma
+            const factor = (idx === 0) ? 1.0 : 0.7;
+            const targetGain = Math.max(0.00001, Math.min(3.0, gainVal * factor));
+            data.channelGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.015);
+        }
+
+        // Aciona ruído rosa individualmente no canal passando pelo equalizador (EQ Eight)
+        function channelPinkOn(idx) {
+            if (idx === 0) return; // Canal de Entrada (LR) não possui ruído rosa
+            const data = channelStripsData[idx];
+            if (!data) return;
+            ensureAudioCtx();
+            initMixerAudioGraph();
+            ensureSharedNoise();
+
+            data.noiseEnabled = true;
+            sharedNoiseUsers++;
+            if (data.noiseGain) {
+                data.noiseGain.gain.setTargetAtTime(0.12, audioCtx.currentTime, 0.015);
+            }
+            updateChannelEQFilters(idx);
+            updateChannelFaderGain(idx);
+
+            if (data.strip) data.strip.classList.add('pink-noise-active');
+            if (data.pill) data.pill.classList.add('pink-noise-active');
+        }
+
+        // Desliga ruído rosa do canal
+        function channelPinkOff(idx) {
+            const data = channelStripsData[idx];
+            if (!data || !data.noiseEnabled) return;
+
+            data.noiseEnabled = false;
+            sharedNoiseUsers = Math.max(0, sharedNoiseUsers - 1);
+
+            if (data.noiseGain) {
+                data.noiseGain.gain.setTargetAtTime(0.00001, audioCtx.currentTime, 0.015);
+            }
+            updateChannelFaderGain(idx);
+
+            if (data.strip) data.strip.classList.remove('pink-noise-active');
+            if (data.pill) data.pill.classList.remove('pink-noise-active');
+
+            if (sharedNoiseUsers <= 0 && sharedNoiseSource) {
+                try {
+                    sharedNoiseSource.stop();
+                    sharedNoiseSource.disconnect();
+                } catch(e) {}
+                sharedNoiseSource = null;
+                sharedNoiseUsers = 0;
+            }
+        }
+
+        // Atualiza o estado visual do botão de ruído rosa no modal do EQ
+        function updatePinkNoiseButton() {
+            if (activeChannelIdx === 0) {
+                // Canal de entrada LR não possui ruído rosa
+                pinkNoiseBtn.style.display = 'none';
+                return;
+            }
+            pinkNoiseBtn.style.display = 'inline-block';
+            const isNoiseOn = !!(channelStripsData[activeChannelIdx] && channelStripsData[activeChannelIdx].noiseEnabled);
+            pinkNoiseBtn.textContent = isNoiseOn ? 'Ruído Rosa: On' : 'Ruído Rosa: Off';
+            pinkNoiseBtn.style.background = isNoiseOn ? '#FF0055' : '#555';
+            pinkNoiseBtn.style.color = '#FFF';
+        }
+
+        // Botão de ruído rosa: aciona individualmente no canal ativo (apenas saídas 1 a 10)
+        const pinkNoiseBtn = document.getElementById('pink-noise-btn');
+        pinkNoiseBtn.onclick = () => {
+            if (activeChannelIdx === 0) return;
+            ensureAudioCtx();
+            const idx = activeChannelIdx;
+            const data = channelStripsData[idx];
+            if (!data) return;
+
+            const willBeOn = !data.noiseEnabled;
+            if (willBeOn) {
+                channelPinkOn(idx);
+            } else {
+                channelPinkOff(idx);
+            }
+            updatePinkNoiseButton();
+            sendSync({ type: 'pink_noise', channel: idx, value: willBeOn });
+        };
+
+        // Captura de áudio real do microfone/entrada
+        async function startMicCapture() {
+            try {
+                ensureAudioCtx();
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                micSource = audioCtx.createMediaStreamSource(micStream);
+                micAnalyser = createAnalyser(audioCtx);
+                micSource.connect(micAnalyser);
+                console.log('[VU] Entrada de áudio conectada');
+            } catch (err) {
+                console.log('[VU] Áudio externo não disponível ou não autorizado:', err.message);
+            }
+        }
+
+        // ── Player Provisório de Áudio Local (Carregar do PC) ───────────
+        let playerElement      = null;
+        let playerSourceNode   = null;
+        let playerAnalyser     = null;
+        let playerMasterGain   = null;
+
+        function formatAudioTime(sec) {
+            if (!sec || isNaN(sec)) return "00:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        function initLocalAudioPlayer() {
+            playerElement = document.getElementById('local-audio-element');
+            const fileInput = document.getElementById('local-audio-file');
+            const loadBtn = document.getElementById('player-load-btn');
+            const playBtn = document.getElementById('player-play-btn');
+            const trackName = document.getElementById('player-track-name');
+            const timeLabel = document.getElementById('player-time');
+            const progressBar = document.getElementById('player-progress-bar');
+            const progressFill = document.getElementById('player-progress-fill');
+
+            if (!playerElement || !fileInput) return;
+
+            // Permite carregar por clique e também arrastar e soltar arquivo
+            fileInput.onchange = async (e) => {
+                const files = e.target.files;
+                if (!files || files.length === 0) return;
+                await loadAndPlayAudioFile(files[0]);
+            };
+
+            // Gera áudio sintetizado em WAV diretamente na memória do navegador para teste imediato
+            const demoBtn = document.getElementById('player-demo-btn');
+            if (demoBtn) {
+                demoBtn.onclick = async () => {
+                    try {
+                        ensureAudioCtx();
+                        if (audioCtx && audioCtx.state === 'suspended') {
+                            await audioCtx.resume();
+                        }
+                        trackName.textContent = 'Gerando áudio demo...';
+
+                        // Gera um groove rítmico musical de 10 segundos com bumbo, baixo e acordes
+                        const sampleRate = 44100;
+                        const duration = 12; // 12 segundos em loop
+                        const totalSamples = sampleRate * duration;
+                        const buffer = new Float32Array(totalSamples);
+                        
+                        const bpm = 120;
+                        const beatSec = 60 / bpm; // 0.5s por batida
+                        
+                        for (let s = 0; s < totalSamples; s++) {
+                            const t = s / sampleRate;
+                            let val = 0;
+
+                            // 1. Kick Drum (bumbo nas batidas 1, 2, 3, 4)
+                            const beatTime = t % beatSec;
+                            if (beatTime < 0.25) {
+                                const kickFreq = 120 * Math.exp(-beatTime * 28) + 40;
+                                const kickEnv = Math.exp(-beatTime * 14);
+                                val += Math.sin(2 * Math.PI * kickFreq * beatTime) * kickEnv * 0.7;
+                            }
+
+                            // 2. Linha de Baixo melódica nos 16 avos
+                            const bassNotes = [55, 55, 65.4, 73.4, 82.4, 73.4, 65.4, 49]; // Lá, Dó, Ré, Mi...
+                            const bassIdx = Math.floor((t / (beatSec / 2)) % bassNotes.length);
+                            const bassFreq = bassNotes[bassIdx];
+                            const bassBeatTime = t % (beatSec / 2);
+                            const bassEnv = Math.exp(-bassBeatTime * 6);
+                            val += (Math.sin(2 * Math.PI * bassFreq * t) + 0.3 * Math.sin(4 * Math.PI * bassFreq * t)) * bassEnv * 0.35;
+
+                            // 3. Sintetizador / Acordes
+                            const chordFreqs = [220, 261.63, 329.63, 392]; // Am7
+                            chordFreqs.forEach((f, fi) => {
+                                const tremolo = 0.8 + 0.2 * Math.sin(2 * Math.PI * 4 * t);
+                                val += Math.sin(2 * Math.PI * f * t) * 0.06 * tremolo;
+                            });
+
+                            // 4. Hi-hat / Prato leve nos contra-tempos
+                            const hatBeat = (t + beatSec / 2) % beatSec;
+                            if (hatBeat < 0.08) {
+                                const whiteNoise = (Math.random() * 2 - 1);
+                                val += whiteNoise * Math.exp(-hatBeat * 40) * 0.15;
+                            }
+
+                            buffer[s] = Math.max(-1, Math.min(1, val));
+                        }
+
+                        // Converte Float32Array para Blob WAV mono
+                        const wavBlob = createWavBlob(buffer, sampleRate);
+                        const fileUrl = URL.createObjectURL(wavBlob);
+                        
+                        playerElement.src = fileUrl;
+                        playerElement.loop = true;
+                        trackName.textContent = '🎵 Demo Groove (120 BPM)';
+                        trackName.title = 'Áudio de demonstração sintetizado para teste';
+                        trackName.style.color = '#00ff88';
+                        playBtn.disabled = false;
+                        playBtn.textContent = '⏸';
+                        playBtn.style.color = '#ff9900';
+
+                        setupPlayerAudioNodes();
+                        await playerElement.play();
+                    } catch(err) {
+                        console.error('Erro ao gerar demo:', err);
+                        trackName.textContent = 'Erro ao sintetizar demo: ' + err.message;
+                    }
+                };
+            }
+
+            // Utilitário rápido para codificar WAV PCM 16-bit
+            function createWavBlob(samples, sampleRate) {
+                const buffer = new ArrayBuffer(44 + samples.length * 2);
+                const view = new DataView(buffer);
+                const writeString = (offset, string) => {
+                    for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+                };
+                writeString(0, 'RIFF');
+                view.setUint32(4, 36 + samples.length * 2, true);
+                writeString(8, 'WAVE');
+                writeString(12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true); // PCM
+                view.setUint16(22, 1, true); // Mono
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * 2, true);
+                view.setUint16(32, 2, true);
+                view.setUint16(34, 16, true);
+                writeString(36, 'data');
+                view.setUint32(40, samples.length * 2, true);
+                let offset = 44;
+                for (let i = 0; i < samples.length; i++, offset += 2) {
+                    const s = Math.max(-1, Math.min(1, samples[i]));
+                    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                }
+                return new Blob([buffer], { type: 'audio/wav' });
+            }
+
+            async function loadAndPlayAudioFile(file) {
+                try {
+                    ensureAudioCtx();
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        await audioCtx.resume();
+                    }
+                    
+                    const fileUrl = URL.createObjectURL(file);
+                    playerElement.src = fileUrl;
+                    trackName.textContent = file.name;
+                    trackName.title = file.name;
+                    trackName.style.color = '#fff';
+                    playBtn.disabled = false;
+                    playBtn.textContent = '▶';
+
+                    // Conecta AudioContext e os nós de saída / analisador
+                    setupPlayerAudioNodes();
+
+                    const playPromise = playerElement.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            playBtn.textContent = '⏸';
+                            playBtn.style.color = '#ff9900';
+                        }).catch(err => {
+                            console.warn('Autoplay bloqueado ou aguardando clique explícito:', err);
+                            trackName.textContent = '▶ Clique Play para iniciar: ' + file.name;
+                            playBtn.textContent = '▶';
+                            playBtn.style.color = '#00ff88';
+                        });
+                    }
+                } catch(err) {
+                    console.error('Erro ao carregar arquivo de áudio:', err);
+                    trackName.textContent = 'Erro ao carregar: ' + err.message;
+                    trackName.style.color = '#ff4444';
+                }
+            }
+
+            // Suporte para arrastar e soltar arquivo direto na barra do player
+            const playerBar = document.getElementById('audio-player-bar');
+            if (playerBar) {
+                playerBar.ondragover = (e) => {
+                    e.preventDefault();
+                    playerBar.style.borderColor = '#ff9900';
+                };
+                playerBar.ondragleave = () => {
+                    playerBar.style.borderColor = '#3d3f47';
+                };
+                playerBar.ondrop = (e) => {
+                    e.preventDefault();
+                    playerBar.style.borderColor = '#3d3f47';
+                    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        loadAndPlayAudioFile(e.dataTransfer.files[0]);
+                    }
+                };
+            }
+
+            playBtn.onclick = async () => {
+                if (!playerElement.src) return;
+                ensureAudioCtx();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    await audioCtx.resume();
+                }
+                setupPlayerAudioNodes();
+                if (playerElement.paused) {
+                    try {
+                        await playerElement.play();
+                        playBtn.textContent = '⏸';
+                        playBtn.style.color = '#ff9900';
+                    } catch(err) {
+                        console.error('Erro ao dar play:', err);
+                    }
+                } else {
+                    playerElement.pause();
+                    playBtn.textContent = '▶';
+                    playBtn.style.color = '#00ff88';
+                }
+            };
+
+            playerElement.onerror = (e) => {
+                console.error('Elemento de áudio com erro:', playerElement.error);
+                trackName.textContent = 'Formato não suportado pelo navegador';
+                trackName.style.color = '#ff4444';
+            };
+
+            playerElement.ontimeupdate = () => {
+                const cur = playerElement.currentTime || 0;
+                const dur = playerElement.duration || 0;
+                timeLabel.textContent = formatAudioTime(cur) + ' / ' + formatAudioTime(dur);
+                if (dur > 0) {
+                    const pct = (cur / dur) * 100;
+                    progressFill.style.width = pct + '%';
+                }
+            };
+
+            playerElement.onended = () => {
+                playBtn.textContent = '▶';
+                playBtn.style.color = '#00ff88';
+                progressFill.style.width = '0%';
+            };
+
+            if (progressBar) {
+                progressBar.onclick = (e) => {
+                    if (!playerElement.duration) return;
+                    const rect = progressBar.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+                    playerElement.currentTime = ratio * playerElement.duration;
+                };
+            }
+        }
+
+        function setupPlayerAudioNodes() {
+            ensureAudioCtx();
+            initMixerAudioGraph();
+            if (playerSourceNode) return; // já configurado
+
+            try {
+                // Conecta o elemento de áudio ao Web Audio Graph
+                playerSourceNode = audioCtx.createMediaElementSource(playerElement);
+
+                // Analisador exclusivo do player
+                playerAnalyser = createAnalyser(audioCtx);
+
+                // Roteamento físico de estúdio:
+                // Player -> playerAnalyser -> Entrada (HPF / EQ) do Canal 0 (LR Entrada)
+                playerSourceNode.connect(playerAnalyser);
+                if (channelStripsData[0]) {
+                    const targetNode = channelStripsData[0].channelInputNode || (channelStripsData[0].eqFilters && channelStripsData[0].eqFilters[0]);
+                    if (targetNode) {
+                        try { playerAnalyser.connect(targetNode); } catch(e) {}
+                    }
+                }
+
+                // Aplica imediatamente a posição atual de todos os faders
+                for (let ch = 0; ch < 11; ch++) {
+                    updateChannelFaderGain(ch);
+                }
+
+                console.log('[Player] Web Audio Graph conectado aos EQs do Mixer com sucesso!');
+            } catch(e) {
+                console.warn('[Player] Erro ao conectar nós de áudio do player:', e);
+            }
+        }
+
+        // Atualiza os ganhos dos faders do mixer
+        function updateInputChannelVolume() {
+            for (let ch = 0; ch < 11; ch++) {
+                updateChannelFaderGain(ch);
+            }
+        }
+
+        // ── Loop de Animação do VU Meter ─────────────────────────────
+        // O VU meter SÓ se move quando houver sinal de áudio real OU ruído rosa acionado
+        function vuLoop() {
+            requestAnimationFrame(vuLoop);
+
+            // Mede sinal geral da entrada (Canal 0 pós-EQ, player ou microfone)
+            let inputSignalPct = 0;
+            const activeInputAnalyser = (channelStripsData[0] && channelStripsData[0].rtaAnalyser)
+                ? channelStripsData[0].rtaAnalyser
+                : (playerAnalyser || micAnalyser);
+
+            if (activeInputAnalyser) {
+                const buf = new Float32Array(activeInputAnalyser.fftSize);
+                activeInputAnalyser.getFloatTimeDomainData(buf);
+                let sum = 0;
+                for (let j = 0; j < buf.length; j++) sum += buf[j] * buf[j];
+                const rms = Math.sqrt(sum / buf.length);
+                if (rms > 0.001) {
+                    const db = 20 * Math.log10(rms);
+                    // -50dB = 0%, 0dB = 72% (marca 0U), +6dB = 100%
+                    inputSignalPct = Math.max(0, Math.min(100, (db + 50) / 56 * 100));
+                }
+            }
+
+            // Atualiza cada um dos 11 canais
+            for (let i = 0; i < 11; i++) {
+                const data = channelStripsData[i];
+                if (!data || !data.meterFill) continue;
+
+                const isMuted = data.muteBtn.classList.contains('muted');
+                const faderPct = parseFloat(data.faderCap.style.bottom) || 0;
+
+                let targetLevel = 0;
+
+                if (!isMuted && faderPct > 1.0) {
+                    // 1. Sinal do Ruído Rosa (apenas nos canais de saída 1 a 10)
+                    let noiseLevel = 0;
+                    if (i > 0 && data.noiseEnabled) {
+                        const flutter = (Math.random() - 0.5) * 5;
+                        noiseLevel = Math.max(0, Math.min(100, faderPct + flutter));
+                    }
+
+                    // 2. Sinal de Áudio Real (se presente: Player ou Mic)
+                    let audioLevel = 0;
+                    if (inputSignalPct > 0) {
+                        const inputFaderPct = (channelStripsData[0] && !channelStripsData[0].muteBtn.classList.contains('muted'))
+                            ? (parseFloat(channelStripsData[0].faderCap.style.bottom) || 0)
+                            : 0;
+                        const inputFactor = inputFaderPct / 100;
+
+                        if (i === 0) {
+                            // LR Entrada Master recebe sinal proporcional ao próprio fader de entrada
+                            audioLevel = inputSignalPct * inputFactor;
+                        } else {
+                            // Canais 1 a 10 de Saída recebem sinal condicionado à Entrada LR E ao fader do canal
+                            audioLevel = inputSignalPct * inputFactor * (faderPct / 100);
+                        }
+                    }
+
+                    targetLevel = Math.max(audioLevel, noiseLevel);
+                }
+
+                // Balística de VU Meter analógico (Attack rápido, Decay suave)
+                const attack = 0.65;
+                const decay  = 0.16;
+                const speed = targetLevel > vuSmooth[i] ? attack : decay;
+                vuSmooth[i] += (targetLevel - vuSmooth[i]) * speed;
+
+                if (vuSmooth[i] < 0.25) vuSmooth[i] = 0;
+
+                // A cortina escura cobre o medidor: 100% = apagado (silêncio)
+                // Quanto maior o sinal, menor a cortina (revela o gradiente verde/amarelo/vermelho)
+                data.meterFill.style.height = (100 - vuSmooth[i]) + '%';
+            }
+        }
+
+        // Inicia o motor de VU, player local e captura de áudio
+        vuLoop();
+        initLocalAudioPlayer();
+        startMicCapture();
+
+        const eqOnBtn = document.getElementById('eq-on-btn');
+        eqOnBtn.onclick = () => {
+            eqEnabled = !eqEnabled;
+            if (typeof channelEQEnabled !== 'undefined') {
+                channelEQEnabled[activeChannelIdx] = eqEnabled;
+            }
+            eqOnBtn.textContent = eqEnabled ? 'EQ: On' : 'EQ: Off';
+            eqOnBtn.style.background = eqEnabled ? '#FF9900' : '#555';
+            eqOnBtn.style.color = eqEnabled ? '#000' : '#FFF';
+            drawEQGraph();
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(true);
+        };
+
+        // ── Botão Reset Geral do Equalizador ──────────────────────────
+        const resetEQBtn = document.getElementById('reset-eq-btn');
+        resetEQBtn.onclick = () => {
+            // Restaura todas as 6 bandas do canal ativo para o padrão original (flat 0 dB)
+            channelEQState[activeChannelIdx] = JSON.parse(JSON.stringify(defaultBands));
+            currentBands = channelEQState[activeChannelIdx];
+
+            // Reseta também o HPF do canal ativo
+            channelHPFState[activeChannelIdx] = { enabled: false, freq: 80, slope: 12 };
+            updateHPFUI();
+
+            // Atualiza os valores visuais dos boxes de cada banda
+            currentBands.forEach((b, i) => {
+                const freqStr = b.freq >= 1000 ? (b.freq / 1000).toFixed(2) + 'k' : b.freq + ' Hz';
+                setBoxVal(document.getElementById(`bx-f-${i}`), freqStr);
+                setBoxVal(document.getElementById(`bx-g-${i}`), b.gain.toFixed(1));
+                setBoxVal(document.getElementById(`bx-q-${i}`), b.q.toFixed(1));
+            });
+
+            updateKnobs();
+            drawEQGraph();
+            drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(true);
+        };
+
+        const defaultBands = [
+            { id: 1, name: 'Low',     color: '#00FFFF', freq: 80,    gain: 0,    q: 2.0, mode: 'LShv' },
+            { id: 2, name: 'Low 2',   color: '#00FF00', freq: 160,   gain: 0,    q: 2.0, mode: 'PEQ'  },
+            { id: 3, name: 'Low Mid', color: '#FFFF00', freq: 500,   gain: 0,    q: 2.0, mode: 'PEQ'  },
+            { id: 4, name: 'High Mid',color: '#FF00FF', freq: 1720,  gain: 0,    q: 1.4, mode: 'PEQ'  },
+            { id: 5, name: 'High 2',  color: '#FF0000', freq: 4370,  gain: 0,    q: 2.0, mode: 'PEQ'  },
+            { id: 6, name: 'High',    color: '#FF8800', freq: 10000, gain: 0,    q: 2.0, mode: 'HShv' }
+        ];
+
+        // ── Per-channel EQ state (11 channels: 1 Entrada LR + 10 Saídas Ch 1..10) ──
+        const NUM_CHANNELS = 11;
+        const channelEQState = Array.from({length: NUM_CHANNELS}, () =>
+            JSON.parse(JSON.stringify(defaultBands))
+        );
+        const channelEQEnabled = new Array(NUM_CHANNELS).fill(true);
+        const channelHPFState = Array.from({length: NUM_CHANNELS}, () => ({
+            enabled: false,
+            freq: 80,
+            slope: 12
+        }));
+        let activeChannelIdx = 0; // which channel's EQ is open
+
+        function getActiveHPF() {
+            return channelHPFState[activeChannelIdx];
+        }
+
+        function getHPFResponseDb(f, hpf) {
+            if (!hpf || !hpf.enabled) return 0;
+            const order = (hpf.slope === 24) ? 8 : 4;
+            const ratio = (hpf.freq || 80) / Math.max(1, f);
+            const db = -10 * Math.log10(1 + Math.pow(ratio, order));
+            return Math.max(-36, db);
+        }
+
+        function updateHPFUI() {
+            const hpf = getActiveHPF();
+            if (!hpf) return;
+            const hpfBtn = document.getElementById('hpf-btn');
+            if (hpfBtn) {
+                hpfBtn.textContent = hpf.enabled ? 'HPF: On' : 'HPF: Off';
+                hpfBtn.style.background = hpf.enabled ? '#00E5FF' : '#555';
+                hpfBtn.style.color = hpf.enabled ? '#000' : '#FFF';
+            }
+            const boxToggle = document.getElementById('hpf-box-toggle');
+            if (boxToggle) {
+                boxToggle.textContent = hpf.enabled ? 'ON' : 'OFF';
+                boxToggle.classList.toggle('active', hpf.enabled);
+            }
+            const slopeBtn = document.getElementById('hpf-slope-btn');
+            if (slopeBtn) {
+                slopeBtn.textContent = `${hpf.slope} dB`;
+            }
+            const freqInput = document.getElementById('bx-hpf-f');
+            if (freqInput) {
+                const freqStr = hpf.freq >= 1000 ? (hpf.freq/1000).toFixed(2) + 'k' : Math.round(hpf.freq) + ' Hz';
+                if (document.activeElement !== freqInput) freqInput.value = freqStr;
+            }
+            const hpfBox = document.getElementById('band-box-hpf');
+            if (hpfBox) {
+                hpfBox.classList.toggle('selected', selectedBandIndex === -1);
+            }
+        }
+
+        function toggleHPF() {
+            const hpf = getActiveHPF();
+            if (!hpf) return;
+            hpf.enabled = !hpf.enabled;
+            updateHPFUI();
+            drawEQGraph();
+            drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(true);
+        }
+
+        function toggleHPFSlope() {
+            const hpf = getActiveHPF();
+            if (!hpf) return;
+            hpf.slope = (hpf.slope === 12) ? 24 : 12;
+            updateHPFUI();
+            drawEQGraph();
+            drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(true);
+        }
+
+        function onHPFFreqBoxChange(rawVal) {
+            selectBand(-1);
+            const hpf = getActiveHPF();
+            if (!hpf) return;
+            let s = String(rawVal).trim().toLowerCase().replace(',', '.');
+            let isK = s.includes('k');
+            s = s.replace(/[^0-9.]/g, '');
+            let num = parseFloat(s);
+            if (!isNaN(num)) {
+                if (isK && num < 100) num *= 1000;
+                hpf.freq = Math.max(20, Math.min(1000, Math.round(num)));
+            }
+            updateHPFUI();
+            updateKnobs();
+            drawEQGraph();
+            drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(true);
+        }
+
+        function renderChannelSelector(channelIdx) {
+            const chSelectorRow = document.getElementById('ch-selector');
+            if(!chSelectorRow) return;
+            chSelectorRow.innerHTML = '';
+            const channelStrips = document.querySelectorAll('.channel-strip');
+
+            for (let i = 0; i < NUM_CHANNELS; i++) {
+                const btn = document.createElement('button');
+                btn.className = `ch-btn ${i === channelIdx ? 'active' : ''}`;
+                
+                let labelName = i === 0 ? 'LR' : `${i}`;
+                if (channelStrips[i]) {
+                    const inp = channelStrips[i].querySelector('.channel-input');
+                    if (inp && inp.value.trim() !== '') {
+                        labelName = i === 0 ? 'LR' : `${i}: ${inp.value.trim()}`;
+                    }
+                }
+                btn.textContent = labelName;
+                btn.onclick = () => {
+                    initModal(i);
+                };
+                chSelectorRow.appendChild(btn);
+            }
+            const activeBtn = chSelectorRow.querySelector('.ch-btn.active');
+            if(activeBtn) {
+                setTimeout(() => activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 50);
+            }
+        }
+
+        function initModal(channelIdx) {
+            activeChannelIdx = channelIdx;
+            // Load this channel's saved EQ state (do NOT clone — edits update it directly)
+            currentBands = channelEQState[channelIdx];
+
+            eqEnabled = (channelEQEnabled[channelIdx] !== false);
+            eqOnBtn.textContent = eqEnabled ? 'EQ: On' : 'EQ: Off';
+            eqOnBtn.style.background = eqEnabled ? '#FF9900' : '#555';
+            eqOnBtn.style.color = eqEnabled ? '#000' : '#FFF';
+
+            // Update title with current channel custom name
+            const channelStrips = document.querySelectorAll('.channel-strip');
+            if (channelStrips[channelIdx]) {
+                const inp = channelStrips[channelIdx].querySelector('.channel-input');
+                if (inp) modalTitle.textContent = "EQ Eight - " + inp.value;
+            }
+
+            renderChannelSelector(channelIdx);
+
+            const boxesContainer = document.getElementById('band-boxes');
+            boxesContainer.innerHTML = '';
+            
+            // Box dedicado do Filtro Passa-Altas (HPF)
+            const hpf = getActiveHPF();
+            const hpfBox = document.createElement('div');
+            hpfBox.className = `band-box band-box-hpf ${selectedBandIndex === -1 ? 'selected' : ''}`;
+            hpfBox.id = 'band-box-hpf';
+            hpfBox.onclick = () => selectBand(-1);
+            const hpfFreqStr = hpf.freq >= 1000 ? (hpf.freq/1000).toFixed(2)+'k' : Math.round(hpf.freq)+' Hz';
+            hpfBox.innerHTML = `
+                <div class="band-header">
+                    <div class="band-num" style="background: #00E5FF; color: #000; font-size: 10px; font-weight: bold; padding: 2px 4px; border-radius: 3px;">HP</div>
+                    <div class="band-name" style="color: #00E5FF;">HPF</div>
+                    <button class="hpf-toggle-btn ${hpf.enabled ? 'active' : ''}" id="hpf-box-toggle" onclick="event.stopPropagation(); toggleHPF();">${hpf.enabled ? 'ON' : 'OFF'}</button>
+                </div>
+                <div class="band-param"><span class="param-lbl">Freq</span><input type="text" class="param-val-box" id="bx-hpf-f" value="${hpfFreqStr}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="onHPFFreqBoxChange(this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
+                <div class="band-param"><span class="param-lbl">Slope</span><button class="hpf-slope-btn" id="hpf-slope-btn" onclick="event.stopPropagation(); toggleHPFSlope();">${hpf.slope} dB</button></div>
+                <div class="band-param"><span class="param-lbl">Status</span><span style="font-size:10px; font-weight:bold; color:${hpf.enabled ? '#00E5FF' : '#888'}; cursor:pointer;" onclick="event.stopPropagation(); toggleHPF();">${hpf.enabled ? 'ATIVO' : 'BYPASS'}</span></div>
+            `;
+            boxesContainer.appendChild(hpfBox);
+
+            currentBands.forEach((b, i) => {
+                const box = document.createElement('div');
+                box.className = `band-box b${b.id} ${i === selectedBandIndex ? 'selected' : ''}`;
+                box.onclick = () => selectBand(i);
+                
+                const freqStr = b.freq >= 1000 ? (b.freq/1000).toFixed(2)+'k' : b.freq+' Hz';
+                box.innerHTML = `
+                    <div class="band-header">
+                        <div class="band-num">${b.id}</div>
+                        <div class="band-name">${b.name}</div>
+                    </div>
+                    <div class="band-param"><span class="param-lbl">Freq</span><input type="text" class="param-val-box" id="bx-f-${i}" value="${freqStr}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="onBoxParamChange(${i}, 'freq', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
+                    <div class="band-param"><span class="param-lbl">Gain</span><input type="text" class="param-val-box" id="bx-g-${i}" value="${b.gain.toFixed(1)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="onBoxParamChange(${i}, 'gain', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
+                    <div class="band-param"><span class="param-lbl">Q</span><input type="text" class="param-val-box" id="bx-q-${i}" value="${b.q.toFixed(1)}" onclick="event.stopPropagation()" onfocus="this.select()" onchange="onBoxParamChange(${i}, 'q', this.value)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
+                `;
+                boxesContainer.appendChild(box);
+            });
+            
+            updateHPFUI();
+            updateKnobs();
+            drawEQGraph();
+            updatePinkNoiseButton();
+            syncModalFader(channelIdx);
+        }
+
+        function setBoxVal(el, val) {
+            if (!el) return;
+            if (el.tagName === 'INPUT') {
+                if (document.activeElement !== el) el.value = val;
+            } else {
+                el.textContent = val;
+            }
+        }
+
+        function onBoxParamChange(bandIdx, param, rawVal) {
+            selectBand(bandIdx);
+            const b = currentBands[bandIdx];
+            if (!b) return;
+
+            let s = String(rawVal).trim().toLowerCase().replace(',', '.');
+            if (param === 'freq') {
+                let isK = s.includes('k');
+                s = s.replace(/[^0-9.]/g, '');
+                let num = parseFloat(s);
+                if (!isNaN(num)) {
+                    if (isK && num < 100) num *= 1000;
+                    b.freq = Math.max(20, Math.min(20000, Math.round(num)));
+                }
+            } else if (param === 'gain') {
+                s = s.replace(/[^0-9.-]/g, '');
+                let num = parseFloat(s);
+                if (!isNaN(num)) {
+                    b.gain = Math.max(-15, Math.min(15, Math.round(num * 10) / 10));
+                }
+            } else if (param === 'q') {
+                s = s.replace(/[^0-9.]/g, '');
+                let num = parseFloat(s);
+                if (!isNaN(num)) {
+                    b.q = Math.max(0.1, Math.min(10, Math.round(num * 10) / 10));
+                }
+            }
+
+            const freqStr = b.freq >= 1000 ? (b.freq / 1000).toFixed(2) + 'k' : b.freq + ' Hz';
+            const fEl = document.getElementById(`bx-f-${bandIdx}`);
+            const gEl = document.getElementById(`bx-g-${bandIdx}`);
+            const qEl = document.getElementById(`bx-q-${bandIdx}`);
+            if (fEl) fEl.value = freqStr;
+            if (gEl) gEl.value = b.gain.toFixed(1);
+            if (qEl) qEl.value = b.q.toFixed(1);
+
+            updateKnobs();
+            drawEQGraph();
+            drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(true);
+        }
+
+        function selectBand(index) {
+            selectedBandIndex = index;
+            const hpfBox = document.getElementById('band-box-hpf');
+            if (hpfBox) hpfBox.classList.toggle('selected', index === -1);
+            const nonHpfBoxes = document.querySelectorAll('.band-box:not(.band-box-hpf)');
+            nonHpfBoxes.forEach((b, i) => {
+                b.classList.toggle('selected', i === index);
+            });
+            const targetBox = (index === -1) ? hpfBox : (nonHpfBoxes ? nonHpfBoxes[index] : null);
+            if (targetBox && targetBox.scrollIntoView) {
+                try {
+                    targetBox.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                } catch(e) {}
+            }
+            updateKnobs();
+            drawEQGraph();
+        }
+
+        function stepParam(type, dir) {
+            if (selectedBandIndex === -1) {
+                const hpf = getActiveHPF();
+                if (!hpf) return;
+                if (type === 'freq') {
+                    hpf.freq = Math.max(20, Math.min(1000, Math.round(hpf.freq * (dir > 0 ? 1.15 : 0.87))));
+                } else if (type === 'gain') {
+                    hpf.slope = (hpf.slope === 12) ? 24 : 12;
+                } else if (type === 'q') {
+                    hpf.enabled = !hpf.enabled;
+                }
+                updateHPFUI();
+                updateKnobs();
+                drawEQGraph();
+                drawMiniEQ(activeChannelIdx);
+                if (typeof updateChannelEQFilters === 'function') updateChannelEQFilters(activeChannelIdx);
+                notifyEQChanged(true);
+                return;
+            }
+            const b = currentBands[selectedBandIndex];
+            if (type === 'freq') {
+                const minF = 20, maxF = 20000;
+                b.freq = Math.max(minF, Math.min(maxF, b.freq * (dir > 0 ? 1.15 : 0.87)));
+            } else if (type === 'gain') {
+                b.gain = Math.max(-15, Math.min(15, Math.round((b.gain + dir * 0.5) * 10) / 10));
+            } else if (type === 'q') {
+                b.q = Math.max(0.2, Math.min(10, Math.round((b.q + dir * 0.1) * 10) / 10));
+            }
+            updateKnobs();
+            drawEQGraph();
+            notifyEQChanged(true);
+        }
+
+        function updateKnobs() {
+            if (selectedBandIndex === -1) {
+                const hpf = getActiveHPF();
+                if (!hpf) return;
+                const freqStr = hpf.freq >= 1000 ? (hpf.freq/1000).toFixed(2) + 'k' : Math.round(hpf.freq) + ' Hz';
+                document.getElementById('val-freq').textContent = freqStr;
+                document.getElementById('val-gain').textContent = `${hpf.slope} dB`;
+                document.getElementById('val-q').textContent = hpf.enabled ? 'ON' : 'OFF';
+
+                const minF = Math.log10(20); const maxF = Math.log10(1000);
+                const normF = (Math.log10(hpf.freq) - minF) / (maxF - minF);
+                document.getElementById('ind-freq').style.transform = `rotate(${Math.max(0, Math.min(1, normF)) * 270 - 135}deg)`;
+                document.getElementById('ind-gain').style.transform = hpf.slope === 24 ? 'rotate(90deg)' : 'rotate(-90deg)';
+                document.getElementById('ind-q').style.transform = hpf.enabled ? 'rotate(90deg)' : 'rotate(-90deg)';
+                return;
+            }
+            const b = currentBands[selectedBandIndex];
+            if (!b) return;
+            document.getElementById('val-freq').textContent = b.freq >= 1000 ? (b.freq/1000).toFixed(2) + 'k' : Math.round(b.freq) + ' Hz';
+            document.getElementById('val-gain').textContent = (b.gain > 0 ? '+' : '') + b.gain.toFixed(1) + ' dB';
+            document.getElementById('val-q').textContent = b.q.toFixed(2);
+            
+            const minF = Math.log10(20); const maxF = Math.log10(20000);
+            const normF = (Math.log10(b.freq) - minF) / (maxF - minF);
+            document.getElementById('ind-freq').style.transform = `rotate(${normF * 270 - 135}deg)`;
+
+            const normG = (b.gain + 15) / 30;
+            document.getElementById('ind-gain').style.transform = `rotate(${normG * 270 - 135}deg)`;
+
+            const normQ = b.q / 10;
+            document.getElementById('ind-q').style.transform = `rotate(${normQ * 270 - 135}deg)`;
+        }
+
+        function drawEQGraph() {
+            const canvas = document.getElementById('eqGraph');
+            const ctx = canvas.getContext('2d');
+            
+            // Adjust internal canvas resolution to match display size for crisp lines
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0 && (canvas.width !== rect.width || canvas.height !== rect.height)) {
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+            
+            const w = canvas.width; const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for(let i = 0; i <= 6; i++) {
+                const y = i * (h / 6);
+                ctx.moveTo(0, y); ctx.lineTo(w, y);
+            }
+            const freqs = [20, 40, 80, 100, 200, 400, 800, 1000, 2000, 4000, 8000, 10000, 20000];
+            const minF = Math.log10(20); const maxF = Math.log10(20000);
+            freqs.forEach(f => {
+                const x = ((Math.log10(f) - minF) / (maxF - minF)) * w;
+                ctx.moveTo(x, 0); ctx.lineTo(x, h);
+            });
+            ctx.stroke();
+
+            ctx.strokeStyle = '#555'; ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+
+            // --- RTA Bars (drawn behind EQ curve, from bottom = -15dB upward) ---
+            if(rtaEnabled && rtaBands.length > 0) {
+                const numBars = rtaBands.length;
+                const barW = w / numBars;
+                for(let b = 0; b < numBars; b++) {
+                    // Full height = full scale (bottom of canvas = -15dB)
+                    const barH = rtaBands[b] * h;
+                    const bx   = b * barW;
+                    const by   = h - barH; // start from the very bottom
+
+                    // Color gradient: dark green (quiet) → bright green → yellow at top
+                    const pct = rtaBands[b];
+                    const r  = Math.round(pct * pct * 220);
+                    const g  = Math.round(180 + pct * 60);
+                    const bl = Math.round(30);
+                    ctx.fillStyle = `rgba(${r},${g},${bl},0.50)`;
+                    ctx.fillRect(bx, by, barW - 1, barH);
+
+                    // Peak hold indicator (bright line at top of bar)
+                    ctx.fillStyle = `rgba(${Math.min(255,r+80)},${g},${bl},0.95)`;
+                    ctx.fillRect(bx, by - 2, barW - 1, 2);
+                }
+            }
+
+            // Draw EQ curve (flat if EQ disabled)
+            ctx.beginPath();
+            ctx.moveTo(0, h/2);
+            
+            const hpf = getActiveHPF();
+            let points = [];
+            for(let px = 0; px <= w; px++) {
+                const curLogF = minF + (px/w)*(maxF - minF);
+                const curF = Math.pow(10, curLogF);
+                
+                let totalDb = 0;
+                if(eqEnabled) {
+                    if (hpf && hpf.enabled) {
+                        totalDb += getHPFResponseDb(curF, hpf);
+                    }
+                    currentBands.forEach(b => {
+                        if(b.gain === 0) return;
+                        const octDiff = Math.log2(curF / b.freq);
+                        const bw = 1 / b.q; 
+                        const response = b.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                        totalDb += response;
+                    });
+                }
+                
+                let y = h/2 - (totalDb / 15) * (h/2);
+                y = Math.max(0, Math.min(h, y));
+                points.push({x: px, y: y});
+                ctx.lineTo(px, y);
+            }
+            
+            const fillPath = new Path2D();
+            fillPath.moveTo(0, h/2);
+            points.forEach(p => fillPath.lineTo(p.x, p.y));
+            fillPath.lineTo(w, h/2);
+            fillPath.closePath();
+            ctx.fillStyle = eqEnabled ? "rgba(255,136,0,0.6)" : "rgba(100,100,100,0.3)";
+            ctx.fill(fillPath);
+
+            ctx.strokeStyle = eqEnabled ? "#FF8800" : "#888";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            points.forEach((p, i) => {
+                if(i===0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+
+            // Draw HPF Handle Node on graph
+            if (hpf) {
+                const hpfX = ((Math.log10(hpf.freq) - minF) / (maxF - minF)) * w;
+                const hpfDb = (eqEnabled && hpf.enabled) ? getHPFResponseDb(hpf.freq, hpf) : 0;
+                const hpfY = h/2 - (hpfDb / 15) * (h/2);
+                const isSelected = (selectedBandIndex === -1);
+                const nodeColor = hpf.enabled ? "#00E5FF" : "#667788";
+
+                // Guia vertical ciano
+                ctx.strokeStyle = hpf.enabled ? "rgba(0, 229, 255, 0.30)" : "rgba(255, 255, 255, 0.08)";
+                ctx.lineWidth = isSelected ? 2 : 1;
+                ctx.beginPath();
+                ctx.moveTo(hpfX, 0); ctx.lineTo(hpfX, h);
+                ctx.stroke();
+
+                // Círculo externo (touch target)
+                const radius = isSelected ? 26 : 20;
+                ctx.beginPath();
+                ctx.arc(hpfX, hpfY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = isSelected ? "rgba(0, 229, 255, 0.45)" : "rgba(0, 229, 255, 0.15)";
+                ctx.fill();
+
+                // Círculo interno sólido
+                const innerRadius = isSelected ? 15 : 12;
+                ctx.beginPath();
+                ctx.arc(hpfX, hpfY, innerRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = nodeColor;
+                ctx.fill();
+
+                // Texto HP
+                ctx.fillStyle = hpf.enabled ? '#000' : '#FFF';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('HP', hpfX, hpfY);
+            }
+
+            currentBands.forEach((b, i) => {
+                const x = ((Math.log10(b.freq) - minF) / (maxF - minF)) * w;
+                const y = h/2 - (b.gain / 15) * (h/2);
+                
+                const isSelected = (i === selectedBandIndex);
+                
+                // Faint vertical line
+                ctx.strokeStyle = "rgba(255,255,255,0.05)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, 0); ctx.lineTo(x, h);
+                ctx.stroke();
+                
+                // Translucent outer circle (large for easy touch target)
+                const radius = isSelected ? 26 : 20;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = b.color + (isSelected ? "88" : "44"); // Hex alpha
+                ctx.fill();
+                
+                // Inner solid circle
+                const innerRadius = isSelected ? 15 : 12;
+                ctx.beginPath();
+                ctx.arc(x, y, innerRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = b.color;
+                ctx.fill();
+                
+                // Band ID text
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(b.id, x, y);
+            });
+        }
+
+        // Mouse and Touch interaction for knobs
+        let isDragging = false;
+        let startY = 0;
+        let activeKnob = null;
+        let lastKnobTapTime = 0;
+
+        const startDrag = (y, knobId) => {
+            isDragging = true;
+            startY = y;
+            activeKnob = knobId;
+        };
+
+        const resetKnob = (knobId) => {
+            if (selectedBandIndex === -1) {
+                const hpf = getActiveHPF();
+                if (hpf) {
+                    if (knobId === 'knob-freq') hpf.freq = 80;
+                    else if (knobId === 'knob-gain') hpf.slope = 12;
+                    else if (knobId === 'knob-q') hpf.enabled = false;
+                    updateHPFUI();
+                    updateKnobs();
+                    drawEQGraph();
+                    drawMiniEQ(activeChannelIdx);
+                    if (typeof updateChannelEQFilters === 'function') updateChannelEQFilters(activeChannelIdx);
+                    notifyEQChanged(true);
+                }
+                return;
+            }
+            const b = currentBands[selectedBandIndex];
+            const def = defaultBands.find(db => db.id === b.id);
+            if(knobId === 'knob-gain') {
+                b.gain = 0;
+                setBoxVal(document.getElementById(`bx-g-${selectedBandIndex}`), '0.0');
+            } else if(knobId === 'knob-freq') {
+                b.freq = def.freq;
+                const freqStr = b.freq >= 1000 ? (b.freq/1000).toFixed(2) + 'k' : Math.round(b.freq) + ' Hz';
+                setBoxVal(document.getElementById(`bx-f-${selectedBandIndex}`), freqStr);
+            } else if(knobId === 'knob-q') {
+                b.q = def.q;
+                setBoxVal(document.getElementById(`bx-q-${selectedBandIndex}`), b.q.toFixed(2));
+            }
+            updateKnobs();
+            drawEQGraph();
+            notifyEQChanged(true);
+        };
+
+        const moveDrag = (y) => {
+            if(!isDragging || !activeKnob) return;
+            const dy = startY - y; // up is positive
+            startY = y;
+            
+            if (selectedBandIndex === -1) {
+                const hpf = getActiveHPF();
+                if (hpf) {
+                    if (activeKnob === 'knob-freq') {
+                        const logF = Math.log10(hpf.freq);
+                        const newF = Math.pow(10, logF + dy * 0.015);
+                        hpf.freq = Math.max(20, Math.min(1000, Math.round(newF)));
+                    } else if (activeKnob === 'knob-gain') {
+                        if (dy > 4) hpf.slope = 24;
+                        else if (dy < -4) hpf.slope = 12;
+                    } else if (activeKnob === 'knob-q') {
+                        if (dy > 4) hpf.enabled = true;
+                        else if (dy < -4) hpf.enabled = false;
+                    }
+                    updateHPFUI();
+                    updateKnobs();
+                    drawEQGraph();
+                    drawMiniEQ(activeChannelIdx);
+                    if (typeof updateChannelEQFilters === 'function') updateChannelEQFilters(activeChannelIdx);
+                    notifyEQChanged(false);
+                }
+                return;
+            }
+
+            const b = currentBands[selectedBandIndex];
+            
+            if(activeKnob === 'knob-freq') {
+                const logF = Math.log10(b.freq);
+                const newF = Math.pow(10, logF + dy * 0.015);
+                b.freq = Math.max(20, Math.min(20000, newF));
+                const freqStr = b.freq >= 1000 ? (b.freq/1000).toFixed(2) + 'k' : Math.round(b.freq) + ' Hz';
+                setBoxVal(document.getElementById(`bx-f-${selectedBandIndex}`), freqStr);
+            }
+            else if(activeKnob === 'knob-gain') {
+                b.gain = Math.max(-15, Math.min(15, b.gain + dy * 0.3));
+                setBoxVal(document.getElementById(`bx-g-${selectedBandIndex}`), b.gain.toFixed(1));
+            }
+            else if(activeKnob === 'knob-q') {
+                b.q = Math.max(0.1, Math.min(10, b.q + dy * 0.08));
+                setBoxVal(document.getElementById(`bx-q-${selectedBandIndex}`), b.q.toFixed(2));
+            }
+            
+            updateKnobs();
+            drawEQGraph();
+            notifyEQChanged(false);
+        };
+
+        const endDrag = () => {
+            if(isDragging) {
+                isDragging = false;
+                activeKnob = null;
+                notifyEQChanged(true);
+            }
+        };
+
+        document.querySelectorAll('.knob').forEach(knob => {
+            const handleKnobStart = (y, id) => {
+                const now = Date.now();
+                if(now - lastKnobTapTime < 300 && activeKnob === id) {
+                    resetKnob(id);
+                }
+                lastKnobTapTime = now;
+                startDrag(y, id);
+            };
+            knob.addEventListener('mousedown', (e) => { e.preventDefault(); handleKnobStart(e.clientY, knob.id); });
+            knob.addEventListener('touchstart', (e) => { e.preventDefault(); handleKnobStart(e.touches[0].clientY, knob.id); }, {passive: false});
+        });
+
+        window.addEventListener('mousemove', (e) => moveDrag(e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if(isDragging) { e.preventDefault(); moveDrag(e.touches[0].clientY); }
+        }, {passive: false});
+
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+
+        // Graph Interaction (Drag directly on the canvas)
+        const eqCanvasNode = document.getElementById('eqGraph');
+        let isPointerDown   = false; // true while mouse/finger is held
+        let isDraggingGraph = false; // true only after crossing threshold
+        let graphHasMoved   = false; // true if actual drag happened
+        let startGraphX = 0, startGraphY = 0;
+        let initialBandFreq = 0, initialBandGain = 0;
+        const DRAG_THRESHOLD = 8;
+
+        // Double-tap tracking
+        let lastTapBandIdx = -1;
+        let lastTapTime    = 0;
+
+        const getGraphCoords = (e) => {
+            const rect = eqCanvasNode.getBoundingClientRect();
+            const src  = e.changedTouches ? e.changedTouches[0]
+                       : e.touches        ? e.touches[0]
+                       : e;
+            return {
+                x: (src.clientX - rect.left) * (eqCanvasNode.width  / rect.width),
+                y: (src.clientY - rect.top)  * (eqCanvasNode.height / rect.height)
+            };
+        };
+
+        const selectNearestBand = (x) => {
+            const w = eqCanvasNode.width;
+            const minF = Math.log10(20), maxF = Math.log10(20000);
+            const curF = Math.pow(10, minF + (x / w) * (maxF - minF));
+            
+            const hpf = getActiveHPF();
+            let nearestIdx = 0;
+            let minDist = Infinity;
+
+            if (hpf) {
+                const dHP = Math.abs(Math.log10(hpf.freq) - Math.log10(curF));
+                minDist = dHP;
+                nearestIdx = -1; // -1 represents HPF node
+            }
+
+            currentBands.forEach((b, i) => {
+                const d = Math.abs(Math.log10(b.freq) - Math.log10(curF));
+                if(d < minDist) { minDist = d; nearestIdx = i; }
+            });
+            return nearestIdx;
+        };
+
+        const resetBandGain = (idx) => {
+            if (idx === -1) {
+                toggleHPF();
+                return;
+            }
+            currentBands[idx].gain = 0;
+            setBoxVal(document.getElementById(`bx-g-${idx}`), '0.0');
+            updateKnobs();
+            drawEQGraph();
+            notifyEQChanged(true);
+        };
+
+        // ── POINTER DOWN ──────────────────────────────────────────────
+        const onGraphDown = (e) => {
+            e.preventDefault();
+            isPointerDown   = true;
+            isDraggingGraph = false;
+            graphHasMoved   = false;
+
+            const {x, y} = getGraphCoords(e);
+            startGraphX = x;
+            startGraphY = y;
+
+            const idx = selectNearestBand(x);
+            selectBand(idx);
+            if (idx === -1) {
+                const hpf = getActiveHPF();
+                initialBandFreq = hpf ? hpf.freq : 80;
+                initialBandGain = 0;
+            } else {
+                initialBandFreq = currentBands[idx].freq;
+                initialBandGain = currentBands[idx].gain;
+            }
+        };
+
+        // ── POINTER MOVE ──────────────────────────────────────────────
+        const onGraphMove = (e) => {
+            if(!isPointerDown) return;   // ignore move when not pressing
+            e.preventDefault();
+
+            const {x, y} = getGraphCoords(e);
+            const dx = x - startGraphX;
+            const dy = y - startGraphY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            if(!isDraggingGraph) {
+                if(dist > DRAG_THRESHOLD) {
+                    isDraggingGraph = true;
+                    graphHasMoved   = true;
+                } else {
+                    return; // still within tap zone
+                }
+            }
+
+            const w = eqCanvasNode.width, h = eqCanvasNode.height;
+            const minF = Math.log10(20), maxF = Math.log10(20000);
+            const initX = ((Math.log10(initialBandFreq) - minF) / (maxF - minF)) * w;
+            const newX  = Math.max(0, Math.min(w, initX + dx));
+
+            if (selectedBandIndex === -1) {
+                // Dragging HPF cutoff frequency (20 Hz - 1000 Hz)
+                const hpf = getActiveHPF();
+                if (hpf) {
+                    const newFreq = Math.pow(10, minF + (newX / w) * (maxF - minF));
+                    hpf.freq = Math.max(20, Math.min(1000, Math.round(newFreq)));
+                    updateHPFUI();
+                    updateKnobs();
+                    drawEQGraph();
+                    drawMiniEQ(activeChannelIdx);
+                    if (typeof updateChannelEQFilters === 'function') {
+                        updateChannelEQFilters(activeChannelIdx);
+                    }
+                    notifyEQChanged(false);
+                }
+                return;
+            }
+
+            const b = currentBands[selectedBandIndex];
+            b.freq  = Math.max(20,  Math.min(20000, Math.pow(10, minF + (newX / w) * (maxF - minF))));
+            b.gain  = Math.max(-15, Math.min(15, initialBandGain - (dy / (h / 2)) * 15));
+
+            const freqStr = b.freq >= 1000 ? (b.freq/1000).toFixed(2)+'k' : Math.round(b.freq)+' Hz';
+            setBoxVal(document.getElementById(`bx-f-${selectedBandIndex}`), freqStr);
+            setBoxVal(document.getElementById(`bx-g-${selectedBandIndex}`), b.gain.toFixed(1));
+            updateKnobs();
+            drawEQGraph();
+            drawMiniEQ(activeChannelIdx);
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(activeChannelIdx);
+            }
+            notifyEQChanged(false);
+        };
+
+        // ── POINTER UP ────────────────────────────────────────────────
+        const onGraphUp = (e) => {
+            if(!isPointerDown) return;
+            isPointerDown   = false;
+            isDraggingGraph = false;
+
+            if(!graphHasMoved) {
+                // Clean tap → check for double-tap
+                const now        = Date.now();
+                const tappedBand = selectedBandIndex;
+                if(now - lastTapTime < 400 && lastTapBandIdx === tappedBand) {
+                    resetBandGain(tappedBand);
+                    lastTapTime    = 0;
+                    lastTapBandIdx = -999;
+                } else {
+                    lastTapTime    = now;
+                    lastTapBandIdx = tappedBand;
+                }
+            }
+            graphHasMoved = false;
+            notifyEQChanged(true);
+        };
+
+        eqCanvasNode.addEventListener('mousedown',  (e) => onGraphDown(e));
+        eqCanvasNode.addEventListener('touchstart', (e) => onGraphDown(e), {passive: false});
+
+        window.addEventListener('mousemove',  (e) => onGraphMove(e));
+        window.addEventListener('touchmove',  (e) => onGraphMove(e), {passive: false});
+
+        window.addEventListener('mouseup',  (e) => onGraphUp(e));
+        window.addEventListener('touchend', (e) => onGraphUp(e));
+
+        // Handle window resize for canvas redraw
+        window.addEventListener('resize', () => {
+            if(modal.style.display === 'flex') drawEQGraph();
+        });
+
+        // --- RTA Animation Loop (Espectro Real do Áudio no Canal) ---
+        let rtaPeak = new Array(64).fill(0);
+        let rtaSmooth = new Array(64).fill(0);
+        let rtaTarget = new Array(64).fill(0);
+        const rtaFreqData = new Uint8Array(512);
+
+        function updateRTA() {
+            const numBars = 64;
+            const minF = Math.log10(20);
+            const maxF = Math.log10(20000);
+
+            const activeData = channelStripsData[activeChannelIdx];
+            const isMuted = activeData && activeData.muteBtn.classList.contains('muted');
+            const faderPct = activeData ? (parseFloat(activeData.faderCap.style.bottom) || 0) : 0;
+
+            // Ganho do potenciômetro do canal ativo (70% = 0.0 dB / ganho 1.0)
+            let potGain = 0;
+            let potDb = -60;
+            if (!isMuted && faderPct > 1.0) {
+                if (faderPct >= 70) {
+                    potGain = 1.0 + ((faderPct - 70) / 30) * 1.0;
+                } else {
+                    potGain = Math.pow(faderPct / 70, 2);
+                }
+                potDb = 20 * Math.log10(Math.max(0.0001, potGain));
+            }
+
+            // Flag explícita: true quando a fonte de áudio do canal é o gerador de ruído rosa
+            let isPinkNoise = false;
+            let activeAnalyser = null;
+
+            // Identifica analisador de entrada de áudio real (player ou mic)
+            const realInputAnalyser = (playerAnalyser && playerElement && !playerElement.paused)
+                ? playerAnalyser
+                : micAnalyser;
+
+            const inputData = channelStripsData[0];
+            const isInputMuted = inputData && inputData.muteBtn.classList.contains('muted');
+            const inputFaderPct = (inputData && !isInputMuted) ? (parseFloat(inputData.faderCap.style.bottom) || 0) : 0;
+
+            if (!isMuted && faderPct > 1.0) {
+                // 1. Ruído Rosa ativo no canal atual (saídas 1 a 10)
+                if (activeChannelIdx > 0 && activeData && activeData.noiseEnabled && activeData.rtaAnalyser) {
+                    activeAnalyser = activeData.rtaAnalyser;
+                    isPinkNoise = true;
+                }
+                // 2. Ou áudio real (player / mic / entrada externa) lido do Analyser pós-fader do canal
+                else if (activeData && activeData.rtaAnalyser) {
+                    // Se for canal de saída (1 a 10), só recebe áudio se a Entrada LR estiver aberta
+                    if (activeChannelIdx === 0 || inputFaderPct > 1.0) {
+                        activeAnalyser = activeData.rtaAnalyser;
+                    }
+                }
+                else if (realInputAnalyser) {
+                    if (activeChannelIdx === 0 || inputFaderPct > 1.0) {
+                        activeAnalyser = realInputAnalyser;
+                    }
+                }
+            }
+
+            // Para ruído rosa: sinal ativo se o fader do canal estiver aberto
+            // Para player/microfone: detecta via energia dos bins FFT pós-fader
+            let hasAudioSignal = isPinkNoise && !isMuted && faderPct > 1.0;
+
+            if (!isPinkNoise && activeAnalyser && audioCtx && audioCtx.state === 'running' && !isMuted && faderPct > 1.0) {
+                activeAnalyser.getByteFrequencyData(rtaFreqData);
+                let energySum = 0;
+                for (let k = 0; k < rtaFreqData.length; k++) energySum += rtaFreqData[k];
+                if (energySum > 100) {
+                    hasAudioSignal = true;
+                }
+            } else if (isPinkNoise && activeAnalyser && audioCtx && audioCtx.state === 'running') {
+                activeAnalyser.getByteFrequencyData(rtaFreqData);
+            }
+
+            const sampleRate = audioCtx ? audioCtx.sampleRate : 48000;
+            const nyquist = sampleRate / 2;
+            const binCount = rtaFreqData.length;
+
+            for (let b = 0; b < numBars; b++) {
+                if (hasAudioSignal && activeAnalyser && !isMuted && faderPct > 1.0) {
+                    // Mapeamento logarítmico de 20 Hz a 20.000 Hz
+                    const curLogF = minF + (b / numBars) * (maxF - minF);
+                    const curF = Math.pow(10, curLogF);
+
+                    let normLevel = 0;
+
+                    // Resposta da curva do EQ Eight em dB na frequência exata desta barra
+                    let eqDb = 0;
+                    if (eqEnabled) {
+                        const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[activeChannelIdx])
+                            ? channelHPFState[activeChannelIdx] : null;
+                        if (hpf && hpf.enabled) {
+                            eqDb += getHPFResponseDb(curF, hpf);
+                        }
+                        currentBands.forEach(band => {
+                            if (band.gain === 0) return;
+                            const octDiff = Math.log2(curF / band.freq);
+                            const bw = 1 / Math.max(0.1, band.q);
+                            eqDb += band.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                        });
+                    }
+
+                    // === 1. RUÍDO ROSA: curva plana modulada pelo EQ + ganho do potenciômetro ===
+                    if (isPinkNoise) {
+                        const jitterDb = Math.sin(b * 13.7 + Date.now() * 0.005) * 0.25 + (Math.random() - 0.5) * 0.3;
+                        const totalDb = eqDb + potDb + jitterDb;
+                        // 0dB (fader em 70%) = normLevel 0.50 (linha central de 0dB).
+                        // +6dB = 0.70. -15dB = 0.0.
+                        normLevel = Math.max(0, Math.min(1, 0.50 + (totalDb / 30)));
+                    }
+                    // === 2. ÁUDIO REAL (PLAYER OU MICROFONE): espectro FFT modulado pelo EQ e ganho do potenciômetro ===
+                    else {
+                        const centerBin = (curF / nyquist) * binCount;
+                        const binLow = Math.max(0, Math.floor(centerBin - 1));
+                        const binHigh = Math.min(binCount - 1, Math.ceil(centerBin + 1));
+                        let binVal = 0;
+                        let weightSum = 0;
+                        for (let k = binLow; k <= binHigh; k++) {
+                            const dist = Math.abs(k - centerBin);
+                            const w = Math.max(0.1, 1 - dist * 0.5);
+                            binVal += rtaFreqData[k] * w;
+                            weightSum += w;
+                        }
+                        binVal = binVal / weightSum;
+
+                        // FFT medido no Analyser pós-fader
+                        const rawSignal = (binVal / 255);
+
+                        // Modulação adicional proporcional ao ganho do potenciômetro (0dB = 0 offset, +6dB eleva, atenuação reduz)
+                        const potOffset = (potDb / 30);
+                        const eqOffset = (eqDb / 30);
+
+                        // Em 0dB (fader em 70%), o sinal de áudio padrão fica em torno de 50% da altura (linha de 0dB)
+                        const scaledSignal = rawSignal * 0.70;
+                        const presence = Math.min(1.0, scaledSignal * 2.2);
+
+                        normLevel = Math.max(0, Math.min(1, scaledSignal + (potOffset * 0.30) + (eqOffset * presence)));
+                    }
+
+                    rtaTarget[b] = Math.max(0, Math.min(1, normLevel));
+                } else {
+                    // Sem áudio no canal ou potenciômetro fechado/mutado -> barras zeram completamente
+                    rtaTarget[b] = 0;
+                }
+
+                // Attack rápido, Decay suave (mais ágil durante ajustes manuais do EQ)
+                const isActivelyAdjusting = (typeof isPointerDown !== 'undefined' && isPointerDown) || 
+                                           (typeof isDragging !== 'undefined' && isDragging);
+                const attack = isActivelyAdjusting ? 0.85 : 0.65;
+                const decay  = isActivelyAdjusting ? 0.40 : 0.15;
+                const speed  = rtaSmooth[b] < rtaTarget[b] ? attack : decay;
+                rtaSmooth[b] += (rtaTarget[b] - rtaSmooth[b]) * speed;
+
+                if (rtaSmooth[b] < 0.008) rtaSmooth[b] = 0;
+
+                // Peak hold com decaimento que acompanha cortes do EQ
+                if (rtaSmooth[b] > rtaPeak[b]) {
+                    rtaPeak[b] = rtaSmooth[b];
+                } else {
+                    rtaPeak[b] = Math.max(0, Math.min(rtaPeak[b] - 0.005, rtaSmooth[b] + 0.12));
+                }
+
+                rtaBands[b] = rtaSmooth[b];
+            }
+
+            if (rtaEnabled && modal.style.display === 'flex') {
+                drawEQGraph();
+            }
+            requestAnimationFrame(updateRTA);
+        }
+        updateRTA(); // Start loop always, drawing only when enabled
+
+        closeModal.onclick = () => { modal.style.display = 'none'; };
+
+        // ── Fader Vertical do Modal ─────────────────────────────────────
+        // Converte pct (0-100) para dB display (70% = 0.0 dB exato)
+        function pctToDbStr(pct) {
+            if (pct <= 1) return '-∞ dB';
+            let db = 0;
+            if (pct >= 70) {
+                const gain = 1.0 + ((pct - 70) / 30) * 1.0;
+                db = 20 * Math.log10(gain);
+            } else {
+                const gain = Math.pow(pct / 70, 2);
+                db = 20 * Math.log10(gain);
+                if (db < -60) return '-∞ dB';
+            }
+            return (db >= 0 ? '+' : '') + db.toFixed(1) + ' dB';
+        }
+
+        // Sincroniza posição visual do fader do modal com o fader real do canal
+        function syncModalFader(channelIdx) {
+            const data = channelStripsData[channelIdx];
+            if (!data) return;
+            const pct = parseFloat(data.faderCap.style.bottom) || 0;
+            const cap = document.getElementById('modal-fader-cap');
+            const val = document.getElementById('modal-fader-val');
+            if (cap) cap.style.bottom = pct + '%';
+            if (val) val.textContent = pctToDbStr(pct);
+        }
+
+        // Lógica de drag do fader do modal
+        const modalFaderTrack = document.getElementById('modal-fader-track');
+        const modalFaderCap   = document.getElementById('modal-fader-cap');
+        const modalFaderVal   = document.getElementById('modal-fader-val');
+        let isModalFaderDragging = false;
+
+        function getModalFaderPct(clientY) {
+            const rect = modalFaderTrack.getBoundingClientRect();
+            const pct = 1 - (clientY - rect.top) / rect.height;
+            return Math.max(0, Math.min(1, pct)) * 100;
+        }
+
+        function applyModalFader(clientY, isFinal) {
+            const valPct = getModalFaderPct(clientY);
+            // Atualiza visualmente o fader do modal
+            if (modalFaderCap) modalFaderCap.style.bottom = valPct + '%';
+            if (modalFaderVal) modalFaderVal.textContent = pctToDbStr(valPct);
+            // Atualiza o canal real (fader no mixer + áudio + VU)
+            applyVolume(activeChannelIdx, valPct);
+            sendVolumeSync(activeChannelIdx, Math.round(valPct * 10) / 10, isFinal);
+        }
+
+        // Mouse
+        modalFaderTrack.addEventListener('pointerdown', (e) => {
+            isModalFaderDragging = true;
+            modalFaderTrack.setPointerCapture(e.pointerId);
+            modalFaderCap && modalFaderCap.classList.add('dragging');
+            applyModalFader(e.clientY, false);
+            e.preventDefault();
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (!isModalFaderDragging) return;
+            applyModalFader(e.clientY, false);
+            e.preventDefault();
+        });
+        window.addEventListener('pointerup', (e) => {
+            if (!isModalFaderDragging) return;
+            isModalFaderDragging = false;
+            modalFaderCap && modalFaderCap.classList.remove('dragging');
+            applyModalFader(e.clientY, true);
+        });
+
+        // Touch
+        modalFaderTrack.addEventListener('touchstart', (e) => {
+            isModalFaderDragging = true;
+            modalFaderCap && modalFaderCap.classList.add('dragging');
+            applyModalFader(e.touches[0].clientY, false);
+            e.preventDefault();
+        }, { passive: false });
+        modalFaderTrack.addEventListener('touchmove', (e) => {
+            if (!isModalFaderDragging) return;
+            applyModalFader(e.touches[0].clientY, false);
+            e.preventDefault();
+        }, { passive: false });
+        modalFaderTrack.addEventListener('touchend', (e) => {
+            if (!isModalFaderDragging) return;
+            isModalFaderDragging = false;
+            modalFaderCap && modalFaderCap.classList.remove('dragging');
+            const t = e.changedTouches[0];
+            applyModalFader(t.clientY, true);
+        }, { passive: false });
+
+
+        // ── Drawing Mini EQ Curves ────────────────────────────────────
+        function drawMiniEQ(chIdx) {
+            const data = channelStripsData[chIdx];
+            if (!data) return;
+            const ctx = data.eqCtx;
+            const w = 70, h = 32;
+            ctx.clearRect(0, 0, w, h);
+
+            const bands = channelEQState[chIdx] || defaultBands;
+            const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[chIdx]) 
+                ? channelHPFState[chIdx] : null;
+            const isEqOn = (typeof channelEQEnabled !== 'undefined' && channelEQEnabled[chIdx] !== undefined)
+                ? channelEQEnabled[chIdx] : true;
+            const minF = Math.log10(20), maxF = Math.log10(20000);
+
+            ctx.fillStyle = "rgba(255, 136, 0, 0.2)";
+            ctx.strokeStyle = "#FF8800";
+            ctx.lineWidth = 1.5;
+
+            ctx.beginPath();
+            ctx.moveTo(0, h/2);
+            for (let px = 0; px <= w; px++) {
+                const curLogF = minF + (px / w) * (maxF - minF);
+                const curF = Math.pow(10, curLogF);
+                let totalDb = 0;
+                if (isEqOn) {
+                    if (hpf && hpf.enabled) {
+                        totalDb += getHPFResponseDb(curF, hpf);
+                    }
+                    bands.forEach(b => {
+                        if (b.gain === 0) return;
+                        const octDiff = Math.log2(curF / b.freq);
+                        const bw = 1 / b.q;
+                        totalDb += b.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                    });
+                }
+                let y = h/2 - (totalDb / 15) * (h/2);
+                y = Math.max(0, Math.min(h, y));
+                ctx.lineTo(px, y);
+            }
+            ctx.stroke();
+        }
+
+        // ── Apply Remote Updates ──────────────────────────────────────
+        function applyVolume(idx, valPct) {
+            const data = channelStripsData[idx];
+            if (!data) return;
+            const clamped = Math.max(0, Math.min(100, valPct));
+            data.faderCap.style.bottom = clamped + '%';
+            
+            // Atualiza o ganho do fader no grafo de áudio do mixer
+            updateChannelFaderGain(idx);
+
+            // Sincroniza o fader do modal se o EQ estiver aberto neste canal
+            if (modal.style.display === 'flex' && idx === activeChannelIdx) {
+                const cap = document.getElementById('modal-fader-cap');
+                const val = document.getElementById('modal-fader-val');
+                if (cap) cap.style.bottom = clamped + '%';
+                if (val && typeof pctToDbStr === 'function') val.textContent = pctToDbStr(clamped);
+            }
+        }
+
+
+        function applyMute(idx, isMuted) {
+            const data = channelStripsData[idx];
+            if (!data) return;
+            if (isMuted) {
+                data.muteBtn.classList.add('muted');
+                data.meterFill.classList.add('muted');
+                if (data.pill) data.pill.classList.add('is-muted');
+            } else {
+                data.muteBtn.classList.remove('muted');
+                data.meterFill.classList.remove('muted');
+                if (data.pill) data.pill.classList.remove('is-muted');
+            }
+            
+            // Atualiza o ganho do fader considerando o mute
+            updateChannelFaderGain(idx);
+        }
+
+        function applyName(idx, name) {
+            const data = channelStripsData[idx];
+            if (!data) return;
+            if (data.channelInput.value !== name) {
+                data.channelInput.value = name;
+            }
+            if (modal.style.display === 'flex') {
+                if (activeChannelIdx === idx) {
+                    modalTitle.textContent = "EQ Eight - " + name;
+                }
+                renderChannelSelector(activeChannelIdx);
+            }
+        }
+
+        // ── Throttled Volume Sync ─────────────────────────────────────
+        let lastVolSendTime = 0;
+        let volSendTimer = null;
+        function sendVolumeSync(channel, valPct, isFinal = false) {
+            const now = Date.now();
+            const valRounded = Math.round(valPct * 10) / 10;
+            if (isFinal) {
+                if (volSendTimer) clearTimeout(volSendTimer);
+                sendSync({ type: 'volume', channel, value: valRounded });
+                return;
+            }
+            if (now - lastVolSendTime > 35) {
+                lastVolSendTime = now;
+                sendSync({ type: 'volume', channel, value: valRounded });
+            } else {
+                if (volSendTimer) clearTimeout(volSendTimer);
+                volSendTimer = setTimeout(() => {
+                    sendSync({ type: 'volume', channel, value: valRounded });
+                }, 35);
+            }
+        }
+
+        // Generate mixer channels (LR Entrada + Ch 1 to Ch 10 Saídas)
+        for (let i = 0; i < 11; i++) {
+            const isInput = i === 0;
+            const channelNumber = isInput ? "LR" : `${i}`;
+            const defaultName = isInput ? "Entrada" : `Ch ${i}`;
+            
+            const strip = document.createElement('div');
+            strip.className = `channel-strip ${isInput ? 'main-strip' : ''}`;
+            
+            strip.innerHTML = `
+                <div class="eq-display" title="Abrir EQ Eight">
+                    <canvas class="eq-canvas" width="70" height="32"></canvas>
+                </div>
+                <button class="mute-btn">Mute</button>
+                <div class="fader-area">
+                    <div class="meter-bg">
+                        <div class="meter-clip line1"></div>
+                        <div class="meter-clip line2"></div>
+                        <div class="meter-fill" style="height: 100%"></div>
+                    </div>
+                    <div class="fader-track"></div>
+                    <div class="scale-marks">
+                        <span style="top: 0%;">+6</span>
+                        <span style="top: 15%;">+3</span>
+                        <span class="scale-mark-0u" style="top: 30%;">0 U</span>
+                        <span style="top: 45%;">-5</span>
+                        <span style="top: 58%;">-10</span>
+                        <span style="top: 70%;">-20</span>
+                        <span style="top: 80%;">-30</span>
+                        <span style="top: 90%;">-50</span>
+                        <span style="top: 100%;">-∞</span>
+                    </div>
+                    <div class="fader-track-touch">
+                        <div class="fader-track-line"></div>
+                        <div class="fader-track-mark-0db"></div>
+                        <div class="fader-cap" style="bottom: 70%;"></div>
+                    </div>
+                </div>
+                <div class="channel-label-container">
+                    <span class="channel-number">${channelNumber}</span>
+                    <input type="text" class="channel-input" value="${defaultName}" ${isInput ? 'readonly' : ''} maxlength="8">
+                </div>
+            `;
+            
+            const muteBtn = strip.querySelector('.mute-btn');
+            const meterFill = strip.querySelector('.meter-fill');
+            const eqDisplay = strip.querySelector('.eq-display');
+            const eqCanvas = strip.querySelector('.eq-canvas');
+            const faderTouch = strip.querySelector('.fader-track-touch');
+            const faderCap = strip.querySelector('.fader-cap');
+            const channelInput = strip.querySelector('.channel-input');
+            const ctx = eqCanvas.getContext('2d');
+
+            // Quick channel ribbon pill (para navegação ágil no celular)
+            const ribbon = document.getElementById('channel-ribbon');
+            let pill = null;
+            if (ribbon) {
+                pill = document.createElement('button');
+                pill.className = `ribbon-pill ${isInput ? 'active' : ''}`;
+                pill.setAttribute('data-ch', i);
+                pill.innerHTML = `<span class="ribbon-dot"></span><span>${channelNumber}</span>`;
+                pill.onclick = () => {
+                    strip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    document.querySelectorAll('.ribbon-pill').forEach((p, idx) => p.classList.toggle('active', idx === i));
+                };
+                ribbon.appendChild(pill);
+            }
+
+            channelStripsData[i] = {
+                strip,
+                pill,
+                muteBtn,
+                meterFill,
+                faderCap,
+                faderTouch,
+                channelInput,
+                eqCanvas,
+                eqCtx: ctx
+            };
+            
+            eqDisplay.addEventListener('click', () => {
+                ensureAudioCtx();
+                const customName = channelInput.value;
+                modalTitle.textContent = "EQ Eight - " + customName;
+                initModal(i);
+                modal.style.display = 'flex';
+                setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+            });
+            
+            muteBtn.addEventListener('click', () => {
+                const willBeMuted = !muteBtn.classList.contains('muted');
+                applyMute(i, willBeMuted);
+                sendSync({ type: 'mute', channel: i, value: willBeMuted });
+            });
+            
+            function getTouchY(e) {
+                if (e.touches && e.touches.length > 0) return e.touches[0].clientY;
+                if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientY;
+                return e.clientY;
+            }
+
+            function updateFaderFromY(clientY, isFinal = false) {
+                if (clientY === undefined || clientY === null || isNaN(clientY)) return;
+                const rect = faderTouch.getBoundingClientRect();
+                const pct = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+                const valPct = (1 - pct) * 100;
+                applyVolume(i, valPct);
+                sendVolumeSync(i, valPct, isFinal);
+            }
+
+            let isDraggingFader = false;
+
+            // Touch events específicos para telas de celular (evita rolagem da página)
+            faderTouch.addEventListener('touchstart', (e) => {
+                isDraggingFader = true;
+                e.preventDefault();
+                updateFaderFromY(getTouchY(e), false);
+            }, { passive: false });
+
+            faderTouch.addEventListener('touchmove', (e) => {
+                if (isDraggingFader) {
+                    e.preventDefault();
+                    updateFaderFromY(getTouchY(e), false);
+                }
+            }, { passive: false });
+
+            faderTouch.addEventListener('touchend', (e) => {
+                if (isDraggingFader) {
+                    isDraggingFader = false;
+                    e.preventDefault();
+                    updateFaderFromY(getTouchY(e), true);
+                }
+            }, { passive: false });
+
+            faderTouch.addEventListener('touchcancel', () => {
+                isDraggingFader = false;
+            });
+
+            // Pointer / Mouse events para computador
+            faderTouch.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'touch') return;
+                isDraggingFader = true;
+                faderTouch.setPointerCapture(e.pointerId);
+                updateFaderFromY(e.clientY, false);
+            });
+            faderTouch.addEventListener('pointermove', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (isDraggingFader) updateFaderFromY(e.clientY, false);
+            });
+            faderTouch.addEventListener('pointerup', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (isDraggingFader) {
+                    isDraggingFader = false;
+                    updateFaderFromY(e.clientY, true);
+                }
+            });
+            faderTouch.addEventListener('pointercancel', () => {
+                isDraggingFader = false;
+            });
+
+            channelInput.addEventListener('input', () => {
+                if (modal.style.display === 'flex') {
+                    if (activeChannelIdx === i) {
+                        modalTitle.textContent = "EQ Eight - " + channelInput.value;
+                    }
+                    renderChannelSelector(activeChannelIdx);
+                }
+                sendSync({ type: 'name', channel: i, value: channelInput.value });
+            });
+            
+            mixerContainer.appendChild(strip);
+            drawMiniEQ(i);
+        }
+
+        // Inicializa o grafo Web Audio se o contexto já estiver ativo
+        if (audioCtx) {
+            initMixerAudioGraph();
+        }
+
+        // Sincronização da barra de atalhos rápidos com o scroll horizontal no celular
+        const mixerWrapper = document.querySelector('.mixer-wrapper');
+        if (mixerWrapper) {
+            let scrollDebounce = null;
+            mixerWrapper.addEventListener('scroll', () => {
+                if (scrollDebounce) cancelAnimationFrame(scrollDebounce);
+                scrollDebounce = requestAnimationFrame(() => {
+                    const center = mixerWrapper.scrollLeft + mixerWrapper.clientWidth / 2;
+                    let closestIdx = 0;
+                    let minDiff = Infinity;
+                    channelStripsData.forEach((chData, idx) => {
+                        if (!chData || !chData.strip) return;
+                        const stripCenter = chData.strip.offsetLeft + chData.strip.offsetWidth / 2;
+                        const diff = Math.abs(stripCenter - center);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closestIdx = idx;
+                        }
+                    });
+                    document.querySelectorAll('.ribbon-pill').forEach((p, idx) => {
+                        const isActive = idx === closestIdx;
+                        p.classList.toggle('active', isActive);
+                        if (isActive && p.scrollIntoView) {
+                            p.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+                        }
+                    });
+                });
+            }, { passive: true });
+        }
+
+        // ── Processador Central de Mensagens Recebidas ────────────────
+        function handleIncomingMessage(msgType, data) {
+            if (!data) return;
+
+            if (msgType === 'clients_count') {
+                setSyncStatus(true, data.count);
+                return;
+            }
+
+            if (msgType === 'init') {
+                setSyncStatus(true);
+                const channels = data.channels || (data.data && data.data.channels);
+                if (channels) {
+                    channels.forEach((ch, idx) => {
+                        if (channelStripsData[idx]) {
+                            applyVolume(idx, ch.volume);
+                            applyMute(idx, ch.mute);
+                            applyName(idx, ch.name);
+                            if (ch.bands) channelEQState[idx] = ch.bands;
+                            if (ch.hpf) channelHPFState[idx] = ch.hpf;
+                            drawMiniEQ(idx);
+                        }
+                    });
+                }
+                return;
+            }
+
+            if (msgType === 'update') {
+                const payload = data.data || data;
+                if (!payload || payload.clientId === CLIENT_ID) return; // ignora eco local
+
+                const ch = payload.channel;
+                if (payload.type === 'volume') {
+                    applyVolume(ch, payload.value);
+                } else if (payload.type === 'mute') {
+                    applyMute(ch, payload.value);
+                } else if (payload.type === 'name') {
+                    applyName(ch, payload.value);
+                } else if (payload.type === 'pink_noise') {
+                    if (payload.value) {
+                        channelPinkOn(ch);
+                    } else {
+                        channelPinkOff(ch);
+                    }
+                    if (modal.style.display === 'flex' && activeChannelIdx === ch) {
+                        updatePinkNoiseButton();
+                    }
+                } else if (payload.type === 'eq') {
+                    if (payload.hpf && channelHPFState[ch]) {
+                        channelHPFState[ch] = payload.hpf;
+                    }
+                    if (payload.bands && channelEQState[ch]) {
+                        channelEQState[ch] = payload.bands;
+                        if (payload.enabled !== undefined) {
+                            channelEQEnabled[ch] = payload.enabled;
+                        }
+                        if (typeof updateChannelEQFilters === 'function') {
+                            updateChannelEQFilters(ch);
+                        }
+                        drawMiniEQ(ch);
+                        if (modal.style.display === 'flex' && activeChannelIdx === ch) {
+                            currentBands = channelEQState[ch];
+                            if (payload.enabled !== undefined) {
+                                eqEnabled = payload.enabled;
+                                eqOnBtn.textContent = eqEnabled ? 'EQ: On' : 'EQ: Off';
+                                eqOnBtn.style.background = eqEnabled ? '#FF9900' : '#555';
+                                eqOnBtn.style.color = eqEnabled ? '#000' : '#FFF';
+                            }
+                            updateHPFUI();
+                            currentBands.forEach((b, k) => {
+                                const freqStr = b.freq >= 1000 ? (b.freq/1000).toFixed(2)+'k' : Math.round(b.freq)+' Hz';
+                                setBoxVal(document.getElementById(`bx-f-${k}`), freqStr);
+                                setBoxVal(document.getElementById(`bx-g-${k}`), b.gain.toFixed(1));
+                                setBoxVal(document.getElementById(`bx-q-${k}`), b.q.toFixed(1));
+                            });
+                            updateKnobs();
+                            drawEQGraph();
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Conexão em Tempo Real (WebSocket Primário + SSE Fallback) ─
+        function connectRealtime() {
+            const host = window.location.host || 'localhost:8080';
+            const wsProtocol = (window.location.protocol === 'https:') ? 'wss://' : 'ws://';
+            const wsUrl = `${wsProtocol}${host}/ws`;
+
+            let wsConnected = false;
+
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    wsConnected = true;
+                    console.log("[WS] Conectado ao servidor!");
+                    setSyncStatus(true);
+                };
+
+                ws.onmessage = (e) => {
+                    try {
+                        const parsed = JSON.parse(e.data);
+                        handleIncomingMessage(parsed.type, parsed.data || parsed);
+                    } catch (err) {
+                        console.error("[WS] Erro parsing:", err);
+                    }
+                };
+
+                ws.onclose = () => {
+                    console.warn("[WS] Conexão fechada. Reconectando em 2s...");
+                    setSyncStatus(false);
+                    setTimeout(connectRealtime, 2000);
+                };
+
+                ws.onerror = () => {
+                    if (!wsConnected) {
+                        console.warn("[WS] Falha na conexão WebSocket, ativando fallback SSE...");
+                        initSSEFallback();
+                    }
+                };
+            } catch (e) {
+                initSSEFallback();
+            }
+        }
+
+        function initSSEFallback() {
+            if (sse) return;
+            try {
+                sse = new EventSource('/events');
+                sse.addEventListener('init', (e) => handleIncomingMessage('init', JSON.parse(e.data)));
+                sse.addEventListener('update', (e) => handleIncomingMessage('update', JSON.parse(e.data)));
+                sse.addEventListener('clients_count', (e) => handleIncomingMessage('clients_count', JSON.parse(e.data)));
+                sse.onopen = () => setSyncStatus(true);
+                sse.onerror = () => setSyncStatus(false);
+            } catch (err) {
+                console.error("SSE Fallback falhou:", err);
+            }
+        }
+
+        connectRealtime();
+    </script>
+</body>
+</html>
