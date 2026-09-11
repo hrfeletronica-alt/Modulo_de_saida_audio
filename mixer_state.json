@@ -3,8 +3,8 @@
     {
       "id": 0,
       "name": "Entrada",
-      "volume": 80.0,
-      "gain": 4.5,
+      "volume": 0.0,
+      "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
       "hpf": {
@@ -72,8 +72,8 @@
     {
       "id": 1,
       "name": "Vocal",
-      "volume": 60.0,
-      "gain": -2.0,
+      "volume": 0.0,
+      "gain": 0.0,
       "mute": true,
       "eqEnabled": true,
       "hpf": {
@@ -141,7 +141,7 @@
     {
       "id": 2,
       "name": "Ch 2",
-      "volume": 75.0,
+      "volume": 0.0,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -348,8 +348,8 @@
     {
       "id": 5,
       "name": "Guitarra",
-      "volume": 90.0,
-      "gain": 6.0,
+      "volume": 0.0,
+      "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
       "hpf": {

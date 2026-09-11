@@ -856,9 +856,9 @@
             border-radius: 6px;
         }
 
-        /* Lateral Fader in EQ Modal */
+        /* Lateral Strip in EQ Modal (Gain + Fader) */
         .modal-fader-panel {
-            width: 60px;
+            width: 64px;
             min-height: 220px;
             background: #141519;
             border: 1px solid #2a2d37;
@@ -867,8 +867,93 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 6px 3px;
-            gap: 4px;
+            padding: 5px 3px;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+        .modal-gain-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            width: 100%;
+            padding: 2px 0 3px 0;
+            flex-shrink: 0;
+        }
+        .modal-gain-label {
+            font-size: 9px;
+            font-weight: 800;
+            color: #ff9900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .modal-gain-knob-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-gain-knob {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #2c2f3a 0%, #17181f 70%, #0d0e12 100%);
+            border: 1.5px solid #3d414e;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1);
+            position: relative;
+            cursor: ns-resize;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .modal-gain-knob:hover, .modal-gain-knob.dragging {
+            border-color: #ff9900;
+            box-shadow: 0 0 8px rgba(255, 153, 0, 0.4), inset 0 1px 2px rgba(255,255,255,0.15);
+        }
+        .modal-gain-indicator {
+            position: absolute;
+            top: 3px;
+            left: 50%;
+            width: 2.5px;
+            height: 9px;
+            margin-left: -1.25px;
+            background: #ff9900;
+            border-radius: 1.5px;
+            transform-origin: center 11px;
+            transform: rotate(0deg);
+            box-shadow: 0 0 4px rgba(255, 153, 0, 0.8);
+            pointer-events: none;
+        }
+        .modal-gain-val {
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #aaa;
+            text-align: center;
+            background: #0d0e12;
+            border: 1px solid #2a2c35;
+            border-radius: 4px;
+            padding: 1px 3px;
+            min-width: 44px;
+            font-family: monospace;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+        }
+        .modal-gain-val:hover {
+            border-color: #ff9900;
+            color: #ff9900;
+        }
+        .modal-gain-val.active-gain {
+            color: #ff9900;
+            border-color: rgba(255, 153, 0, 0.5);
+            background: #14120b;
+        }
+        .modal-strip-divider {
+            width: 80%;
+            height: 1px;
+            background: #252833;
+            margin: 2px 0 3px 0;
             flex-shrink: 0;
         }
         .modal-fader-label {
@@ -1340,11 +1425,38 @@
                 flex-shrink: 0;
             }
             .modal-fader-panel {
-                width: 48px;
+                width: 52px;
                 min-height: 165px;
-                padding: 4px 2px;
+                padding: 3px 2px;
                 gap: 2px;
                 flex-shrink: 0;
+            }
+            .modal-gain-box {
+                gap: 1px;
+                padding: 1px 0 2px 0;
+            }
+            .modal-gain-label {
+                font-size: 8px;
+            }
+            .modal-gain-knob {
+                width: 22px;
+                height: 22px;
+            }
+            .modal-gain-indicator {
+                top: 2px;
+                width: 2px;
+                height: 7px;
+                margin-left: -1px;
+                transform-origin: center 9px;
+            }
+            .modal-gain-val {
+                font-size: 8px;
+                min-width: 36px;
+                padding: 1px 2px;
+            }
+            .modal-strip-divider {
+                width: 85%;
+                margin: 1px 0 2px 0;
             }
             .modal-fader-label {
                 font-size: 8px;
@@ -1595,8 +1707,19 @@
                 <div class="eq-graph-container">
                     <canvas class="eq-main-canvas" id="eqGraph" width="778" height="250"></canvas>
                 </div>
-                <!-- Fader vertical de volume do canal ativo -->
+                <!-- Controles laterais do canal ativo no EQ (Ganho + Fader) -->
                 <div class="modal-fader-panel" id="modal-fader-panel">
+                    <!-- Ganho Pré-Amplificador do Canal no EQ -->
+                    <div class="modal-gain-box">
+                        <div class="modal-gain-label">GAIN</div>
+                        <div class="modal-gain-knob-wrap">
+                            <div class="modal-gain-knob" id="modal-gain-knob" title="Ganho do Canal (Arraste verticalmente, duplo-clique para 0 dB)">
+                                <div class="modal-gain-indicator" id="modal-gain-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="modal-gain-val" id="modal-gain-val" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
+                    </div>
+                    <div class="modal-strip-divider"></div>
                     <div class="modal-fader-label">VOL</div>
                     <div class="modal-fader-val" id="modal-fader-val">+0.0 dB</div>
                     <div class="modal-fader-track-area" id="modal-fader-track">
@@ -1755,6 +1878,13 @@
                     data.preampGain.gain.setTargetAtTime(linGain, audioCtx.currentTime, 0.015);
                 }
             }
+
+            // Sincroniza o botão de ganho do modal se o EQ estiver aberto neste canal
+            if (typeof syncModalGain === 'function' && modal && modal.style.display === 'flex' && idx === activeChannelIdx) {
+                syncModalGain(idx);
+            }
+
+            if (typeof scheduleSaveLocalState === 'function') scheduleSaveLocalState(200);
         }
 
         let gainSyncTimer = null;
@@ -2954,6 +3084,7 @@
             drawEQGraph();
             updatePinkNoiseButton();
             syncModalFader(channelIdx);
+            if (typeof syncModalGain === 'function') syncModalGain(channelIdx);
         }
 
         function setBoxVal(el, val) {
@@ -3762,6 +3893,134 @@
             }
             return (db >= 0 ? '+' : '') + db.toFixed(1) + ' dB';
         }
+
+
+        // ── Sincronização e Eventos do Botão de Ganho no Modal de EQ ────
+        function syncModalGain(channelIdx) {
+            const idx = (channelIdx !== undefined) ? channelIdx : activeChannelIdx;
+            const gainDb = (channelGainState && channelGainState[idx] !== undefined) ? channelGainState[idx] : 0.0;
+            const knob = document.getElementById('modal-gain-knob');
+            const ind = document.getElementById('modal-gain-indicator');
+            const val = document.getElementById('modal-gain-val');
+            if (val) {
+                val.textContent = (gainDb >= 0 ? '+' : '') + gainDb.toFixed(1) + ' dB';
+                if (Math.abs(gainDb) > 0.01) {
+                    val.classList.add('active-gain');
+                } else {
+                    val.classList.remove('active-gain');
+                }
+            }
+            if (ind) {
+                const deg = (gainDb / 18.0) * 135.0;
+                ind.style.transform = `rotate(${deg}deg)`;
+            }
+        }
+
+        function setupModalGainKnobEvents() {
+            const gainKnob = document.getElementById('modal-gain-knob');
+            const gainVal  = document.getElementById('modal-gain-val');
+            if (!gainKnob) return;
+
+            let isDragging = false;
+            let startY = 0;
+            let initialVal = 0;
+
+            function startDrag(clientY) {
+                isDragging = true;
+                startY = clientY;
+                initialVal = channelGainState[activeChannelIdx] || 0.0;
+                gainKnob.classList.add('dragging');
+            }
+
+            function moveDrag(clientY) {
+                if (!isDragging) return;
+                const dy = startY - clientY;
+                const deltaDb = (dy / 3.0) * 0.5; // sensibilidade suave
+                const newDb = Math.max(-18.0, Math.min(18.0, initialVal + deltaDb));
+                applyGain(activeChannelIdx, newDb);
+                sendGainSync(activeChannelIdx, newDb, false);
+            }
+
+            function endDrag() {
+                if (!isDragging) return;
+                isDragging = false;
+                gainKnob.classList.remove('dragging');
+                sendGainSync(activeChannelIdx, channelGainState[activeChannelIdx], true);
+            }
+
+            // Touch events
+            gainKnob.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                startDrag(e.touches[0].clientY);
+            }, { passive: false });
+
+            gainKnob.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moveDrag(e.touches[0].clientY);
+                }
+            }, { passive: false });
+
+            gainKnob.addEventListener('touchend', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    endDrag();
+                }
+            }, { passive: false });
+
+            gainKnob.addEventListener('touchcancel', () => {
+                isDragging = false;
+                gainKnob.classList.remove('dragging');
+            });
+
+            // Pointer / Mouse events
+            gainKnob.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'touch') return;
+                e.stopPropagation();
+                gainKnob.setPointerCapture(e.pointerId);
+                startDrag(e.clientY);
+            });
+
+            gainKnob.addEventListener('pointermove', (e) => {
+                if (isDragging && e.pointerType !== 'touch') {
+                    moveDrag(e.clientY);
+                }
+            });
+
+            gainKnob.addEventListener('pointerup', (e) => {
+                if (isDragging && e.pointerType !== 'touch') {
+                    endDrag();
+                }
+            });
+
+            // Mouse wheel para ajuste fino
+            gainKnob.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const step = (e.deltaY < 0 ? 0.5 : -0.5);
+                const cur = channelGainState[activeChannelIdx] || 0.0;
+                const newDb = Math.max(-18.0, Math.min(18.0, cur + step));
+                applyGain(activeChannelIdx, newDb);
+                sendGainSync(activeChannelIdx, newDb, true);
+            }, { passive: false });
+
+            // Duplo clique reseta para 0.0 dB
+            gainKnob.addEventListener('dblclick', () => {
+                applyGain(activeChannelIdx, 0.0);
+                sendGainSync(activeChannelIdx, 0.0, true);
+            });
+
+            // Toque no display de valor reseta para 0.0 dB
+            if (gainVal) {
+                gainVal.addEventListener('click', () => {
+                    applyGain(activeChannelIdx, 0.0);
+                    sendGainSync(activeChannelIdx, 0.0, true);
+                });
+            }
+        }
+        setupModalGainKnobEvents();
 
         // Sincroniza posição visual do fader do modal com o fader real do canal
         function syncModalFader(channelIdx) {
