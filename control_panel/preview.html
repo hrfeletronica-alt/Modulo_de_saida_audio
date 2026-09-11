@@ -951,6 +951,39 @@
             z-index: 1;
         }
 
+        
+        /* Barra de Espectro RTA por trás de cada fader no EQ Gráfico */
+        .geq-rta-bar {
+            position: absolute;
+            bottom: 0;
+            width: 12px;
+            background: linear-gradient(to top, 
+                rgba(0, 229, 255, 0.25) 0%, 
+                rgba(0, 229, 255, 0.50) 45%, 
+                rgba(255, 153, 0, 0.60) 75%, 
+                rgba(255, 60, 60, 0.80) 100%);
+            border-radius: 2px 2px 0 0;
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+            transition: height 0.04s ease-out, opacity 0.15s ease;
+            opacity: 0;
+        }
+
+        .geq-rta-peak {
+            position: absolute;
+            width: 14px;
+            height: 2px;
+            background: #ffffff;
+            box-shadow: 0 0 4px #00e5ff, 0 0 8px rgba(255, 255, 255, 0.9);
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 2;
+            margin-bottom: -1px;
+            transition: bottom 0.04s ease-out, opacity 0.15s ease;
+            opacity: 0;
+        }
+
         /* Barra de preenchimento vermelho a partir do centro (0 dB) */
         .geq-fill-bar {
             position: absolute;
@@ -1238,6 +1271,39 @@
             box-shadow: 0 0 3px rgba(42, 122, 64, 0.6);
             pointer-events: none;
             z-index: 1;
+        }
+
+        
+        /* Barra de Espectro RTA por trás de cada fader no EQ Gráfico */
+        .geq-rta-bar {
+            position: absolute;
+            bottom: 0;
+            width: 12px;
+            background: linear-gradient(to top, 
+                rgba(0, 229, 255, 0.25) 0%, 
+                rgba(0, 229, 255, 0.50) 45%, 
+                rgba(255, 153, 0, 0.60) 75%, 
+                rgba(255, 60, 60, 0.80) 100%);
+            border-radius: 2px 2px 0 0;
+            pointer-events: none;
+            z-index: 1;
+            box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+            transition: height 0.04s ease-out, opacity 0.15s ease;
+            opacity: 0;
+        }
+
+        .geq-rta-peak {
+            position: absolute;
+            width: 14px;
+            height: 2px;
+            background: #ffffff;
+            box-shadow: 0 0 4px #00e5ff, 0 0 8px rgba(255, 255, 255, 0.9);
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 2;
+            margin-bottom: -1px;
+            transition: bottom 0.04s ease-out, opacity 0.15s ease;
+            opacity: 0;
         }
 
         /* Barra de preenchimento vermelho a partir do centro (0 dB) */
@@ -2373,9 +2439,10 @@
                 <div class="geq-toolbar">
                     <div class="geq-toolbar-left">
                         <span class="geq-title-badge">Equalizador Gráfico (31 Bandas ISO)</span>
-                        <span class="geq-scale-legend">Escala: ±12.0 dB • Centro: 0 dB</span>
+                        <span class="geq-scale-legend">Escala: ±12.0 dB • Centro: 0 dB • RTA em Tempo Real</span>
                     </div>
                     <div class="geq-toolbar-right">
+                        <button class="geq-btn" id="geq-rta-btn" onclick="toggleRTA()" style="background:#FF9900; color:#000;">RTA: On</button>
                         <button class="geq-btn" id="geq-on-btn" onclick="toggleGEQBypass()">GEQ: On</button>
                         <button class="geq-btn" onclick="resetGEQFlat()" title="Resetar todas as 31 bandas para Flat (0.0 dB)">Zerar (Flat)</button>
                     </div>
@@ -2731,13 +2798,27 @@
         let eqEnabled = true;
         let rtaBands = new Array(64).fill(0);
 
-        rtaBtn.onclick = () => {
+        function updateRTAButtonsUI() {
+            ['rta-btn', 'geq-rta-btn'].forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.textContent = rtaEnabled ? 'RTA: On' : 'RTA: Off';
+                    btn.style.background = rtaEnabled ? '#FF9900' : '#555';
+                    btn.style.color = rtaEnabled ? '#000' : '#FFF';
+                }
+            });
+        }
+
+        function toggleRTA() {
             rtaEnabled = !rtaEnabled;
-            rtaBtn.textContent = rtaEnabled ? 'RTA: On' : 'RTA: Off';
-            rtaBtn.style.background = rtaEnabled ? '#FF9900' : '#555';
-            rtaBtn.style.color = rtaEnabled ? '#000' : '#FFF';
-            if(!rtaEnabled) drawEQGraph();
-        };
+            updateRTAButtonsUI();
+            if (!rtaEnabled) {
+                drawEQGraph();
+                if (typeof clearGEQRTABars === 'function') clearGEQRTABars();
+            }
+        }
+
+        rtaBtn.onclick = toggleRTA;
 
         if (hpfBtn) {
             hpfBtn.onclick = () => {
@@ -3759,10 +3840,12 @@
                     geqView.classList.add('active');
                     renderGEQSliders(ch);
                     updateGEQToolbarUI();
+                    updateRTAButtonsUI();
                     syncModalGain(ch);
                     syncModalFader(ch);
                 } else {
                     geqView.classList.remove('active');
+                    if (typeof clearGEQRTABars === 'function') clearGEQRTABars();
                 }
             }
 
@@ -4009,6 +4092,8 @@
                         <div class="geq-db-val" title="Clique ou duplo-clique para 0 dB">0.0</div>
                         <div class="geq-slider-track" title="${ISO_GEQ_LABELS[k]} Hz • Arraste verticalmente, duplo-clique para 0 dB">
                             <div class="geq-track-groove"></div>
+                            <div class="geq-rta-bar" id="geq-rta-bar-${k}"></div>
+                            <div class="geq-rta-peak" id="geq-rta-peak-${k}"></div>
                             <div class="geq-center-zero-line"></div>
                             <div class="geq-fill-bar" style="height: 0px;"></div>
                             <div class="geq-cap" style="bottom: 50%;"></div>
@@ -4719,6 +4804,134 @@
         let rtaTarget = new Array(64).fill(0);
         const rtaFreqData = new Uint8Array(512);
 
+        
+        // ── RTA em Tempo Real para o Equalizador Gráfico de 31 Bandas ─
+        const geqRtaSmooth = new Array(NUM_GEQ_BANDS).fill(0);
+        const geqRtaPeak   = new Array(NUM_GEQ_BANDS).fill(0);
+        const geqRtaTarget = new Array(NUM_GEQ_BANDS).fill(0);
+
+        function clearGEQRTABars() {
+            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                geqRtaSmooth[k] = 0;
+                geqRtaPeak[k] = 0;
+                geqRtaTarget[k] = 0;
+                const bar = document.getElementById(`geq-rta-bar-${k}`);
+                const peak = document.getElementById(`geq-rta-peak-${k}`);
+                if (bar) {
+                    bar.style.height = '0%';
+                    bar.style.opacity = '0';
+                }
+                if (peak) {
+                    peak.style.bottom = '0%';
+                    peak.style.opacity = '0';
+                }
+            }
+        }
+
+        function updateGEQRTA(hasAudioSignal, isPinkNoise, isMuted, faderPct, potDb, activeAnalyser, sampleRate, nyquist, binCount) {
+            const isEqOn = (channelEQEnabled[activeChannelIdx] !== false);
+            const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[activeChannelIdx])
+                ? channelGEQState[activeChannelIdx] : null;
+            const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[activeChannelIdx])
+                ? channelHPFState[activeChannelIdx] : null;
+
+            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                if (hasAudioSignal && activeAnalyser && !isMuted && faderPct > 1.0) {
+                    const f0 = ISO_GEQ_FREQS[k];
+                    const fStart = f0 * 0.8909;
+                    const fEnd   = f0 * 1.1225;
+
+                    let eqDb = 0;
+                    if (isEqOn) {
+                        if (hpf && hpf.enabled) {
+                            eqDb += getHPFResponseDb(f0, hpf);
+                        }
+                        if (geqBands) {
+                            eqDb += (geqBands[k] || 0);
+                        }
+                    }
+
+                    let normLevel = 0;
+
+                    if (isPinkNoise) {
+                        const jitterDb = Math.sin(k * 11.3 + Date.now() * 0.005) * 0.25 + (Math.random() - 0.5) * 0.3;
+                        const totalDb = eqDb + potDb + jitterDb;
+                        normLevel = Math.max(0, Math.min(1, 0.50 + (totalDb / 30)));
+                    } else {
+                        if (fStart >= nyquist) {
+                            normLevel = 0;
+                        } else {
+                            const binStart = Math.max(0, Math.min(binCount - 1, Math.floor((fStart / nyquist) * binCount)));
+                            const binEnd   = Math.max(binStart, Math.min(binCount - 1, Math.ceil((fEnd / nyquist) * binCount)));
+
+                            let maxBinVal = 0;
+                            let sumBinVal = 0;
+                            let count = 0;
+                            for (let b = binStart; b <= binEnd; b++) {
+                                const v = rtaFreqData[b];
+                                if (v > maxBinVal) maxBinVal = v;
+                                sumBinVal += v;
+                                count++;
+                            }
+                            const avgBinVal = count > 0 ? (sumBinVal / count) : 0;
+                            let bandVal = (maxBinVal * 0.70 + avgBinVal * 0.30) / 255.0;
+
+                            // Compensação de inclinação espectral (+3.2 dB/oitava acima de 1 kHz)
+                            if (f0 > 1000 && bandVal > 0.002) {
+                                const tilt = Math.pow(f0 / 1000, 0.25);
+                                bandVal = Math.min(1.0, bandVal * tilt);
+                            }
+
+                            // Atua estritamente nas frequências existentes no áudio
+                            if (bandVal < 0.005) {
+                                normLevel = 0;
+                            } else {
+                                const scaledSignal = bandVal * 0.70;
+                                const potOffset = (potDb / 30);
+                                const eqOffset = (eqDb / 30);
+                                const presence = Math.min(1.0, scaledSignal * 2.2);
+                                normLevel = Math.max(0, Math.min(1, scaledSignal + (potOffset * 0.30) + (eqOffset * presence)));
+                            }
+                        }
+                    }
+
+                    geqRtaTarget[k] = Math.max(0, Math.min(1, normLevel));
+                } else {
+                    geqRtaTarget[k] = 0;
+                }
+
+                // Attack rápido e Decay suave
+                const attack = 0.75;
+                const decay  = 0.20;
+                const speed  = geqRtaSmooth[k] < geqRtaTarget[k] ? attack : decay;
+                geqRtaSmooth[k] += (geqRtaTarget[k] - geqRtaSmooth[k]) * speed;
+
+                if (geqRtaSmooth[k] < 0.005) geqRtaSmooth[k] = 0;
+
+                // Peak hold com decaimento suave
+                if (geqRtaSmooth[k] > geqRtaPeak[k]) {
+                    geqRtaPeak[k] = geqRtaSmooth[k];
+                } else {
+                    geqRtaPeak[k] = Math.max(0, Math.min(geqRtaPeak[k] - 0.006, geqRtaSmooth[k] + 0.12));
+                }
+
+                // Atualiza visualmente a barra e o marcador de pico no DOM
+                const bar = document.getElementById(`geq-rta-bar-${k}`);
+                const peak = document.getElementById(`geq-rta-peak-${k}`);
+                const lvl = geqRtaSmooth[k];
+                const pk  = geqRtaPeak[k];
+
+                if (bar) {
+                    bar.style.height = (lvl * 100).toFixed(1) + '%';
+                    bar.style.opacity = lvl > 0.01 ? '0.85' : '0';
+                }
+                if (peak) {
+                    peak.style.bottom = (pk * 100).toFixed(1) + '%';
+                    peak.style.opacity = pk > 0.02 ? '0.9' : '0';
+                }
+            }
+        }
+
         function updateRTA() {
             const numBars = 64;
             const minF = Math.log10(20);
@@ -4905,7 +5118,14 @@
             }
 
             if (rtaEnabled && modal.style.display === 'flex') {
-                drawEQGraph();
+                const curMode = (typeof channelEQMode !== 'undefined' && channelEQMode[activeChannelIdx]) ? channelEQMode[activeChannelIdx] : 'peq';
+                if (curMode === 'peq') {
+                    drawEQGraph();
+                } else if (curMode === 'geq') {
+                    updateGEQRTA(hasAudioSignal, isPinkNoise, isMuted, faderPct, potDb, activeAnalyser, sampleRate, nyquist, binCount);
+                }
+            } else if (!rtaEnabled && modal.style.display === 'flex') {
+                if (typeof clearGEQRTABars === 'function') clearGEQRTABars();
             }
             requestAnimationFrame(updateRTA);
         }

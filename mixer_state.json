@@ -110,7 +110,7 @@
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
-      "eqMode": "peq",
+      "eqMode": "geq",
       "hpf": {
         "enabled": false,
         "freq": 20,
