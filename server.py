@@ -31,6 +31,7 @@ server_state = {
             'id': i,
             'name': 'Entrada' if i == 0 else f'Ch {i}',
             'volume': 70.0,
+            'gain': 0.0,
             'mute': False,
             'eqEnabled': True,
             'bands': json.loads(json.dumps(DEFAULT_BANDS))
@@ -131,6 +132,8 @@ def apply_sync_payload(payload):
             ch = server_state['channels'][ch_idx]
             if event_type == 'volume':
                 ch['volume'] = float(payload.get('value', 70))
+            elif event_type == 'gain':
+                ch['gain'] = float(payload.get('value', 0.0))
             elif event_type == 'mute':
                 ch['mute'] = bool(payload.get('value', False))
             elif event_type == 'name':
@@ -298,6 +301,7 @@ class AudioMixerHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_PUT(self):
         vol_match = re.match(r'^/channel/(\d+)/volume/?$', self.path)
+        gain_match = re.match(r'^/channel/(\d+)/gain/?$', self.path)
         mute_match = re.match(r'^/channel/(\d+)/mute/?$', self.path)
 
         length = int(self.headers.get('Content-Length', 0))
@@ -320,6 +324,25 @@ class AudioMixerHandler(http.server.SimpleHTTPRequestHandler):
             })
 
             print(f"[ESP32 API] Canal {ch_id}: Volume {val_raw} ({val_pct}%)")
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(b'OK')
+            return
+
+        if gain_match:
+            ch_id = int(gain_match.group(1))
+            val_gain = float(data.get('value', data.get('gain', 0.0)))
+
+            apply_sync_payload({
+                'type': 'gain',
+                'channel': ch_id,
+                'value': val_gain,
+                'clientId': 'esp32'
+            })
+
+            print(f"[ESP32 API] Canal {ch_id}: Ganho {val_gain:+.1f} dB")
             self.send_response(200)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-Type', 'text/plain')

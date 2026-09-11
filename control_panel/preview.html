@@ -345,6 +345,99 @@
             box-shadow: 0 4px 12px rgba(255, 119, 0, 0.2);
         }
 
+        /* Container e Botão de Ganho (Preamp Trim) */
+        .channel-gain-container {
+            height: 46px;
+            margin: 3px 4px 2px 4px;
+            padding: 2px 3px;
+            background: #111216;
+            border: 1px solid #252830;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: none;
+            transition: border-color 0.15s ease;
+        }
+        .main-strip .channel-gain-container {
+            border-color: #ff7700;
+            background: #1c130c;
+        }
+        .gain-title {
+            font-size: 8px;
+            font-weight: 800;
+            color: #8c909d;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+        .main-strip .gain-title {
+            color: #ffaa33;
+        }
+        .gain-knob-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+        }
+        .gain-knob {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #3c3f4a 0%, #17181c 100%);
+            border: 1.5px solid #0d0e11;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), 0 2px 5px rgba(0,0,0,0.7);
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            flex-shrink: 0;
+            transition: box-shadow 0.1s ease;
+        }
+        .gain-knob:hover, .gain-knob.dragging {
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 0 8px rgba(0, 229, 255, 0.6);
+        }
+        .main-strip .gain-knob:hover, .main-strip .gain-knob.dragging {
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 0 8px rgba(255, 153, 0, 0.7);
+        }
+        .gain-indicator {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 2px;
+            height: 8px;
+            margin-left: -1px;
+            background: #00e5ff;
+            box-shadow: 0 0 4px #00e5ff;
+            border-radius: 1px;
+            transform-origin: center 9px;
+            pointer-events: none;
+            transition: transform 0.05s linear;
+        }
+        .main-strip .gain-indicator {
+            background: #ff9900;
+            box-shadow: 0 0 4px #ff9900;
+        }
+        .gain-val {
+            font-size: 9px;
+            font-weight: 800;
+            color: #ffffff;
+            font-family: monospace, sans-serif;
+            min-width: 38px;
+            text-align: right;
+            cursor: pointer;
+            letter-spacing: -0.2px;
+        }
+        .gain-val:hover {
+            color: #00e5ff;
+        }
+        .main-strip .gain-val:hover {
+            color: #ffaa33;
+        }
+
         .eq-display {
             background-color: #0c0d11;
             border: 1px solid #262933;
@@ -1146,6 +1239,27 @@
             .channel-strip {
                 width: 88px;
             }
+            .channel-gain-container {
+                height: 38px;
+                margin: 2px 3px 1px 3px;
+                padding: 1px 2px;
+            }
+            .gain-title {
+                font-size: 7.5px;
+                margin-bottom: 1px;
+            }
+            .gain-knob {
+                width: 20px;
+                height: 20px;
+            }
+            .gain-indicator {
+                height: 6px;
+                transform-origin: center 7px;
+            }
+            .gain-val {
+                font-size: 8px;
+                min-width: 30px;
+            }
             .eq-display {
                 height: 34px;
                 margin: 3px 3px 0 3px;
@@ -1392,6 +1506,21 @@
             .fader-area {
                 min-height: 130px;
             }
+            .channel-gain-container {
+                height: 28px;
+                margin: 1px 2px;
+            }
+            .gain-title {
+                display: none;
+            }
+            .gain-knob {
+                width: 18px;
+                height: 18px;
+            }
+            .gain-val {
+                font-size: 7.5px;
+                min-width: 26px;
+            }
             .eq-display {
                 height: 28px;
             }
@@ -1532,6 +1661,141 @@
 
     <script>
         const CLIENT_ID = 'client_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+        const channelGainState = new Array(11).fill(0.0); // Ganho em dB (-18.0 dB a +18.0 dB, padrão 0.0 dB)
+
+        function applyGain(idx, gainDb) {
+            if (idx === undefined || idx < 0 || idx >= 11) return;
+            const clamped = Math.max(-18.0, Math.min(18.0, Math.round(gainDb * 10) / 10));
+            channelGainState[idx] = clamped;
+
+            const data = channelStripsData[idx];
+            if (data) {
+                if (data.gainVal) {
+                    data.gainVal.textContent = (clamped >= 0 ? '+' : '') + clamped.toFixed(1) + ' dB';
+                }
+                if (data.gainIndicator) {
+                    const deg = (clamped / 18.0) * 135.0;
+                    data.gainIndicator.style.transform = `rotate(${deg}deg)`;
+                }
+                if (data.preampGain && audioCtx) {
+                    const linGain = Math.pow(10, clamped / 20.0);
+                    data.preampGain.gain.setTargetAtTime(linGain, audioCtx.currentTime, 0.015);
+                }
+            }
+        }
+
+        let gainSyncTimer = null;
+        function sendGainSync(idx, gainDb, immediate = false) {
+            if (gainSyncTimer) clearTimeout(gainSyncTimer);
+            const payload = { type: 'gain', channel: idx, value: gainDb };
+            if (immediate) {
+                sendSync(payload);
+            } else {
+                gainSyncTimer = setTimeout(() => sendSync(payload), 40);
+            }
+        }
+
+        function setupGainKnobEvents(gainKnob, gainIndicator, gainVal, chIdx) {
+            let isDraggingGain = false;
+            let startGainY = 0;
+            let initialGainVal = 0;
+
+            function startGainDrag(clientY) {
+                isDraggingGain = true;
+                startGainY = clientY;
+                initialGainVal = channelGainState[chIdx] || 0.0;
+                gainKnob.classList.add('dragging');
+            }
+
+            function moveGainDrag(clientY) {
+                if (!isDraggingGain) return;
+                const dy = startGainY - clientY; // arrastar para cima aumenta ganho
+                const deltaDb = (dy / 3.0) * 0.5; // sensibilidade suave
+                const newDb = Math.max(-18.0, Math.min(18.0, initialGainVal + deltaDb));
+                applyGain(chIdx, newDb);
+                sendGainSync(chIdx, newDb, false);
+            }
+
+            function endGainDrag(clientY) {
+                if (!isDraggingGain) return;
+                isDraggingGain = false;
+                gainKnob.classList.remove('dragging');
+                sendGainSync(chIdx, channelGainState[chIdx], true);
+            }
+
+            // Touch events
+            gainKnob.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                startGainDrag(e.touches[0].clientY);
+            }, { passive: false });
+
+            gainKnob.addEventListener('touchmove', (e) => {
+                if (isDraggingGain) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moveGainDrag(e.touches[0].clientY);
+                }
+            }, { passive: false });
+
+            gainKnob.addEventListener('touchend', (e) => {
+                if (isDraggingGain) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    endGainDrag(e.changedTouches[0].clientY);
+                }
+            }, { passive: false });
+
+            gainKnob.addEventListener('touchcancel', () => {
+                isDraggingGain = false;
+                gainKnob.classList.remove('dragging');
+            });
+
+            // Mouse / Pointer
+            gainKnob.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'touch') return;
+                e.stopPropagation();
+                gainKnob.setPointerCapture(e.pointerId);
+                startGainDrag(e.clientY);
+            });
+
+            gainKnob.addEventListener('pointermove', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (isDraggingGain) moveGainDrag(e.clientY);
+            });
+
+            gainKnob.addEventListener('pointerup', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (isDraggingGain) {
+                    try { gainKnob.releasePointerCapture(e.pointerId); } catch(err) {}
+                    endGainDrag(e.clientY);
+                }
+            });
+
+            gainKnob.addEventListener('pointercancel', (e) => {
+                if (isDraggingGain) {
+                    isDraggingGain = false;
+                    gainKnob.classList.remove('dragging');
+                    try { gainKnob.releasePointerCapture(e.pointerId); } catch(err) {}
+                }
+            });
+
+            // Duplo-clique no knob ou clique no valor reseta para 0.0 dB
+            gainKnob.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                applyGain(chIdx, 0.0);
+                sendGainSync(chIdx, 0.0, true);
+            });
+
+            if (gainVal) {
+                gainVal.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    applyGain(chIdx, 0.0);
+                    sendGainSync(chIdx, 0.0, true);
+                });
+            }
+        }
+
         const channelStripsData = [];
         let ws = null;
         let sse = null;
@@ -1750,6 +2014,15 @@
             const inputNode   = data.channelInputNode || data.eqFilters[0];
             const lastFilter  = data.eqFilters[data.eqFilters.length - 1];
 
+            // 1. Nó de Ganho / Preamp Trim na entrada de cada canal (Entrada e Saídas)
+            if (!data.preampGain) {
+                data.preampGain = audioCtx.createGain();
+                const initGainDb = channelGainState[idx] || 0.0;
+                data.preampGain.gain.value = Math.pow(10, initGainDb / 20.0);
+            }
+            data.preampGain.disconnect();
+            data.preampGain.connect(inputNode);
+
             // Analisador RTA pós-EQ exclusivo deste canal
             if (!data.rtaAnalyser) {
                 data.rtaAnalyser = createAnalyser(audioCtx);
@@ -1772,7 +2045,7 @@
             } else {
                 // Canais 1 a 10 (Saídas):
                 // Recebe sinal do barramento mestre e entra no nó de entrada (HPF) do canal
-                mixerMasterBus.connect(inputNode);
+                mixerMasterBus.connect(data.preampGain);
 
                 // Entrada de ruído rosa independente
                 data.noiseGain = audioCtx.createGain();
@@ -1817,7 +2090,7 @@
 
             // Se o player já tiver nó criado, conecta na entrada do Canal 0
             if (playerAnalyser && channelStripsData[0]) {
-                const targetNode = channelStripsData[0].channelInputNode || (channelStripsData[0].eqFilters && channelStripsData[0].eqFilters[0]);
+                const targetNode = channelStripsData[0].preampGain || channelStripsData[0].channelInputNode || (channelStripsData[0].eqFilters && channelStripsData[0].eqFilters[0]);
                 if (targetNode) {
                     try { playerAnalyser.connect(targetNode); } catch(e) {}
                 }
@@ -2249,7 +2522,7 @@
                 // Player -> playerAnalyser -> Entrada (HPF / EQ) do Canal 0 (LR Entrada)
                 playerSourceNode.connect(playerAnalyser);
                 if (channelStripsData[0]) {
-                    const targetNode = channelStripsData[0].channelInputNode || (channelStripsData[0].eqFilters && channelStripsData[0].eqFilters[0]);
+                    const targetNode = channelStripsData[0].preampGain || channelStripsData[0].channelInputNode || (channelStripsData[0].eqFilters && channelStripsData[0].eqFilters[0]);
                     if (targetNode) {
                         try { playerAnalyser.connect(targetNode); } catch(e) {}
                     }
@@ -2323,12 +2596,17 @@
                             : 0;
                         const inputFactor = inputFaderPct / 100;
 
+                        const inputGainDb = channelGainState[0] || 0.0;
+                        const inputGainFactor = Math.pow(10, inputGainDb / 20.0);
+
                         if (i === 0) {
-                            // LR Entrada Master recebe sinal proporcional ao próprio fader de entrada
-                            audioLevel = inputSignalPct * inputFactor;
+                            // LR Entrada Master recebe sinal proporcional ao fader e ganho de entrada
+                            audioLevel = inputSignalPct * inputFactor * inputGainFactor;
                         } else {
-                            // Canais 1 a 10 de Saída recebem sinal condicionado à Entrada LR E ao fader do canal
-                            audioLevel = inputSignalPct * inputFactor * (faderPct / 100);
+                            // Canais 1 a 10 de Saída recebem sinal condicionado à Entrada LR, fader E ganho do canal
+                            const chGainDb = channelGainState[i] || 0.0;
+                            const chGainFactor = Math.pow(10, chGainDb / 20.0);
+                            audioLevel = inputSignalPct * inputFactor * (faderPct / 100) * inputGainFactor * chGainFactor;
                         }
                     }
 
@@ -3629,6 +3907,15 @@
             strip.className = `channel-strip ${isInput ? 'main-strip' : ''}`;
             
             strip.innerHTML = `
+                <div class="channel-gain-container">
+                    <span class="gain-title">GAIN</span>
+                    <div class="gain-knob-wrapper">
+                        <div class="gain-knob" data-ch="${i}" title="Ganho do Canal (Arraste verticalmente, duplo-clique para 0 dB)">
+                            <div class="gain-indicator"></div>
+                        </div>
+                        <div class="gain-val" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
+                    </div>
+                </div>
                 <div class="eq-display" title="Abrir EQ Eight">
                     <canvas class="eq-canvas" width="70" height="32"></canvas>
                 </div>
@@ -3674,6 +3961,11 @@
             const volReadout = strip.querySelector('.fader-vol-readout');
             const channelInput = strip.querySelector('.channel-input');
             const ctx = eqCanvas.getContext('2d');
+            const gainKnob = strip.querySelector('.gain-knob');
+            const gainIndicator = strip.querySelector('.gain-indicator');
+            const gainVal = strip.querySelector('.gain-val');
+
+            setupGainKnobEvents(gainKnob, gainIndicator, gainVal, i);
 
             // Quick channel ribbon pill (navegação rápida no celular e desktop)
             const ribbon = document.getElementById('channel-ribbon');
@@ -3703,7 +3995,10 @@
                 faderArea,
                 channelInput,
                 eqCanvas,
-                eqCtx: ctx
+                eqCtx: ctx,
+                gainKnob,
+                gainIndicator,
+                gainVal
             };
             
             eqDisplay.addEventListener('click', () => {
@@ -3902,6 +4197,7 @@
                 if (channels) {
                     channels.forEach((ch, idx) => {
                         if (channelStripsData[idx]) {
+                            if (ch.gain !== undefined) applyGain(idx, ch.gain);
                             applyVolume(idx, ch.volume);
                             applyMute(idx, ch.mute);
                             applyName(idx, ch.name);
@@ -3919,7 +4215,9 @@
                 if (!payload || payload.clientId === CLIENT_ID) return; // ignora eco local
 
                 const ch = payload.channel;
-                if (payload.type === 'volume') {
+                if (payload.type === 'gain') {
+                    applyGain(ch, payload.value);
+                } else if (payload.type === 'volume') {
                     applyVolume(ch, payload.value);
                 } else if (payload.type === 'mute') {
                     applyMute(ch, payload.value);
