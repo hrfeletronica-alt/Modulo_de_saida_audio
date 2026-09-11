@@ -744,6 +744,584 @@
             box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
         }
 
+        
+        /* ── Seletor de Modo no EQ (Paramétrico vs Gráfico) ──────────── */
+        .modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .eq-mode-switch {
+            display: flex;
+            background: #0f1014;
+            border: 1px solid #2d303a;
+            border-radius: 6px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .eq-mode-btn {
+            background: transparent;
+            border: none;
+            color: #8e929f;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .eq-mode-btn:hover {
+            color: #fff;
+        }
+        .eq-mode-btn.active {
+            background: #ff9900;
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 1px 6px rgba(255, 153, 0, 0.4);
+        }
+
+        /* ── Container do Equalizador Gráfico (GEQ 31-Band) ──────────── */
+        .geq-view-container {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .geq-view-container.active {
+            display: flex;
+        }
+        .peq-view-container.hidden {
+            display: none !important;
+        }
+
+        .geq-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+            background: #141519;
+            border: 1px solid #282a33;
+            border-radius: 6px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .geq-toolbar-left, .geq-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .geq-title-badge {
+            font-size: 11px;
+            font-weight: 800;
+            color: #ff9900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .geq-scale-legend {
+            font-size: 10px;
+            color: #777;
+            font-family: monospace;
+        }
+        .geq-btn {
+            background: #25272e;
+            border: 1px solid #3d414e;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .geq-btn:hover {
+            background: #333640;
+            border-color: #ff9900;
+        }
+        .geq-btn:active {
+            transform: scale(0.95);
+        }
+
+        .geq-main-area {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        /* Rack horizontal dos 31 faders */
+        .geq-rack-wrapper {
+            flex: 1;
+            background: #0d0e12;
+            border: 1px solid #262832;
+            border-radius: 6px;
+            padding: 8px 6px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #333 #111;
+            position: relative;
+        }
+        .geq-rack-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+        .geq-rack-wrapper::-webkit-scrollbar-thumb {
+            background: #333642;
+            border-radius: 3px;
+        }
+
+        .geq-rack {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: stretch;
+            min-width: 820px;
+            height: 250px;
+            gap: 2px;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .geq-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 24px;
+            max-width: 32px;
+            height: 100%;
+            position: relative;
+        }
+
+        .geq-db-val {
+            font-size: 8.5px;
+            font-family: monospace;
+            font-weight: 700;
+            color: #666;
+            height: 14px;
+            line-height: 14px;
+            text-align: center;
+            transition: color 0.15s;
+        }
+        .geq-db-val.boosted {
+            color: #e54545;
+        }
+        .geq-db-val.cut {
+            color: #388bfd;
+        }
+
+        .geq-slider-track {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Linha guia vertical da trilha */
+        .geq-track-groove {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            width: 3px;
+            background: #181920;
+            border-radius: 1.5px;
+            border: 1px solid #090a0d;
+            pointer-events: none;
+        }
+
+        /* Linha horizontal central de 0 dB */
+        .geq-center-zero-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: #2a7a40;
+            box-shadow: 0 0 3px rgba(42, 122, 64, 0.6);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Barra de preenchimento vermelho a partir do centro (0 dB) */
+        .geq-fill-bar {
+            position: absolute;
+            width: 6px;
+            background: #c84343;
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 2;
+            box-shadow: 0 0 4px rgba(200, 67, 67, 0.4);
+            transition: height 0.04s ease-out, top 0.04s ease-out;
+        }
+        .geq-fill-bar.cut-fill {
+            background: #a83636;
+        }
+
+        /* Cap branco clássico do fader gráfico (idêntico à referência) */
+        .geq-cap {
+            position: absolute;
+            width: 20px;
+            height: 13px;
+            left: 50%;
+            margin-left: -10px;
+            margin-bottom: -6.5px;
+            background: #ececec;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 1px 1px #ffffff, inset 0 -1px 1px #999999;
+            border: 1px solid #777;
+            cursor: grab;
+            z-index: 4;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: bottom 0.04s ease-out;
+        }
+        .geq-cap::after {
+            content: '';
+            width: 10px;
+            height: 1.5px;
+            background: #222;
+            border-radius: 1px;
+        }
+        .geq-slider-track.dragging .geq-cap {
+            cursor: grabbing;
+            border-color: #ff9900;
+            box-shadow: 0 0 8px rgba(255,153,0,0.8);
+        }
+
+        .geq-freq-lbl {
+            font-size: 8px;
+            font-weight: 700;
+            color: #888;
+            font-family: -apple-system, BlinkMacSystemFont, monospace;
+            text-align: center;
+            height: 16px;
+            line-height: 16px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .geq-rack {
+                height: 185px;
+                min-width: 780px;
+            }
+            .geq-cap {
+                width: 17px;
+                height: 12px;
+                margin-left: -8.5px;
+                margin-bottom: -6px;
+            }
+            .geq-freq-lbl {
+                font-size: 7.5px;
+            }
+            .modal-header-left {
+                gap: 8px;
+            }
+            .eq-mode-btn {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+        }
+
+        
+        /* ── Seletor de Modo no EQ (Paramétrico vs Gráfico) ──────────── */
+        .modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .eq-mode-switch {
+            display: flex;
+            background: #0f1014;
+            border: 1px solid #2d303a;
+            border-radius: 6px;
+            padding: 2px;
+            gap: 2px;
+        }
+        .eq-mode-btn {
+            background: transparent;
+            border: none;
+            color: #8e929f;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .eq-mode-btn:hover {
+            color: #fff;
+        }
+        .eq-mode-btn.active {
+            background: #ff9900;
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 1px 6px rgba(255, 153, 0, 0.4);
+        }
+
+        /* ── Container do Equalizador Gráfico (GEQ 31-Band) ──────────── */
+        .geq-view-container {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .geq-view-container.active {
+            display: flex;
+        }
+        .peq-view-container.hidden {
+            display: none !important;
+        }
+
+        .geq-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+            background: #141519;
+            border: 1px solid #282a33;
+            border-radius: 6px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .geq-toolbar-left, .geq-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .geq-title-badge {
+            font-size: 11px;
+            font-weight: 800;
+            color: #ff9900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .geq-scale-legend {
+            font-size: 10px;
+            color: #777;
+            font-family: monospace;
+        }
+        .geq-btn {
+            background: #25272e;
+            border: 1px solid #3d414e;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .geq-btn:hover {
+            background: #333640;
+            border-color: #ff9900;
+        }
+        .geq-btn:active {
+            transform: scale(0.95);
+        }
+
+        .geq-main-area {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        /* Rack horizontal dos 31 faders */
+        .geq-rack-wrapper {
+            flex: 1;
+            background: #0d0e12;
+            border: 1px solid #262832;
+            border-radius: 6px;
+            padding: 8px 6px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #333 #111;
+            position: relative;
+        }
+        .geq-rack-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+        .geq-rack-wrapper::-webkit-scrollbar-thumb {
+            background: #333642;
+            border-radius: 3px;
+        }
+
+        .geq-rack {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: stretch;
+            min-width: 820px;
+            height: 250px;
+            gap: 2px;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .geq-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 24px;
+            max-width: 32px;
+            height: 100%;
+            position: relative;
+        }
+
+        .geq-db-val {
+            font-size: 8.5px;
+            font-family: monospace;
+            font-weight: 700;
+            color: #666;
+            height: 14px;
+            line-height: 14px;
+            text-align: center;
+            transition: color 0.15s;
+        }
+        .geq-db-val.boosted {
+            color: #e54545;
+        }
+        .geq-db-val.cut {
+            color: #388bfd;
+        }
+
+        .geq-slider-track {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Linha guia vertical da trilha */
+        .geq-track-groove {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            width: 3px;
+            background: #181920;
+            border-radius: 1.5px;
+            border: 1px solid #090a0d;
+            pointer-events: none;
+        }
+
+        /* Linha horizontal central de 0 dB */
+        .geq-center-zero-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: #2a7a40;
+            box-shadow: 0 0 3px rgba(42, 122, 64, 0.6);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Barra de preenchimento vermelho a partir do centro (0 dB) */
+        .geq-fill-bar {
+            position: absolute;
+            width: 6px;
+            background: #c84343;
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 2;
+            box-shadow: 0 0 4px rgba(200, 67, 67, 0.4);
+            transition: height 0.04s ease-out, top 0.04s ease-out;
+        }
+        .geq-fill-bar.cut-fill {
+            background: #a83636;
+        }
+
+        /* Cap branco clássico do fader gráfico (idêntico à referência) */
+        .geq-cap {
+            position: absolute;
+            width: 20px;
+            height: 13px;
+            left: 50%;
+            margin-left: -10px;
+            margin-bottom: -6.5px;
+            background: #ececec;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 1px 1px #ffffff, inset 0 -1px 1px #999999;
+            border: 1px solid #777;
+            cursor: grab;
+            z-index: 4;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: bottom 0.04s ease-out;
+        }
+        .geq-cap::after {
+            content: '';
+            width: 10px;
+            height: 1.5px;
+            background: #222;
+            border-radius: 1px;
+        }
+        .geq-slider-track.dragging .geq-cap {
+            cursor: grabbing;
+            border-color: #ff9900;
+            box-shadow: 0 0 8px rgba(255,153,0,0.8);
+        }
+
+        .geq-freq-lbl {
+            font-size: 8px;
+            font-weight: 700;
+            color: #888;
+            font-family: -apple-system, BlinkMacSystemFont, monospace;
+            text-align: center;
+            height: 16px;
+            line-height: 16px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .geq-rack {
+                height: 185px;
+                min-width: 780px;
+            }
+            .geq-cap {
+                width: 17px;
+                height: 12px;
+                margin-left: -8.5px;
+                margin-bottom: -6px;
+            }
+            .geq-freq-lbl {
+                font-size: 7.5px;
+            }
+            .modal-header-left {
+                gap: 8px;
+            }
+            .eq-mode-btn {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+        }
+
         /* Parametric EQ Modal */
         .modal-overlay {
             position: fixed;
@@ -1694,7 +2272,14 @@
     <div class="modal-overlay" id="eq-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modal-title" style="margin:0; font-size: 16px; color: #FFF;">EQ Eight</h3>
+                <div class="modal-header-left">
+                    <h3 id="modal-title" style="margin:0; font-size: 16px; color: #FFF;">EQ Eight</h3>
+                    <!-- Seletor de Modo: Paramétrico vs Gráfico -->
+                    <div class="eq-mode-switch">
+                        <button class="eq-mode-btn active" id="btn-mode-peq" onclick="setChannelEQMode('peq')">Paramétrico</button>
+                        <button class="eq-mode-btn" id="btn-mode-geq" onclick="setChannelEQMode('geq')">Gráfico (31-B)</button>
+                    </div>
+                </div>
                 <button class="close-btn" id="close-modal">Concluído</button>
             </div>
 
@@ -1703,79 +2288,131 @@
                 <!-- Buttons injected by JS -->
             </div>
             
-            <div class="eq-graph-wrapper">
-                <div class="eq-graph-container">
-                    <canvas class="eq-main-canvas" id="eqGraph" width="778" height="250"></canvas>
-                </div>
-                <!-- Controles laterais do canal ativo no EQ (Ganho + Fader) -->
-                <div class="modal-fader-panel" id="modal-fader-panel">
-                    <!-- Ganho Pré-Amplificador do Canal no EQ -->
-                    <div class="modal-gain-box">
-                        <div class="modal-gain-label">GAIN</div>
-                        <div class="modal-gain-knob-wrap">
-                            <div class="modal-gain-knob" id="modal-gain-knob" title="Ganho do Canal (Arraste verticalmente, duplo-clique para 0 dB)">
-                                <div class="modal-gain-indicator" id="modal-gain-indicator"></div>
+            <!-- ── Visualização 1: EQ Paramétrico (PEQ Eight) ── -->
+            <div class="peq-view-container" id="peq-view">
+                <div class="eq-graph-wrapper">
+                    <div class="eq-graph-container">
+                        <canvas class="eq-main-canvas" id="eqGraph" width="778" height="250"></canvas>
+                    </div>
+                    <!-- Controles laterais do canal ativo no EQ (Ganho + Fader) -->
+                    <div class="modal-fader-panel" id="modal-fader-panel">
+                        <!-- Ganho Pré-Amplificador do Canal no EQ -->
+                        <div class="modal-gain-box">
+                            <div class="modal-gain-label">GAIN</div>
+                            <div class="modal-gain-knob-wrap">
+                                <div class="modal-gain-knob" id="modal-gain-knob" title="Ganho do Canal (Arraste verticalmente, duplo-clique para 0 dB)">
+                                    <div class="modal-gain-indicator" id="modal-gain-indicator"></div>
+                                </div>
                             </div>
+                            <div class="modal-gain-val" id="modal-gain-val" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
                         </div>
-                        <div class="modal-gain-val" id="modal-gain-val" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
-                    </div>
-                    <div class="modal-strip-divider"></div>
-                    <div class="modal-fader-label">VOL</div>
-                    <div class="modal-fader-val" id="modal-fader-val">+0.0 dB</div>
-                    <div class="modal-fader-track-area" id="modal-fader-track">
-                        <div class="modal-fader-track-line"></div>
-                        <div class="modal-fader-mark-0db"></div>
-                        <div class="modal-fader-scale">
-                            <span style="top: 0%;">+6</span>
-                            <span class="mark-0u" style="top: 30%;">0U</span>
-                            <span style="top: 55%;">-10</span>
-                            <span style="top: 75%;">-20</span>
-                            <span style="top: 100%;">-∞</span>
+                        <div class="modal-strip-divider"></div>
+                        <div class="modal-fader-label">VOL</div>
+                        <div class="modal-fader-val" id="modal-fader-val">+0.0 dB</div>
+                        <div class="modal-fader-track-area" id="modal-fader-track">
+                            <div class="modal-fader-track-line"></div>
+                            <div class="modal-fader-mark-0db"></div>
+                            <div class="modal-fader-scale">
+                                <span style="top: 0%;">+6</span>
+                                <span class="mark-0u" style="top: 30%;">0U</span>
+                                <span style="top: 55%;">-10</span>
+                                <span style="top: 75%;">-20</span>
+                                <span style="top: 100%;">-∞</span>
+                            </div>
+                            <div class="modal-fader-cap" id="modal-fader-cap" style="bottom: 70%;"></div>
                         </div>
-                        <div class="modal-fader-cap" id="modal-fader-cap" style="bottom: 70%;"></div>
+                    </div>
+                </div>
+
+                <!-- Toolbar de Ações Rápidas (EQ, RTA, HPF, Ruído Rosa, Reset) -->
+                <div class="eq-actions-row">
+                    <button class="eq-on-btn" id="eq-on-btn">EQ: On</button>
+                    <button class="eq-on-btn" id="rta-btn" style="background:#FF9900; color:#000;">RTA: On</button>
+                    <button class="eq-on-btn" id="hpf-btn" style="background:#555; color:#FFF;" title="Filtro Passa-Altas (HPF / Low Cut)">HPF: Off</button>
+                    <button class="eq-on-btn" id="pink-noise-btn" style="background:#555; color:#FFF;">Ruído Rosa: Off</button>
+                    <button class="eq-on-btn reset-btn" id="reset-eq-btn" style="background:#444; color:#FFF;" title="Resetar todas as bandas para Flat (0 dB)">Reset</button>
+                </div>
+
+                <div class="eq-bands-row" id="band-boxes">
+                    <!-- Band boxes generated by JS -->
+                </div>
+
+                <div class="eq-bottom-row">
+                    <div class="knob-container">
+                        <span class="knob-lbl">Freq</span>
+                        <div class="knob" id="knob-freq"><div class="knob-indicator" id="ind-freq"></div></div>
+                        <div class="knob-stepper-wrap">
+                            <button class="step-btn" onclick="stepParam('freq', -1)">-</button>
+                            <div class="knob-val" id="val-freq">100 Hz</div>
+                            <button class="step-btn" onclick="stepParam('freq', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="knob-container">
+                        <span class="knob-lbl">Gain</span>
+                        <div class="knob" id="knob-gain"><div class="knob-indicator" id="ind-gain"></div></div>
+                        <div class="knob-stepper-wrap">
+                            <button class="step-btn" onclick="stepParam('gain', -1)">-</button>
+                            <div class="knob-val" id="val-gain">0.0 dB</div>
+                            <button class="step-btn" onclick="stepParam('gain', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="knob-container">
+                        <span class="knob-lbl">Q</span>
+                        <div class="knob" id="knob-q"><div class="knob-indicator" id="ind-q"></div></div>
+                        <div class="knob-stepper-wrap">
+                            <button class="step-btn" onclick="stepParam('q', -1)">-</button>
+                            <div class="knob-val" id="val-q">1.0</div>
+                            <button class="step-btn" onclick="stepParam('q', 1)">+</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Toolbar de Ações Rápidas (EQ, RTA, HPF, Ruído Rosa, Reset) -->
-            <div class="eq-actions-row">
-                <button class="eq-on-btn" id="eq-on-btn">EQ: On</button>
-                <button class="eq-on-btn" id="rta-btn" style="background:#FF9900; color:#000;">RTA: On</button>
-                <button class="eq-on-btn" id="hpf-btn" style="background:#555; color:#FFF;" title="Filtro Passa-Altas (HPF / Low Cut)">HPF: Off</button>
-                <button class="eq-on-btn" id="pink-noise-btn" style="background:#555; color:#FFF;">Ruído Rosa: Off</button>
-                <button class="eq-on-btn reset-btn" id="reset-eq-btn" style="background:#444; color:#FFF;" title="Resetar todas as bandas para Flat (0 dB)">Reset</button>
-            </div>
-
-            <div class="eq-bands-row" id="band-boxes">
-                <!-- Band boxes generated by JS -->
-            </div>
-
-            <div class="eq-bottom-row">
-                <div class="knob-container">
-                    <span class="knob-lbl">Freq</span>
-                    <div class="knob" id="knob-freq"><div class="knob-indicator" id="ind-freq"></div></div>
-                    <div class="knob-stepper-wrap">
-                        <button class="step-btn" onclick="stepParam('freq', -1)">-</button>
-                        <div class="knob-val" id="val-freq">100 Hz</div>
-                        <button class="step-btn" onclick="stepParam('freq', 1)">+</button>
+            <!-- ── Visualização 2: EQ Gráfico (GEQ 31-Bandas ISO) ── -->
+            <div class="geq-view-container" id="geq-view">
+                <div class="geq-toolbar">
+                    <div class="geq-toolbar-left">
+                        <span class="geq-title-badge">Equalizador Gráfico (31 Bandas ISO)</span>
+                        <span class="geq-scale-legend">Escala: ±12.0 dB • Centro: 0 dB</span>
+                    </div>
+                    <div class="geq-toolbar-right">
+                        <button class="geq-btn" id="geq-on-btn" onclick="toggleGEQBypass()">GEQ: On</button>
+                        <button class="geq-btn" onclick="resetGEQFlat()" title="Resetar todas as 31 bandas para Flat (0.0 dB)">Zerar (Flat)</button>
                     </div>
                 </div>
-                <div class="knob-container">
-                    <span class="knob-lbl">Gain</span>
-                    <div class="knob" id="knob-gain"><div class="knob-indicator" id="ind-gain"></div></div>
-                    <div class="knob-stepper-wrap">
-                        <button class="step-btn" onclick="stepParam('gain', -1)">-</button>
-                        <div class="knob-val" id="val-gain">0.0 dB</div>
-                        <button class="step-btn" onclick="stepParam('gain', 1)">+</button>
+                <div class="geq-main-area">
+                    <div class="geq-rack-wrapper">
+                        <div class="geq-rack" id="geq-rack">
+                            <!-- 31 sliders injetados via JavaScript -->
+                        </div>
                     </div>
-                </div>
-                <div class="knob-container">
-                    <span class="knob-lbl">Q</span>
-                    <div class="knob" id="knob-q"><div class="knob-indicator" id="ind-q"></div></div>
-                    <div class="knob-stepper-wrap">
-                        <button class="step-btn" onclick="stepParam('q', -1)">-</button>
-                        <div class="knob-val" id="val-q">1.0</div>
-                        <button class="step-btn" onclick="stepParam('q', 1)">+</button>
+                    <!-- Painel lateral de Ganho e Volume também disponível no GEQ -->
+                    <div class="modal-fader-panel" id="modal-fader-panel-geq">
+                        <!-- Ganho Pré-Amplificador do Canal no GEQ -->
+                        <div class="modal-gain-box">
+                            <div class="modal-gain-label">GAIN</div>
+                            <div class="modal-gain-knob-wrap">
+                                <div class="modal-gain-knob" id="modal-gain-knob-geq" title="Ganho do Canal (Arraste verticalmente, duplo-clique para 0 dB)">
+                                    <div class="modal-gain-indicator" id="modal-gain-indicator-geq"></div>
+                                </div>
+                            </div>
+                            <div class="modal-gain-val" id="modal-gain-val-geq" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
+                        </div>
+                        <div class="modal-strip-divider"></div>
+                        <div class="modal-fader-label">VOL</div>
+                        <div class="modal-fader-val" id="modal-fader-val-geq">+0.0 dB</div>
+                        <div class="modal-fader-track-area" id="modal-fader-track-geq">
+                            <div class="modal-fader-track-line"></div>
+                            <div class="modal-fader-mark-0db"></div>
+                            <div class="modal-fader-scale">
+                                <span style="top: 0%;">+6</span>
+                                <span class="mark-0u" style="top: 30%;">0U</span>
+                                <span style="top: 55%;">-10</span>
+                                <span style="top: 75%;">-20</span>
+                                <span style="top: 100%;">-∞</span>
+                            </div>
+                            <div class="modal-fader-cap" id="modal-fader-cap-geq" style="bottom: 70%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1785,6 +2422,20 @@
     <script>
         const CLIENT_ID = 'client_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
         const channelGainState = new Array(11).fill(0.0); // Ganho em dB (-18.0 dB a +18.0 dB, padrão 0.0 dB)
+
+        // ── 31-Band Graphic Equalizer Constants & State ──────────────
+        const ISO_GEQ_FREQS = [
+            20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+            1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000
+        ];
+        const ISO_GEQ_LABELS = [
+            '20', '25', '31.5', '40', '50', '63', '80', '100', '125', '160', '200', '250', '315', '400', '500', '630', '800',
+            '1k', '1.25k', '1.6k', '2k', '2.5k', '3.15k', '4k', '5k', '6.3k', '8k', '10k', '12.5k', '16k', '20k'
+        ];
+        const NUM_GEQ_BANDS = 31;
+        const channelEQMode = new Array(11).fill('peq'); // 'peq' ou 'geq'
+        const channelGEQState = Array.from({length: 11}, () => new Array(NUM_GEQ_BANDS).fill(0.0));
+
 
         const STORAGE_KEY = 'audio_mixer_state_v1';
         let localSaveTimer = null;
@@ -1818,7 +2469,9 @@
                         mute: isMuted,
                         name: chName,
                         eqEnabled: eqOn,
+                        eqMode: (typeof channelEQMode !== 'undefined') ? (channelEQMode[i] || 'peq') : 'peq',
                         bands: bands,
+                        geqBands: (typeof channelGEQState !== 'undefined' && channelGEQState[i]) ? channelGEQState[i] : null,
                         hpf: hpf
                     });
                 }
@@ -1848,6 +2501,8 @@
                             }
                             if (ch.bands && typeof channelEQState !== 'undefined') channelEQState[idx] = ch.bands;
                             if (ch.eqEnabled !== undefined && typeof channelEQEnabled !== 'undefined') channelEQEnabled[idx] = ch.eqEnabled;
+                            if (ch.eqMode && typeof channelEQMode !== 'undefined') channelEQMode[idx] = ch.eqMode;
+                            if (ch.geqBands && typeof channelGEQState !== 'undefined') channelGEQState[idx] = ch.geqBands;
                             if (ch.hpf && typeof channelHPFState !== 'undefined') channelHPFState[idx] = ch.hpf;
                             if (typeof drawMiniEQ === 'function') drawMiniEQ(idx);
                         }
@@ -2206,6 +2861,23 @@
                     data.eqFilters[i].connect(data.eqFilters[i + 1]);
                 }
             }
+
+            if (!data.geqFilters) {
+                data.geqFilters = [];
+                for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                    const f = audioCtx.createBiquadFilter();
+                    f.type = 'peaking';
+                    f.frequency.value = ISO_GEQ_FREQS[k];
+                    f.Q.value = 4.31; // Q de 1/3 de oitava
+                    f.gain.value = 0.0;
+                    data.geqFilters.push(f);
+                }
+                // Conecta PEQ último filtro -> GEQ cascata (geqFilters[0..30])
+                data.eqFilters[data.eqFilters.length - 1].connect(data.geqFilters[0]);
+                for (let k = 0; k < data.geqFilters.length - 1; k++) {
+                    data.geqFilters[k].connect(data.geqFilters[k + 1]);
+                }
+            }
         }
 
         // Configura a cadeia de áudio completa do canal (HPF + EQ + Analyser + Fader Gain + Roteamento)
@@ -2216,7 +2888,9 @@
 
             setupChannelEQAudioNodes(idx);
             const inputNode   = data.channelInputNode || data.eqFilters[0];
-            const lastFilter  = data.eqFilters[data.eqFilters.length - 1];
+            const lastFilter  = (data.geqFilters && data.geqFilters.length > 0)
+                ? data.geqFilters[data.geqFilters.length - 1]
+                : data.eqFilters[data.eqFilters.length - 1];
 
             // 1. Nó de Ganho / Preamp Trim na entrada de cada canal (Entrada e Saídas)
             if (!data.preampGain) {
@@ -2323,12 +2997,15 @@
                 data.hpfFilter2.Q.setTargetAtTime(0.707, audioCtx.currentTime, 0.01);
             }
 
+            const mode = (typeof channelEQMode !== 'undefined' && channelEQMode[idx]) ? channelEQMode[idx] : 'peq';
+
+            // 2. Modo PEQ: aplica ganhos no PEQ se estiver em 'peq'; se estiver em 'geq', zera PEQ para bypass
             bands.forEach((b, i) => {
                 const filter = data.eqFilters[i];
                 if (!filter) return;
                 try {
                     const targetFreq = Math.max(20, Math.min(20000, b.freq));
-                    const targetGain = isEqActive ? b.gain : 0;
+                    const targetGain = (isEqActive && mode === 'peq') ? b.gain : 0.0;
                     filter.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.01);
                     filter.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.01);
                     if (filter.type === 'peaking') {
@@ -2336,6 +3013,21 @@
                     }
                 } catch(e) {}
             });
+
+            // 3. Modo GEQ: aplica ganhos no GEQ de 31 bandas se estiver em 'geq'; se estiver em 'peq', zera GEQ para bypass
+            if (data.geqFilters) {
+                const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[idx])
+                    ? channelGEQState[idx]
+                    : null;
+                for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                    const f = data.geqFilters[k];
+                    if (!f) continue;
+                    try {
+                        const targetGain = (isEqActive && mode === 'geq' && geqBands) ? geqBands[k] : 0.0;
+                        f.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.01);
+                    } catch(e) {}
+                }
+            }
         }
 
         // Atualiza o ganho do fader do canal
@@ -3020,10 +3712,328 @@
             }
         }
 
+        
+        // ═════════════════════════════════════════════════════════════════════
+        // ── 31-Band Graphic Equalizer (GEQ) Implementation ─────────────────
+        // ═════════════════════════════════════════════════════════════════════
+
+        let geqSyncTimer = null;
+        function sendGEQSync(chIdx, immediate = false) {
+            if (geqSyncTimer) clearTimeout(geqSyncTimer);
+            const payload = {
+                type: 'geq',
+                channel: chIdx,
+                bands: channelGEQState[chIdx] ? [...channelGEQState[chIdx]] : new Array(NUM_GEQ_BANDS).fill(0.0),
+                enabled: (channelEQEnabled[chIdx] !== false)
+            };
+            if (immediate) {
+                sendSync(payload);
+            } else {
+                geqSyncTimer = setTimeout(() => sendSync(payload), 40);
+            }
+        }
+
+        // Alterna entre modo Paramétrico (PEQ) e Gráfico (GEQ)
+        function setChannelEQMode(mode, syncRemote = true) {
+            const ch = activeChannelIdx;
+            channelEQMode[ch] = mode;
+
+            const btnPeq = document.getElementById('btn-mode-peq');
+            const btnGeq = document.getElementById('btn-mode-geq');
+            const peqView = document.getElementById('peq-view');
+            const geqView = document.getElementById('geq-view');
+
+            if (btnPeq) btnPeq.classList.toggle('active', mode === 'peq');
+            if (btnGeq) btnGeq.classList.toggle('active', mode === 'geq');
+
+            if (peqView) {
+                if (mode === 'peq') {
+                    peqView.classList.remove('hidden');
+                } else {
+                    peqView.classList.add('hidden');
+                }
+            }
+
+            if (geqView) {
+                if (mode === 'geq') {
+                    geqView.classList.add('active');
+                    renderGEQSliders(ch);
+                    updateGEQToolbarUI();
+                    syncModalGain(ch);
+                    syncModalFader(ch);
+                } else {
+                    geqView.classList.remove('active');
+                }
+            }
+
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(ch);
+            }
+            if (typeof drawMiniEQ === 'function') {
+                drawMiniEQ(ch);
+            }
+
+            if (syncRemote) {
+                sendSync({
+                    type: 'eq_mode',
+                    channel: ch,
+                    value: mode
+                });
+                if (typeof scheduleSaveLocalState === 'function') {
+                    scheduleSaveLocalState(150);
+                }
+            }
+        }
+
+        function updateGEQToolbarUI() {
+            const isEqOn = (channelEQEnabled[activeChannelIdx] !== false);
+            const geqOnBtn = document.getElementById('geq-on-btn');
+            if (geqOnBtn) {
+                geqOnBtn.textContent = isEqOn ? 'GEQ: On' : 'GEQ: Bypass';
+                geqOnBtn.style.background = isEqOn ? '#ff9900' : '#444';
+                geqOnBtn.style.color = isEqOn ? '#000' : '#fff';
+            }
+        }
+
+        function toggleGEQBypass() {
+            const ch = activeChannelIdx;
+            const newState = !(channelEQEnabled[ch] !== false);
+            channelEQEnabled[ch] = newState;
+
+            eqEnabled = newState;
+            if (eqOnBtn) {
+                eqOnBtn.textContent = eqEnabled ? 'EQ: On' : 'EQ: Off';
+                eqOnBtn.style.background = eqEnabled ? '#FF9900' : '#555';
+                eqOnBtn.style.color = eqEnabled ? '#000' : '#FFF';
+            }
+            updateGEQToolbarUI();
+
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(ch);
+            }
+            if (typeof drawMiniEQ === 'function') {
+                drawMiniEQ(ch);
+            }
+
+            sendGEQSync(ch, true);
+            if (typeof scheduleSaveLocalState === 'function') {
+                scheduleSaveLocalState(100);
+            }
+        }
+
+        function resetGEQFlat() {
+            const ch = activeChannelIdx;
+            if (!channelGEQState[ch]) {
+                channelGEQState[ch] = new Array(NUM_GEQ_BANDS).fill(0.0);
+            } else {
+                channelGEQState[ch].fill(0.0);
+            }
+
+            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                updateGEQSliderUI(k, 0.0);
+            }
+
+            if (typeof updateChannelEQFilters === 'function') {
+                updateChannelEQFilters(ch);
+            }
+            if (typeof drawMiniEQ === 'function') {
+                drawMiniEQ(ch);
+            }
+
+            sendGEQSync(ch, true);
+            if (typeof scheduleSaveLocalState === 'function') {
+                scheduleSaveLocalState(100);
+            }
+        }
+
+        function updateGEQSliderUI(bandIdx, valDb) {
+            valDb = Math.max(-12.0, Math.min(12.0, valDb));
+            const col = document.getElementById(`geq-col-${bandIdx}`);
+            if (!col) return;
+
+            const valEl  = col.querySelector('.geq-db-val');
+            const fillEl = col.querySelector('.geq-fill-bar');
+            const capEl  = col.querySelector('.geq-cap');
+
+            // Formatação do dB text
+            if (valEl) {
+                valEl.textContent = (valDb > 0 ? '+' : '') + valDb.toFixed(1);
+                valEl.className = 'geq-db-val' + (valDb > 0.05 ? ' boosted' : (valDb < -0.05 ? ' cut' : ''));
+            }
+
+            // Posição percentual do cap fader (0% em -12 dB, 50% em 0 dB, 100% em +12 dB)
+            const pct = (valDb + 12.0) / 24.0;
+            if (capEl) {
+                capEl.style.bottom = (pct * 100).toFixed(2) + '%';
+            }
+
+            // Barra vermelha de preenchimento a partir do centro (0 dB)
+            if (fillEl) {
+                if (valDb > 0.01) {
+                    fillEl.style.bottom = '50%';
+                    fillEl.style.top = 'auto';
+                    fillEl.style.height = ((valDb / 24.0) * 100).toFixed(2) + '%';
+                    fillEl.className = 'geq-fill-bar';
+                } else if (valDb < -0.01) {
+                    fillEl.style.top = '50%';
+                    fillEl.style.bottom = 'auto';
+                    fillEl.style.height = ((Math.abs(valDb) / 24.0) * 100).toFixed(2) + '%';
+                    fillEl.className = 'geq-fill-bar cut-fill';
+                } else {
+                    fillEl.style.height = '0px';
+                }
+            }
+        }
+
+        function setGEQBandGain(chIdx, bandIdx, valDb, isFinal = false) {
+            valDb = Math.max(-12.0, Math.min(12.0, Math.round(valDb * 10) / 10));
+            if (!channelGEQState[chIdx]) {
+                channelGEQState[chIdx] = new Array(NUM_GEQ_BANDS).fill(0.0);
+            }
+            channelGEQState[chIdx][bandIdx] = valDb;
+
+            updateGEQSliderUI(bandIdx, valDb);
+
+            // Atualiza nó de áudio Web Audio do filtro peaking correspondente
+            const data = channelStripsData[chIdx];
+            if (data && data.geqFilters && data.geqFilters[bandIdx]) {
+                const isEqActive = (channelEQEnabled[chIdx] !== false) && (channelEQMode[chIdx] === 'geq');
+                try {
+                    data.geqFilters[bandIdx].gain.setTargetAtTime(isEqActive ? valDb : 0.0, audioCtx.currentTime, 0.01);
+                } catch(e) {}
+            }
+
+            if (typeof drawMiniEQ === 'function') {
+                drawMiniEQ(chIdx);
+            }
+
+            sendGEQSync(chIdx, isFinal);
+            if (isFinal && typeof scheduleSaveLocalState === 'function') {
+                scheduleSaveLocalState(150);
+            }
+        }
+
+        function setupGEQSliderEvents(col, bandIdx) {
+            const track = col.querySelector('.geq-slider-track');
+            const cap   = col.querySelector('.geq-cap');
+            const valEl = col.querySelector('.geq-db-val');
+            if (!track) return;
+
+            let isDragging = false;
+
+            function calcGainFromY(clientY) {
+                const rect = track.getBoundingClientRect();
+                const rawPct = 1 - (clientY - rect.top) / rect.height;
+                const clampedPct = Math.max(0, Math.min(1, rawPct));
+                let db = (clampedPct * 24.0) - 12.0;
+                // Snap suave para 0 dB
+                if (Math.abs(db) < 0.25) db = 0.0;
+                return Math.round(db * 10) / 10;
+            }
+
+            // Pointer / Mouse events
+            track.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = true;
+                track.classList.add('dragging');
+                try { track.setPointerCapture(e.pointerId); } catch(err) {}
+                const db = calcGainFromY(e.clientY);
+                setGEQBandGain(activeChannelIdx, bandIdx, db, false);
+            });
+
+            track.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const db = calcGainFromY(e.clientY);
+                setGEQBandGain(activeChannelIdx, bandIdx, db, false);
+            });
+
+            const onRelease = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                track.classList.remove('dragging');
+                try { track.releasePointerCapture(e.pointerId); } catch(err) {}
+                const curDb = (channelGEQState[activeChannelIdx] && channelGEQState[activeChannelIdx][bandIdx] !== undefined)
+                    ? channelGEQState[activeChannelIdx][bandIdx] : 0.0;
+                setGEQBandGain(activeChannelIdx, bandIdx, curDb, true);
+            };
+
+            track.addEventListener('pointerup', onRelease);
+            track.addEventListener('pointercancel', onRelease);
+
+            // Duplo clique reseta para 0 dB
+            track.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                setGEQBandGain(activeChannelIdx, bandIdx, 0.0, true);
+            });
+
+            // Clique no valor de dB reseta para 0 dB
+            if (valEl) {
+                valEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setGEQBandGain(activeChannelIdx, bandIdx, 0.0, true);
+                });
+            }
+
+            // Mouse wheel para ajuste fino (±0.5 dB)
+            track.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const step = (e.deltaY < 0 ? 0.5 : -0.5);
+                const cur = (channelGEQState[activeChannelIdx] && channelGEQState[activeChannelIdx][bandIdx] !== undefined)
+                    ? channelGEQState[activeChannelIdx][bandIdx] : 0.0;
+                const newDb = Math.max(-12.0, Math.min(12.0, cur + step));
+                setGEQBandGain(activeChannelIdx, bandIdx, newDb, true);
+            }, { passive: false });
+        }
+
+        // Renderiza ou sincroniza os 31 sliders no rack
+        function renderGEQSliders(channelIdx) {
+            const rack = document.getElementById('geq-rack');
+            if (!rack) return;
+
+            if (!channelGEQState[channelIdx]) {
+                channelGEQState[channelIdx] = new Array(NUM_GEQ_BANDS).fill(0.0);
+            }
+            const bands = channelGEQState[channelIdx];
+
+            // Se o rack ainda não possui as 31 colunas, constrói a estrutura DOM
+            if (rack.children.length !== NUM_GEQ_BANDS) {
+                rack.innerHTML = '';
+                for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                    const col = document.createElement('div');
+                    col.className = 'geq-col';
+                    col.id = `geq-col-${k}`;
+                    col.innerHTML = `
+                        <div class="geq-db-val" title="Clique ou duplo-clique para 0 dB">0.0</div>
+                        <div class="geq-slider-track" title="${ISO_GEQ_LABELS[k]} Hz • Arraste verticalmente, duplo-clique para 0 dB">
+                            <div class="geq-track-groove"></div>
+                            <div class="geq-center-zero-line"></div>
+                            <div class="geq-fill-bar" style="height: 0px;"></div>
+                            <div class="geq-cap" style="bottom: 50%;"></div>
+                        </div>
+                        <div class="geq-freq-lbl">${ISO_GEQ_LABELS[k]}</div>
+                    `;
+                    rack.appendChild(col);
+                    setupGEQSliderEvents(col, k);
+                }
+            }
+
+            // Atualiza os valores visuais dos 31 faders
+            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                updateGEQSliderUI(k, bands[k] || 0.0);
+            }
+        }
+
         function initModal(channelIdx) {
             activeChannelIdx = channelIdx;
             // Load this channel's saved EQ state (do NOT clone — edits update it directly)
             currentBands = channelEQState[channelIdx];
+
+            // Carrega modo EQ do canal (Paramétrico ou Gráfico)
+            const curMode = (typeof channelEQMode !== 'undefined' && channelEQMode[channelIdx]) ? channelEQMode[channelIdx] : 'peq';
+            setChannelEQMode(curMode, false);
 
             eqEnabled = (channelEQEnabled[channelIdx] !== false);
             eqOnBtn.textContent = eqEnabled ? 'EQ: On' : 'EQ: Off';
@@ -3924,21 +4934,24 @@
         function syncModalGain(channelIdx) {
             const idx = (channelIdx !== undefined) ? channelIdx : activeChannelIdx;
             const gainDb = (channelGainState && channelGainState[idx] !== undefined) ? channelGainState[idx] : 0.0;
-            const knob = document.getElementById('modal-gain-knob');
-            const ind = document.getElementById('modal-gain-indicator');
-            const val = document.getElementById('modal-gain-val');
-            if (val) {
-                val.textContent = (gainDb >= 0 ? '+' : '') + gainDb.toFixed(1) + ' dB';
-                if (Math.abs(gainDb) > 0.01) {
-                    val.classList.add('active-gain');
-                } else {
-                    val.classList.remove('active-gain');
+            const textStr = (gainDb >= 0 ? '+' : '') + gainDb.toFixed(1) + ' dB';
+            const deg = (gainDb / 18.0) * 135.0;
+
+            ['', '-geq'].forEach(suf => {
+                const ind = document.getElementById('modal-gain-indicator' + suf);
+                const val = document.getElementById('modal-gain-val' + suf);
+                if (val) {
+                    val.textContent = textStr;
+                    if (Math.abs(gainDb) > 0.01) {
+                        val.classList.add('active-gain');
+                    } else {
+                        val.classList.remove('active-gain');
+                    }
                 }
-            }
-            if (ind) {
-                const deg = (gainDb / 18.0) * 135.0;
-                ind.style.transform = `rotate(${deg}deg)`;
-            }
+                if (ind) {
+                    ind.style.transform = `rotate(${deg}deg)`;
+                }
+            });
         }
 
         function setupModalGainKnobEvents() {
@@ -4047,78 +5060,179 @@
         }
         setupModalGainKnobEvents();
 
-        // Sincroniza posição visual do fader do modal com o fader real do canal
+        // Configura também o knob de ganho dentro do GEQ
+        function setupModalGainKnobEventsGEQ() {
+            const gainKnob = document.getElementById('modal-gain-knob-geq');
+            const gainVal  = document.getElementById('modal-gain-val-geq');
+            if (!gainKnob) return;
+
+            let isDragging = false;
+            let startY = 0;
+            let initialVal = 0;
+
+            function startDrag(clientY) {
+                isDragging = true;
+                startY = clientY;
+                initialVal = channelGainState[activeChannelIdx] || 0.0;
+                gainKnob.classList.add('dragging');
+            }
+
+            function moveDrag(clientY) {
+                if (!isDragging) return;
+                const dy = startY - clientY;
+                const deltaDb = (dy / 3.0) * 0.5;
+                const newDb = Math.max(-18.0, Math.min(18.0, initialVal + deltaDb));
+                applyGain(activeChannelIdx, newDb);
+                sendGainSync(activeChannelIdx, newDb, false);
+            }
+
+            function endDrag() {
+                if (!isDragging) return;
+                isDragging = false;
+                gainKnob.classList.remove('dragging');
+                sendGainSync(activeChannelIdx, channelGainState[activeChannelIdx], true);
+            }
+
+            gainKnob.addEventListener('touchstart', (e) => {
+                e.preventDefault(); e.stopPropagation(); startDrag(e.touches[0].clientY);
+            }, { passive: false });
+            gainKnob.addEventListener('touchmove', (e) => {
+                if (isDragging) { e.preventDefault(); e.stopPropagation(); moveDrag(e.touches[0].clientY); }
+            }, { passive: false });
+            gainKnob.addEventListener('touchend', (e) => {
+                if (isDragging) { e.preventDefault(); e.stopPropagation(); endDrag(); }
+            }, { passive: false });
+            gainKnob.addEventListener('touchcancel', () => {
+                isDragging = false; gainKnob.classList.remove('dragging');
+            });
+
+            gainKnob.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'touch') return;
+                e.stopPropagation();
+                gainKnob.setPointerCapture(e.pointerId);
+                startDrag(e.clientY);
+            });
+            gainKnob.addEventListener('pointermove', (e) => {
+                if (isDragging && e.pointerType !== 'touch') moveDrag(e.clientY);
+            });
+            gainKnob.addEventListener('pointerup', (e) => {
+                if (isDragging && e.pointerType !== 'touch') endDrag();
+            });
+
+            gainKnob.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const step = (e.deltaY < 0 ? 0.5 : -0.5);
+                const cur = channelGainState[activeChannelIdx] || 0.0;
+                const newDb = Math.max(-18.0, Math.min(18.0, cur + step));
+                applyGain(activeChannelIdx, newDb);
+                sendGainSync(activeChannelIdx, newDb, true);
+            }, { passive: false });
+
+            gainKnob.addEventListener('dblclick', () => {
+                applyGain(activeChannelIdx, 0.0);
+                sendGainSync(activeChannelIdx, 0.0, true);
+            });
+            if (gainVal) {
+                gainVal.addEventListener('click', () => {
+                    applyGain(activeChannelIdx, 0.0);
+                    sendGainSync(activeChannelIdx, 0.0, true);
+                });
+            }
+        }
+        setupModalGainKnobEventsGEQ();
+
+        // Sincroniza posição visual do fader do modal (PEQ e GEQ) com o fader real do canal
         function syncModalFader(channelIdx) {
             const data = channelStripsData[channelIdx];
             if (!data) return;
             const pct = parseFloat(data.faderCap.style.bottom) || 0;
-            const cap = document.getElementById('modal-fader-cap');
-            const val = document.getElementById('modal-fader-val');
-            if (cap) cap.style.bottom = pct + '%';
-            if (val) val.textContent = pctToDbStr(pct);
+            const dbStr = pctToDbStr(pct);
+            ['', '-geq'].forEach(suf => {
+                const cap = document.getElementById('modal-fader-cap' + suf);
+                const val = document.getElementById('modal-fader-val' + suf);
+                if (cap) cap.style.bottom = pct + '%';
+                if (val) val.textContent = dbStr;
+            });
         }
 
-        // Lógica de drag do fader do modal
-        const modalFaderTrack = document.getElementById('modal-fader-track');
-        const modalFaderCap   = document.getElementById('modal-fader-cap');
-        const modalFaderVal   = document.getElementById('modal-fader-val');
+        // Lógica de drag do fader do modal (unificada para PEQ e GEQ)
         let isModalFaderDragging = false;
+        let activeFaderTrack = null;
 
-        function getModalFaderPct(clientY) {
-            const rect = modalFaderTrack.getBoundingClientRect();
+        function applyModalFaderWithTrack(clientY, trackEl, isFinal) {
+            if (!trackEl) return;
+            const rect = trackEl.getBoundingClientRect();
             const pct = 1 - (clientY - rect.top) / rect.height;
-            return Math.max(0, Math.min(1, pct)) * 100;
-        }
+            const valPct = Math.max(0, Math.min(1, pct)) * 100;
+            const dbStr = pctToDbStr(valPct);
 
-        function applyModalFader(clientY, isFinal) {
-            const valPct = getModalFaderPct(clientY);
-            // Atualiza visualmente o fader do modal
-            if (modalFaderCap) modalFaderCap.style.bottom = valPct + '%';
-            if (modalFaderVal) modalFaderVal.textContent = pctToDbStr(valPct);
-            // Atualiza o canal real (fader no mixer + áudio + VU)
+            ['', '-geq'].forEach(suf => {
+                const cap = document.getElementById('modal-fader-cap' + suf);
+                const val = document.getElementById('modal-fader-val' + suf);
+                if (cap) cap.style.bottom = valPct + '%';
+                if (val) val.textContent = dbStr;
+            });
+
             applyVolume(activeChannelIdx, valPct);
             sendVolumeSync(activeChannelIdx, Math.round(valPct * 10) / 10, isFinal);
         }
 
-        // Mouse
-        modalFaderTrack.addEventListener('pointerdown', (e) => {
-            isModalFaderDragging = true;
-            modalFaderTrack.setPointerCapture(e.pointerId);
-            modalFaderCap && modalFaderCap.classList.add('dragging');
-            applyModalFader(e.clientY, false);
-            e.preventDefault();
-        });
-        window.addEventListener('pointermove', (e) => {
-            if (!isModalFaderDragging) return;
-            applyModalFader(e.clientY, false);
-            e.preventDefault();
-        });
-        window.addEventListener('pointerup', (e) => {
-            if (!isModalFaderDragging) return;
-            isModalFaderDragging = false;
-            modalFaderCap && modalFaderCap.classList.remove('dragging');
-            applyModalFader(e.clientY, true);
+        ['modal-fader-track', 'modal-fader-track-geq'].forEach(trackId => {
+            const track = document.getElementById(trackId);
+            if (!track) return;
+            track.addEventListener('pointerdown', (e) => {
+                isModalFaderDragging = true;
+                activeFaderTrack = track;
+                track.setPointerCapture(e.pointerId);
+                const cap = track.querySelector('.modal-fader-cap');
+                if (cap) cap.classList.add('dragging');
+                applyModalFaderWithTrack(e.clientY, track, false);
+                e.preventDefault();
+            });
         });
 
-        // Touch
-        modalFaderTrack.addEventListener('touchstart', (e) => {
-            isModalFaderDragging = true;
-            modalFaderCap && modalFaderCap.classList.add('dragging');
-            applyModalFader(e.touches[0].clientY, false);
+        window.addEventListener('pointermove', (e) => {
+            if (!isModalFaderDragging || !activeFaderTrack) return;
+            applyModalFaderWithTrack(e.clientY, activeFaderTrack, false);
             e.preventDefault();
-        }, { passive: false });
-        modalFaderTrack.addEventListener('touchmove', (e) => {
-            if (!isModalFaderDragging) return;
-            applyModalFader(e.touches[0].clientY, false);
-            e.preventDefault();
-        }, { passive: false });
-        modalFaderTrack.addEventListener('touchend', (e) => {
-            if (!isModalFaderDragging) return;
+        });
+
+        window.addEventListener('pointerup', (e) => {
+            if (!isModalFaderDragging || !activeFaderTrack) return;
             isModalFaderDragging = false;
-            modalFaderCap && modalFaderCap.classList.remove('dragging');
-            const t = e.changedTouches[0];
-            applyModalFader(t.clientY, true);
-        }, { passive: false });
+            const cap = activeFaderTrack.querySelector('.modal-fader-cap');
+            if (cap) cap.classList.remove('dragging');
+            applyModalFaderWithTrack(e.clientY, activeFaderTrack, true);
+            activeFaderTrack = null;
+        });
+
+        // Touch events para fader do modal (PEQ e GEQ)
+        ['modal-fader-track', 'modal-fader-track-geq'].forEach(trackId => {
+            const track = document.getElementById(trackId);
+            if (!track) return;
+            track.addEventListener('touchstart', (e) => {
+                isModalFaderDragging = true;
+                activeFaderTrack = track;
+                const cap = track.querySelector('.modal-fader-cap');
+                if (cap) cap.classList.add('dragging');
+                applyModalFaderWithTrack(e.touches[0].clientY, track, false);
+                e.preventDefault();
+            }, { passive: false });
+            track.addEventListener('touchmove', (e) => {
+                if (!isModalFaderDragging) return;
+                applyModalFaderWithTrack(e.touches[0].clientY, track, false);
+                e.preventDefault();
+            }, { passive: false });
+            track.addEventListener('touchend', (e) => {
+                if (!isModalFaderDragging) return;
+                isModalFaderDragging = false;
+                const cap = track.querySelector('.modal-fader-cap');
+                if (cap) cap.classList.remove('dragging');
+                const t = e.changedTouches[0];
+                if (t) applyModalFaderWithTrack(t.clientY, track, true);
+                activeFaderTrack = null;
+            }, { passive: false });
+        });
 
 
         // ── Drawing Mini EQ Curves (Retina / Mobile Crisp) ─────────
@@ -4153,6 +5267,8 @@
             ctx.strokeStyle = "#FF8800";
             ctx.lineWidth = 1.5;
 
+            const curMode = (typeof channelEQMode !== 'undefined' && channelEQMode[chIdx]) ? channelEQMode[chIdx] : 'peq';
+
             ctx.beginPath();
             ctx.moveTo(0, h/2);
             for (let px = 0; px <= w; px++) {
@@ -4163,12 +5279,27 @@
                     if (hpf && hpf.enabled) {
                         totalDb += getHPFResponseDb(curF, hpf);
                     }
-                    bands.forEach(b => {
-                        if (b.gain === 0) return;
-                        const octDiff = Math.log2(curF / b.freq);
-                        const bw = 1 / b.q;
-                        totalDb += b.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
-                    });
+                    if (curMode === 'peq') {
+                        bands.forEach(b => {
+                            if (b.gain === 0) return;
+                            const octDiff = Math.log2(curF / b.freq);
+                            const bw = 1 / b.q;
+                            totalDb += b.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                        });
+                    } else if (curMode === 'geq') {
+                        const geqBands = (typeof channelGEQState !== 'undefined' && channelGEQState[chIdx])
+                            ? channelGEQState[chIdx] : null;
+                        if (geqBands) {
+                            const bw = 1 / 4.31; // Q de 1/3 oitava
+                            for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                                const g = geqBands[k];
+                                if (!g) continue;
+                                const f0 = ISO_GEQ_FREQS[k];
+                                const octDiff = Math.log2(curF / f0);
+                                totalDb += g * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
+                            }
+                        }
+                    }
                 }
                 let y = h/2 - (totalDb / 15) * (h/2);
                 y = Math.max(0, Math.min(h, y));
@@ -4564,6 +5695,8 @@
                             applyName(idx, ch.name);
                             if (ch.bands) channelEQState[idx] = ch.bands;
                             if (ch.hpf) channelHPFState[idx] = ch.hpf;
+                            if (ch.eqMode && typeof channelEQMode !== 'undefined') channelEQMode[idx] = ch.eqMode;
+                            if (ch.geqBands && typeof channelGEQState !== 'undefined') channelGEQState[idx] = ch.geqBands;
                             if (ch.eqEnabled !== undefined) channelEQEnabled[idx] = ch.eqEnabled;
                             drawMiniEQ(idx);
                         }
@@ -4594,6 +5727,32 @@
                     }
                     if (modal.style.display === 'flex' && activeChannelIdx === ch) {
                         updatePinkNoiseButton();
+                    }
+                } else if (payload.type === 'eq_mode') {
+                    if (typeof channelEQMode !== 'undefined') {
+                        channelEQMode[ch] = payload.value;
+                        if (typeof updateChannelEQFilters === 'function') updateChannelEQFilters(ch);
+                        drawMiniEQ(ch);
+                        if (modal.style.display === 'flex' && activeChannelIdx === ch) {
+                            setChannelEQMode(payload.value, false);
+                        }
+                    }
+                } else if (payload.type === 'geq') {
+                    if (typeof channelGEQState !== 'undefined' && payload.bands) {
+                        channelGEQState[ch] = payload.bands;
+                        if (payload.enabled !== undefined) {
+                            channelEQEnabled[ch] = payload.enabled;
+                        }
+                        if (typeof updateChannelEQFilters === 'function') updateChannelEQFilters(ch);
+                        drawMiniEQ(ch);
+                        if (modal.style.display === 'flex' && activeChannelIdx === ch) {
+                            updateGEQToolbarUI();
+                            if (channelEQMode[ch] === 'geq') {
+                                for (let k = 0; k < NUM_GEQ_BANDS; k++) {
+                                    updateGEQSliderUI(k, payload.bands[k] || 0.0);
+                                }
+                            }
+                        }
                     }
                 } else if (payload.type === 'eq') {
                     if (payload.hpf && channelHPFState[ch]) {

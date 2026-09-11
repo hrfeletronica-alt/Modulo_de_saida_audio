@@ -26,6 +26,8 @@ DEFAULT_BANDS = [
     { 'id': 6, 'name': 'High',    'color': '#FF8800', 'freq': 10000, 'gain': 0,    'q': 2.0, 'mode': 'HShv' }
 ]
 
+DEFAULT_GEQ_FREQS = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
+
 server_state = {
     'channels': [
         {
@@ -35,8 +37,10 @@ server_state = {
             'gain': 0.0,
             'mute': False,
             'eqEnabled': True,
+            'eqMode': 'peq',
             'hpf': { 'enabled': False, 'freq': 80, 'slope': 12 },
-            'bands': json.loads(json.dumps(DEFAULT_BANDS))
+            'bands': json.loads(json.dumps(DEFAULT_BANDS)),
+            'geqBands': [0.0] * 31
         }
         for i in range(11)
     ]
@@ -62,7 +66,12 @@ def load_saved_state():
                 for item in saved['channels']:
                     ch_id = item.get('id')
                     if ch_id is not None and 0 <= ch_id < len(server_state['channels']):
-                        server_state['channels'][ch_id].update(item)
+                        ch = server_state['channels'][ch_id]
+                        ch.update(item)
+                        if 'eqMode' not in ch:
+                            ch['eqMode'] = 'peq'
+                        if 'geqBands' not in ch or not isinstance(ch['geqBands'], list):
+                            ch['geqBands'] = [0.0] * 31
             print(f"[Estado] Estado anterior carregado com sucesso de {STATE_FILE}!")
     except Exception as e:
         print(f"[Estado] Erro ao carregar {STATE_FILE}: {e}")
@@ -190,6 +199,13 @@ def apply_sync_payload(payload):
                     ch['eqEnabled'] = bool(payload['enabled'])
                 if 'hpf' in payload:
                     ch['hpf'] = payload['hpf']
+                if 'mode' in payload:
+                    ch['eqMode'] = str(payload['mode'])
+            elif event_type == 'geq':
+                if 'bands' in payload:
+                    ch['geqBands'] = [float(v) for v in payload['bands']]
+            elif event_type == 'eq_mode':
+                ch['eqMode'] = str(payload.get('value', 'peq'))
 
     schedule_save_state()
     broadcast('update', payload)
