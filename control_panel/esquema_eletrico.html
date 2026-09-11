@@ -543,9 +543,7 @@
         <button class="filter-chip" onclick="filterBus('spi', this)">
             <span class="chip-dot" style="background:var(--accent-purple);"></span> SPI (Rede W5500)
         </button>
-        <button class="filter-chip" onclick="filterBus('i2c', this)">
-            <span class="chip-dot" style="background:var(--accent-yellow);"></span> I2C (Controle Digital)
-        </button>
+
         <button class="filter-chip" onclick="filterBus('mute', this)">
             <span class="chip-dot" style="background:var(--accent-red);"></span> Mute GPIOs (10x)
         </button>
@@ -572,7 +570,7 @@
                 <div class="arch-pin-row"><span>I2S0 (RX):</span><span class="gpio-tag">GPIO 25, 26, 27</span></div>
                 <div class="arch-pin-row"><span>I2S1 (TX):</span><span class="gpio-tag">GPIO 14, 15, 16</span></div>
                 <div class="arch-pin-row"><span>SPI (W5500):</span><span class="gpio-tag">GPIO 5, 18, 19, 23</span></div>
-                <div class="arch-pin-row"><span>I2C Master:</span><span class="gpio-tag">GPIO 21 (SDA), 22 (SCL)</span></div>
+                <div class="arch-pin-row"><span>Volume / DSP:</span><span style="color:#8c96ab; font-size:10px;">Processado no DSP (Sem I2C)</span></div>
                 <div class="arch-pin-row"><span>Mute Saídas 1-10:</span><span class="gpio-tag">GPIO 2,4,12,13,14..32</span></div>
             </div>
         </div>
@@ -651,7 +649,7 @@
                 <div class="legend-item"><span class="legend-line" style="background:var(--accent-cyan);"></span> I2S RX (Entrada)</div>
                 <div class="legend-item"><span class="legend-line" style="background:var(--accent-green);"></span> I2S TX (Saídas)</div>
                 <div class="legend-item"><span class="legend-line" style="background:var(--accent-purple);"></span> SPI (Ethernet)</div>
-                <div class="legend-item"><span class="legend-line" style="background:var(--accent-yellow);"></span> I2C (Controle)</div>
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-yellow);"></span> I2S DIN (Dados TDM)</div>
                 <div class="legend-item"><span class="legend-line" style="background:var(--accent-red);"></span> Mute / DEEM</div>
                 <div class="legend-item"><span class="legend-line" style="background:var(--accent-blue);"></span> Power / VCC</div>
             </div>
@@ -718,14 +716,7 @@
                 <text x="430" y="414" fill="#b388ff" font-size="11" font-weight="bold">GPIO 5</text>
                 <text x="475" y="414" fill="#6c768a" font-size="9">(SPI CS)</text>
 
-                <!-- I2C -->
-                <circle cx="420" cy="470" r="4" fill="#ffd600"/>
-                <text x="430" y="474" fill="#ffd600" font-size="11" font-weight="bold">GPIO 21</text>
-                <text x="480" y="474" fill="#6c768a" font-size="9">(I2C SDA)</text>
 
-                <circle cx="420" cy="500" r="4" fill="#ffd600"/>
-                <text x="430" y="504" fill="#ffd600" font-size="11" font-weight="bold">GPIO 22</text>
-                <text x="480" y="504" fill="#6c768a" font-size="9">(I2C SCL)</text>
 
                 <!-- Pinos do ESP32 Lado Direito -->
                 <!-- I2S TX: 3 Linhas Independentes e Conectadas -->
@@ -1063,23 +1054,7 @@
                         <td>Chip Select ativo em nível baixo para habilitação da comunicação</td>
                     </tr>
 
-                    <!-- I2C -->
-                    <tr data-bus="i2c">
-                        <td class="cell-mcu">GPIO 21</td>
-                        <td><span class="bus-pill bus-i2c">I2C Master</span></td>
-                        <td><strong>Barramento de Controle</strong></td>
-                        <td class="cell-module-pin">SDA</td>
-                        <td>3.3V (Bidirecional)</td>
-                        <td>Linha de dados I2C (Pull-up 4.7kΩ ao 3.3V)</td>
-                    </tr>
-                    <tr data-bus="i2c">
-                        <td class="cell-mcu">GPIO 22</td>
-                        <td><span class="bus-pill bus-i2c">I2C Master</span></td>
-                        <td><strong>Barramento de Controle</strong></td>
-                        <td class="cell-module-pin">SCL</td>
-                        <td>3.3V (Output)</td>
-                        <td>Linha de clock I2C a 200 kHz / 400 kHz</td>
-                    </tr>
+
 
                     <!-- MUTE GPIOs -->
                     <tr data-bus="mute">
