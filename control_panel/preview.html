@@ -2,15 +2,15 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Audio Mixer Preview</title>
-    <style>
+        <style>
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
         html, body {
-            background-color: #141517;
+            background-color: #121316;
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
@@ -20,45 +20,51 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            overscroll-behavior-y: contain;
+            overscroll-behavior: none;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         /* Top Navigation App Bar */
         .app-header {
             height: 48px;
-            background: #1c1d21;
-            border-bottom: 1px solid #2d2e33;
+            background: #191a1f;
+            border-bottom: 1px solid #2a2c34;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 14px;
+            padding: 0 12px;
             flex-shrink: 0;
             z-index: 100;
+            gap: 8px;
         }
         .header-brand {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
         .mixer-logo {
             font-size: 18px;
+            filter: drop-shadow(0 0 4px rgba(255, 153, 0, 0.4));
         }
         .mixer-title {
             font-size: 13px;
             font-weight: 800;
             letter-spacing: 1.5px;
             color: #eeeeee;
+            white-space: nowrap;
         }
 
-        /* Sync Status Badge (integrado na barra superior) */
+        /* Sync Status Badge */
         .sync-badge {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: rgba(30, 31, 35, 0.95);
-            border: 1px solid #444;
+            background: rgba(26, 28, 34, 0.95);
+            border: 1px solid #3d414d;
             border-radius: 14px;
             padding: 4px 10px;
             font-size: 11px;
@@ -66,6 +72,8 @@
             color: #00ff66;
             box-shadow: 0 1px 4px rgba(0,0,0,0.5);
             transition: all 0.2s ease;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
         .status-dot {
             width: 7px;
@@ -84,15 +92,17 @@
             box-shadow: 0 0 6px #ff4444;
         }
 
-        /* Player de Áudio Provisório (Carregar arquivo do PC) */
+        /* Player de Áudio */
         .audio-player-bar {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: #25272d;
+            gap: 6px;
+            background: #23252d;
             padding: 3px 8px;
             border-radius: 8px;
-            border: 1px solid #3d3f47;
+            border: 1px solid #383b45;
+            max-width: 480px;
+            overflow: hidden;
         }
         .player-load-btn {
             background: #ff9900;
@@ -101,23 +111,39 @@
             border-radius: 5px;
             font-size: 11px;
             font-weight: 700;
-            padding: 4px 9px;
+            padding: 4px 8px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
+            white-space: nowrap;
             transition: background 0.15s ease, transform 0.1s ease;
         }
-        .player-load-btn:hover {
-            background: #ffaa22;
+        .player-load-btn:hover { background: #ffaa22; }
+        .player-load-btn:active { transform: scale(0.96); }
+
+        .player-demo-btn {
+            background: #333640;
+            color: #ffaa33;
+            border: 1px solid #484d5c;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            transition: all 0.15s ease;
         }
-        .player-load-btn:active {
-            transform: scale(0.96);
-        }
+        .player-demo-btn:hover { background: #3f4350; }
+        .player-demo-btn:active { transform: scale(0.96); }
+
         .player-play-btn {
-            background: #33363f;
+            background: #2b2e38;
             color: #00ff88;
-            border: 1px solid #484c58;
+            border: 1px solid #484d5c;
             border-radius: 5px;
             font-size: 12px;
             font-weight: 700;
@@ -127,12 +153,140 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            flex-shrink: 0;
             transition: all 0.15s ease;
         }
-        .player-play-btn:hover:not(:disabled) {
-            background: #3f4350;
+        .player-play-btn:hover:not(:disabled) { background: #3c404e; }
+        .player-play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .player-info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 80px;
+            overflow: hidden;
+        }
+        .player-track-name {
+            font-size: 10px;
+            font-weight: bold;
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .player-time {
+            font-size: 9px;
+            color: #888;
+            font-family: monospace;
+        }
+        .player-progress-bar {
+            width: 60px;
+            height: 5px;
+            background: #17181c;
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .player-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #00ff88;
+            transition: width 0.1s linear;
         }
 
+        /* Barra de Navegação Rápida entre Canais */
+        .channel-nav-ribbon {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #16171b;
+            border-bottom: 1px solid #23252d;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex-shrink: 0;
+            z-index: 50;
+        }
+        .channel-nav-ribbon::-webkit-scrollbar {
+            display: none;
+        }
+        .ribbon-pill {
+            flex: 0 0 auto;
+            min-width: 44px;
+            height: 36px;
+            padding: 0 10px;
+            background: #25272e;
+            border: 1px solid #3c3f4a;
+            border-radius: 18px;
+            color: #cfd3dc;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.12s ease;
+            outline: none;
+            font-family: inherit;
+        }
+        .ribbon-pill:hover {
+            background: #31343e;
+            border-color: #555a68;
+            color: #fff;
+        }
+        .ribbon-pill:active {
+            transform: scale(0.95);
+        }
+        .ribbon-pill.active {
+            background: #ff9900;
+            color: #000;
+            border-color: #ffaa22;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.55);
+            font-weight: 800;
+        }
+        .ribbon-pill[data-ch="0"] {
+            border-color: #ff7700;
+            color: #ffaa44;
+        }
+        .ribbon-pill[data-ch="0"].active {
+            background: #ff7700;
+            color: #000;
+            border-color: #ff9900;
+        }
+        .ribbon-pill.is-muted {
+            border-color: #ff3344 !important;
+            color: #ff4455 !important;
+        }
+        .ribbon-pill.is-muted::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff2233;
+            box-shadow: 0 0 5px #ff2233;
+        }
+        .ribbon-pill .ribbon-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: transparent;
+            display: none;
+        }
+        .ribbon-pill.pink-noise-active {
+            border-color: #ff0055 !important;
+            color: #ff0055 !important;
+        }
+        .ribbon-pill.pink-noise-active .ribbon-dot {
+            display: inline-block;
+            background-color: #ff0055 !important;
+            box-shadow: 0 0 6px #ff0055;
+        }
 
         /* Mixer horizontal container & channels */
         .mixer-wrapper {
@@ -141,65 +295,85 @@
             overflow-x: auto;
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
-            padding: 10px;
+            padding: 8px 10px;
             box-sizing: border-box;
             display: flex;
             align-items: stretch;
+            overscroll-behavior-x: contain;
+            scrollbar-width: thin;
+            scrollbar-color: #383b46 transparent;
+        }
+        .mixer-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+        .mixer-wrapper::-webkit-scrollbar-thumb {
+            background: #383b46;
+            border-radius: 3px;
         }
         .mixer-container {
             display: inline-flex;
-            background-color: #2B2B2B;
-            padding: 10px;
-            border-radius: 8px;
+            background-color: #17181c;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #23252d;
             gap: 6px;
             height: 100%;
-            min-height: 480px;
+            min-height: 420px;
+            box-sizing: border-box;
         }
         .channel-strip {
-            width: 84px;
+            width: 86px;
             flex-shrink: 0;
-            background-color: #B0B0B0;
-            border: 2px solid black;
-            border-radius: 4px;
+            background: linear-gradient(180deg, #24262d 0%, #191b20 100%);
+            border: 1px solid #343742;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
             position: relative;
             user-select: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .channel-strip.active-focused {
+            border-color: #ff9900 !important;
+            box-shadow: 0 0 12px rgba(255, 153, 0, 0.4);
         }
         .main-strip {
-            background-color: #704422;
-            border-color: #FF5500;
+            background: linear-gradient(180deg, #322216 0%, #1c140e 100%);
+            border: 1.5px solid #ff7700;
+            box-shadow: 0 4px 12px rgba(255, 119, 0, 0.2);
         }
-        
+
         .eq-display {
-            background-color: #1a2200;
-            border: 2px solid black;
+            background-color: #0c0d11;
+            border: 1px solid #262933;
             border-radius: 4px;
             margin: 4px 4px 0 4px;
-            height: 40px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             cursor: pointer;
+            transition: border-color 0.15s ease;
         }
-        .eq-display:hover { border-color: white; }
+        .eq-display:hover { border-color: #ff9900; }
         .eq-canvas { width: 100%; height: 100%; pointer-events: none; }
 
         .mute-btn {
-            background: linear-gradient(180deg, #32353c 0%, #222429 100%);
+            background: linear-gradient(180deg, #32353d 0%, #202227 100%);
             border: 1px solid #141518;
             border-radius: 4px;
-            color: #9da2ad;
+            color: #a0a6b2;
             font-weight: 800;
             font-size: 11px;
             letter-spacing: 0.8px;
-            height: 32px;
-            margin: 6px 4px 4px 4px;
+            height: 30px;
+            margin: 4px 4px 2px 4px;
             cursor: pointer;
             touch-action: manipulation;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 4px rgba(0,0,0,0.5);
             transition: all 0.1s ease;
             display: flex;
             align-items: center;
@@ -207,45 +381,78 @@
             text-transform: uppercase;
         }
         .mute-btn:hover {
-            background: linear-gradient(180deg, #3c4049 0%, #2b2e35 100%);
-            color: #c0c6d2;
+            background: linear-gradient(180deg, #3a3e47 0%, #292c33 100%);
+            color: #c8ceda;
         }
         .mute-btn:active {
-            transform: translateY(1px);
+            transform: translateY(1px) scale(0.97);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
         }
         .mute-btn.muted {
-            background: linear-gradient(180deg, #d3202f 0%, #990f1b 100%);
+            background: linear-gradient(180deg, #e6202f 0%, #9e101c 100%);
             color: #ffffff;
-            border-color: #59080e;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 12px rgba(230, 32, 47, 0.7);
+            border-color: #610910;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 12px rgba(230, 32, 47, 0.75);
             text-shadow: 0 0 4px rgba(255,255,255,0.7);
         }
-        
-        .fader-area {
-            background-color: #0b0c10;
-            border: 1px solid #22242a;
+
+        /* Real-Time Volume Readout Badge */
+        .fader-vol-readout {
+            font-size: 10px;
+            font-weight: 800;
+            color: #ff9900;
+            font-family: monospace, sans-serif;
+            text-align: center;
+            background: #0d0f13;
+            border: 1px solid #282a33;
             border-radius: 4px;
             margin: 2px 4px;
-            flex-grow: 1;
+            padding: 2px 0;
+            cursor: pointer;
+            touch-action: manipulation;
+            letter-spacing: 0.5px;
+            transition: all 0.1s ease;
+        }
+        .fader-vol-readout:hover {
+            border-color: #ff9900;
+            background: #14171d;
+        }
+        .fader-vol-readout:active {
+            transform: scale(0.95);
+            background: #222630;
+        }
+        .fader-vol-readout.muted {
+            color: #ff4444;
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        /* Fader & Meter Column */
+        .fader-area {
+            background-color: #0a0b0e;
+            border: 1px solid #202229;
+            border-radius: 6px;
+            margin: 2px 4px;
+            flex: 1;
             position: relative;
-            height: 250px;
+            min-height: 220px;
             display: flex;
             overflow: hidden;
             touch-action: none;
+            cursor: pointer;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
         }
         .main-strip .fader-area {
-            border: 2px solid #FF5500;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 0 8px rgba(255,85,0,0.3);
+            border: 1.5px solid #ff7700;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 0 8px rgba(255,119,0,0.25);
         }
-        
+
         .meter-bg {
             position: absolute;
-            left: 8px;
+            left: 6px;
             top: 10px;
             bottom: 10px;
-            width: 12px;
+            width: 10px;
             background: linear-gradient(to top, 
                 #00b020 0%, #00d028 55%, 
                 #ffb800 68%, #ff9900 80%, 
@@ -262,7 +469,7 @@
             right: 0;
             top: 0;
             height: 100%;
-            background: #0b0c10;
+            background: #0a0b0e;
             transition: height 0.04s linear;
         }
         .meter-fill.muted {
@@ -286,19 +493,19 @@
             background: rgba(0,0,0,0.6);
             z-index: 2;
         }
-        
+
         .scale-marks {
             position: absolute;
-            right: 6px;
+            right: 4px;
             top: 10px;
             bottom: 10px;
-            width: 24px;
+            width: 22px;
             pointer-events: none;
             font-size: 8px;
             font-weight: bold;
-            color: #FFFFFF;
+            color: #ffffff;
             font-family: monospace, sans-serif;
-            opacity: 0.85;
+            opacity: 0.8;
         }
         .scale-marks span {
             position: absolute;
@@ -308,31 +515,30 @@
             white-space: nowrap;
         }
         .scale-mark-0u {
-            color: #FF9900 !important;
+            color: #ff9900 !important;
             font-weight: 800 !important;
             text-shadow: 0 0 6px rgba(255, 153, 0, 0.7);
         }
-        
+
         .fader-track {
             display: none;
         }
-        
+
         .fader-track-touch {
             position: absolute;
-            right: 4px;
+            left: 18px;
+            right: 2px;
             top: 10px;
             bottom: 10px;
-            width: 50px;
             cursor: pointer;
             touch-action: none;
             user-select: none;
             z-index: 5;
         }
-        
-        /* Trilha slot vertical profundo */
+
         .fader-track-line {
             position: absolute;
-            left: 23px;
+            left: 20px;
             top: 0;
             bottom: 0;
             width: 4px;
@@ -342,24 +548,23 @@
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
             pointer-events: none;
         }
-        
+
         .fader-track-mark-0db {
             position: absolute;
-            left: 8px;
-            right: 8px;
+            left: 6px;
+            right: 22px;
             height: 2px;
-            background: #FF9900;
+            background: #ff9900;
             box-shadow: 0 0 6px rgba(255, 153, 0, 0.8);
             border-radius: 1px;
             bottom: 70%;
             pointer-events: none;
             z-index: 2;
         }
-        
-        /* Botão do Mixer (Fader Cap) formato de console de estúdio */
+
         .fader-cap {
             position: absolute;
-            left: 25px;
+            left: 22px;
             transform: translate(-50%, 50%);
             width: 30px;
             height: 56px;
@@ -378,325 +583,206 @@
         }
 
         .channel-label-container {
-            height: 52px;
-            background-color: #999999;
+            height: 50px;
+            background-color: #17181c;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2px;
-            border-top: 1px solid black;
+            padding: 3px;
+            border-top: 1px solid #282a32;
+            border-bottom-left-radius: 7px;
+            border-bottom-right-radius: 7px;
         }
         .main-strip .channel-label-container {
-            background-color: #552200;
+            background-color: #26170d;
+            border-top: 1px solid #ff7700;
         }
         .channel-number {
             font-size: 10px;
-            font-weight: bold;
-            color: black;
+            font-weight: 800;
+            color: #a0a6b2;
             margin-bottom: 2px;
+            letter-spacing: 0.5px;
         }
         .main-strip .channel-number {
-            color: white;
+            color: #ff9900;
         }
         .channel-input {
             width: 92%;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 700;
             text-align: center;
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid #666;
-            border-radius: 2px;
+            background-color: #23252d;
+            border: 1px solid #3a3d48;
+            border-radius: 4px;
             padding: 3px 2px;
             box-sizing: border-box;
-            color: black;
+            color: #ffffff;
+            font-family: inherit;
+        }
+        .channel-input:focus {
+            outline: none;
+            border-color: #ff9900;
+            background-color: #2b2e38;
         }
         .main-strip .channel-input {
             background-color: transparent;
             border: none;
-            color: white;
+            color: #ffaa33;
             pointer-events: none;
+            font-weight: 800;
         }
-        
-        .fader-vol-text {
-            font-size: 10px;
-            font-weight: bold;
-            color: #fff;
-            text-align: center;
-            margin: 2px 0;
-        }
-        
-        /* Indicador de Ruído Rosa Ativo no Canal */
+
         .channel-strip.pink-noise-active {
-            border-color: #FF0055 !important;
+            border-color: #ff0055 !important;
             box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
         }
-        /* Barra de Navegação Rápida entre Canais (Idêntica ao seletor de canais do EQ) */
-        .channel-nav-ribbon {
+
+        /* Parametric EQ Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 1000;
+            padding-top: 3vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .modal-content {
+            background: #202126;
+            border-radius: 10px;
+            border: 1px solid #333640;
+            width: 96%;
+            max-width: 820px;
+            color: #b3b3b3;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.9);
+            font-family: inherit;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 0 4px;
+        }
+        .close-btn {
+            background: #333640;
+            border: 1px solid #484d5c;
+            color: #ffffff;
+            height: 38px;
+            padding: 0 18px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            touch-action: manipulation;
+            user-select: none;
+            transition: transform 0.05s, background 0.1s;
+        }
+        .close-btn:hover { background: #3f4350; }
+        .close-btn:active { transform: scale(0.95); }
+
+        .ch-selector-row {
             display: flex;
             flex-wrap: nowrap;
             overflow-x: auto;
             gap: 6px;
-            padding: 8px 10px;
-            background: #161718;
-            border-bottom: 1px solid #111;
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: #15161a;
+            border-radius: 6px;
+            border: 1px solid #282a33;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: #444 #161718;
-            flex-shrink: 0;
-            z-index: 50;
+            scrollbar-width: none;
         }
-        .channel-nav-ribbon::-webkit-scrollbar {
-            height: 4px;
-        }
-        .channel-nav-ribbon::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 2px;
-        }
-        .ribbon-pill {
+        .ch-selector-row::-webkit-scrollbar { display: none; }
+        .ch-btn {
             flex: 0 0 auto;
             min-width: 44px;
-            height: 40px;
+            height: 36px;
             padding: 0 10px;
-            background: #303135;
-            border: 1.5px solid #555;
+            background: #25272e;
+            border: 1px solid #3d414e;
             border-radius: 6px;
-            color: #FFF;
-            font-size: 13px;
-            font-weight: bold;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: transform 0.05s, background 0.1s, border-color 0.1s, box-shadow 0.1s;
-            outline: none;
-            font-family: inherit;
+            transition: all 0.1s ease;
         }
-        .ribbon-pill:hover {
-            background: #3a3b42;
-            border-color: #777;
-        }
-        .ribbon-pill:active {
-            transform: scale(0.95);
-            background: #555;
-        }
-        .ribbon-pill.active {
-            background: #FF9900;
+        .ch-btn:active { transform: scale(0.95); }
+        .ch-btn.active {
+            background: #ff9900;
             color: #000;
-            border-color: #FF9900;
+            border-color: #ffaa22;
             box-shadow: 0 0 10px rgba(255, 153, 0, 0.6);
             font-weight: 800;
         }
-        .ribbon-pill .ribbon-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: transparent;
-            display: none;
-        }
-        .ribbon-pill.pink-noise-active {
-            border-color: #FF0055 !important;
-            color: #FF0055 !important;
-        }
-        .ribbon-pill.pink-noise-active .ribbon-dot {
-            display: inline-block;
-            background-color: #FF0055 !important;
-            box-shadow: 0 0 6px #FF0055;
-        }
 
-        /* Mobile Optimized EQ Modal Styles */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.92); display: none; align-items: flex-start; justify-content: center; z-index: 1000;
-            padding-top: 4vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-        }
-        .modal-content {
-            background: #232428; border-radius: 10px; border: 1px solid #111;
-            width: 96%; max-width: 800px; color: #b3b3b3; display: flex; flex-direction: column;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.9); font-family: sans-serif;
-            padding: 12px; margin-bottom: 20px; box-sizing: border-box;
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; padding: 0 4px;
-        }
-        .close-btn {
-            background: #444; border: 1px solid #222; color: #FFF; height: 42px; padding: 0 20px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 14px;
-            touch-action: manipulation; user-select: none; transition: transform 0.05s, background 0.1s;
-        }
-        .close-btn:active { transform: scale(0.95); background: #555; }
-        
-        /* EQ Graph Area */
-        .eq-graph-container {
-            height: 220px; background-color: #0f1012; border: 1px solid #333;
-            position: relative; margin-bottom: 12px; border-radius: 6px; width: 100%;
-        }
-        .eq-main-canvas { width: 100%; height: 100%; display: block; border-radius: 6px; }
-        
-        /* Band Boxes Row */
-        .eq-bands-row {
-            display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; margin-bottom: 12px;
-        }
-        .band-box {
-            background: #34353a; border: 1.5px solid #1c1c1c; border-radius: 6px; flex: 1 1 30%; min-width: 90px;
-            display: flex; flex-direction: column; padding: 6px; cursor: pointer; position: relative;
-            touch-action: manipulation; user-select: none; transition: transform 0.05s, border-color 0.1s;
-        }
-        .band-box:active { transform: scale(0.97); }
-        .band-box.selected { background: #44464c; border: 2px solid #FF9900; box-shadow: 0 0 8px rgba(255,153,0,0.4); }
-        .band-header {
-            display: flex; align-items: center; margin-bottom: 4px; border-bottom: 2px solid; padding-bottom: 3px;
-        }
-        .band-num {
-            background: #111; color: white; width: 18px; height: 18px; display: inline-flex;
-            align-items: center; justify-content: center; font-size: 12px; margin-right: 5px; border-radius: 3px; font-weight: bold;
-        }
-        .band-name { font-size: 12px; font-weight: bold; color: #FFF; }
-        
-        .band-param { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
-        .param-lbl { font-size: 11px; color: #AAA; }
-        .param-val-box {
-            background: #cfcfcf; color: #000; border: 1px solid #111; border-radius: 3px;
-            font-size: 11px; padding: 2px 5px; min-width: 44px; text-align: right; font-weight: bold;
-        }
-        
-        /* Bottom Controls Row */
-        .step-btn {
-            width: 40px;
-            height: 40px;
-            background: #2f3035;
-            border: 1.5px solid #666;
-            border-radius: 6px;
-            color: #FFF;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            touch-action: manipulation;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.05s, background 0.1s;
-        }
-        .step-btn:active {
-            transform: scale(0.92);
-            background: #555;
-            border-color: #FF9900;
-        }
-
-        .eq-bottom-row {
-            display: flex; flex-wrap: wrap; background: #323338; border: 1px solid #1c1c1c; border-radius: 6px;
-            padding: 10px; gap: 8px; align-items: center; justify-content: space-around;
-        }
-        .knob-container {
-            display: flex; align-items: center; gap: 10px; touch-action: none;
-        }
-        .knob {
-            width: 56px; height: 56px; border-radius: 50%; background: #1c1d20; border: 2.5px solid #111;
-            position: relative; cursor: pointer;
-            box-shadow: inset 0 3px 6px rgba(255,255,255,0.15), 0 4px 8px rgba(0,0,0,0.6);
-        }
-        .knob-indicator {
-            position: absolute; top: 5px; left: 25px; width: 4px; height: 18px; background: #FF9900;
-            transform-origin: center 23px; border-radius: 2px;
-        }
-        .knob-data { display: flex; flex-direction: column; }
-        .channel-input {
-            width: 90%;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: center;
-            background-color: #FFFFFF;
-            border: 1px solid #777;
-            border-radius: 4px;
-            color: #000;
-            font-family: sans-serif;
-            margin-top: 12px;
-            padding: 4px 2px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
-            cursor: text;
-        }
-        .main-strip .channel-input {
-            background-color: transparent;
-            border: none;
-            color: #FFF;
-            box-shadow: none;
-            cursor: default;
-        }
-
-        /* Mobile Optimized EQ Modal Styles */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.92); display: none; align-items: flex-start; justify-content: center; z-index: 1000;
-            padding-top: 4vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-        }
-        .modal-content {
-            background: #232428; border-radius: 10px; border: 1px solid #111;
-            width: 96%; max-width: 800px; color: #b3b3b3; display: flex; flex-direction: column;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.9); font-family: sans-serif;
-            padding: 12px; margin-bottom: 20px; box-sizing: border-box;
-        }
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; padding: 0 4px;
-        }
-        .close-btn {
-            background: #444; border: 1px solid #222; color: #FFF; height: 42px; padding: 0 20px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 14px;
-            touch-action: manipulation; user-select: none; transition: transform 0.05s, background 0.1s;
-        }
-        .close-btn:active { transform: scale(0.95); background: #555; }
-        
-        /* EQ Graph Area + Fader lateral */
         .eq-graph-wrapper {
             display: flex;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             align-items: stretch;
         }
         .eq-graph-container {
-            height: 220px; background-color: #0f1012; border: 1px solid #333;
-            position: relative; border-radius: 6px; flex: 1;
+            height: 220px;
+            background-color: #0c0d10;
+            border: 1px solid #282a33;
+            position: relative;
+            border-radius: 6px;
+            flex: 1;
         }
-        .eq-main-canvas { width: 100%; height: 100%; display: block; border-radius: 6px; }
+        .eq-main-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 6px;
+        }
 
-        /* Fader Vertical no Modal */
+        /* Lateral Fader in EQ Modal */
         .modal-fader-panel {
-            width: 64px;
+            width: 60px;
             min-height: 220px;
-            background: #0f1012;
-            border: 1px solid #333;
+            background: #141519;
+            border: 1px solid #2a2d37;
             border-radius: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 8px 4px 6px;
-            background: #555;
-            border-color: #FF9900;
-        }
-
-        .eq-bottom-row {
-            display: flex; flex-wrap: wrap; background: #323338; border: 1px solid #1c1c1c; border-radius: 6px;
-            padding: 10px; gap: 8px; align-items: center; justify-content: space-around;
-        }
-        .knob-container {
-            text-align: center;
-            letter-spacing: 0.5px;
+            padding: 6px 3px;
+            gap: 4px;
             flex-shrink: 0;
         }
+        .modal-fader-label {
+            font-size: 9px;
+            font-weight: 800;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
         .modal-fader-val {
-            font-size: 11px;
-            font-weight: bold;
-            color: #FF9900;
+            font-size: 10px;
+            font-weight: 800;
+            color: #ff9900;
             text-align: center;
-            background: #1a1b1f;
-            border: 1px solid #333;
+            background: #0d0e12;
+            border: 1px solid #2a2c35;
             border-radius: 4px;
             padding: 2px 4px;
             min-width: 46px;
+            font-family: monospace;
             flex-shrink: 0;
         }
         .modal-fader-track-area {
@@ -705,7 +791,7 @@
             position: relative;
             cursor: pointer;
             touch-action: none;
-            min-height: 100px;
+            min-height: 120px;
         }
         .modal-fader-track-line {
             position: absolute;
@@ -714,19 +800,19 @@
             bottom: 0;
             width: 4px;
             margin-left: -2px;
-            background: #1e1f24;
+            background: #050608;
             border-radius: 2px;
-            border: 1px solid #111;
+            border: 1px solid #1a1b20;
         }
         .modal-fader-mark-0db {
             position: absolute;
-            left: 2px;
-            right: 2px;
+            left: 4px;
+            right: 4px;
             height: 2px;
-            background: #FF9900;
+            background: #ff9900;
             box-shadow: 0 0 6px rgba(255,153,0,0.8);
             border-radius: 1px;
-            bottom: 70%; /* 70% do fundo = marca 0dB (Unity Gain) */
+            bottom: 70%;
             pointer-events: none;
             z-index: 2;
         }
@@ -740,7 +826,7 @@
             font-size: 8px;
             font-weight: bold;
             font-family: monospace, sans-serif;
-            color: #777;
+            color: #666;
             user-select: none;
         }
         .modal-fader-scale span {
@@ -751,7 +837,7 @@
             white-space: nowrap;
         }
         .modal-fader-scale .mark-0u {
-            color: #FF9900;
+            color: #ff9900;
             font-weight: 800;
             text-shadow: 0 0 6px rgba(255, 153, 0, 0.7);
         }
@@ -759,172 +845,210 @@
             position: absolute;
             left: 50%;
             transform: translate(-50%, 50%);
-            width: 32px;
-            height: 58px;
+            width: 30px;
+            height: 54px;
             background-image: url('fader_knob.svg');
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.85)) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.85));
             cursor: grab;
             z-index: 10;
-            transition: filter 0.1s ease;
         }
         .modal-fader-cap:active, .modal-fader-cap.dragging {
             cursor: grabbing;
-            filter: drop-shadow(0 6px 14px rgba(0,0,0,0.95)) drop-shadow(0 0 10px rgba(255,153,0,0.8));
-        }
-        
-        /* Band Boxes Row */
-        .eq-bands-row {
-            display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; margin-bottom: 12px;
-        }
-        .band-box {
-            background: #34353a; border: 1.5px solid #1c1c1c; border-radius: 6px; flex: 1 1 30%; min-width: 90px;
-            display: flex; flex-direction: column; padding: 6px; cursor: pointer; position: relative;
-            touch-action: manipulation; user-select: none; transition: transform 0.05s, border-color 0.1s;
-        }
-        .band-box:active { transform: scale(0.97); }
-        .band-box.selected { background: #44464c; border: 2px solid #FF9900; box-shadow: 0 0 8px rgba(255,153,0,0.4); }
-        .band-header {
-            display: flex; align-items: center; margin-bottom: 4px; border-bottom: 2px solid; padding-bottom: 3px;
-        }
-        .band-num {
-            background: #111; color: white; width: 18px; height: 18px; display: inline-flex;
-            align-items: center; justify-content: center; font-size: 12px; margin-right: 5px; border-radius: 3px; font-weight: bold;
-        }
-        .band-name { font-size: 12px; font-weight: bold; color: #FFF; }
-        
-        .band-param { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
-        .param-lbl { font-size: 11px; color: #AAA; }
-        .param-val-box {
-            background: #cfcfcf; color: #000; border: 1px solid #111; border-radius: 3px;
-            font-size: 11px; padding: 2px 4px; width: 50px; text-align: right; font-weight: bold;
-            outline: none; box-sizing: border-box; font-family: inherit;
-        }
-        .param-val-box:focus {
-            background: #FFF; border-color: #FF9900; box-shadow: 0 0 4px #FF9900;
-        }
-        
-        /* Bottom Controls Row */
-        .step-btn {
-            width: 40px;
-            height: 40px;
-            background: #2f3035;
-            border: 1.5px solid #666;
-            border-radius: 6px;
-            color: #FFF;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            touch-action: manipulation;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.05s, background 0.1s;
-        }
-        .step-btn:active {
-            transform: scale(0.92);
-            background: #555;
-            border-color: #FF9900;
+            filter: drop-shadow(0 6px 14px rgba(0,0,0,0.95)) drop-shadow(0 0 8px rgba(255,153,0,0.7));
         }
 
-                /* Toolbar de Ações do EQ (EQ On, RTA, HPF, Ruído Rosa, Reset) */
+        /* Toolbar de Ações do EQ */
         .eq-actions-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 6px;
+            margin-bottom: 8px;
             align-items: center;
         }
-
         .eq-on-btn {
-            height: 38px;
-            min-width: 90px;
+            height: 36px;
+            min-width: 80px;
             padding: 0 12px;
             border-radius: 6px;
-            border: 1px solid #111;
-            background: #FF9900;
+            border: 1px solid #383b46;
+            background: #ff9900;
             color: #000;
-            font-weight: bold;
-            font-size: 13px;
+            font-weight: 800;
+            font-size: 12px;
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
-            transition: transform 0.05s, opacity 0.1s, background 0.1s;
+            transition: all 0.1s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             white-space: nowrap;
         }
-        .eq-on-btn:active { transform: scale(0.95); opacity: 0.9; }
+        .eq-on-btn:active { transform: scale(0.95); }
 
+        /* Band Boxes Row */
+        .eq-bands-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .band-box {
+            background: #2a2c33;
+            border: 1.5px solid #1c1d22;
+            border-radius: 6px;
+            flex: 1 1 30%;
+            min-width: 90px;
+            display: flex;
+            flex-direction: column;
+            padding: 6px;
+            cursor: pointer;
+            position: relative;
+            touch-action: manipulation;
+            user-select: none;
+            transition: all 0.1s ease;
+        }
+        .band-box:active { transform: scale(0.97); }
+        .band-box.selected {
+            background: #393c45;
+            border: 2px solid #ff9900;
+            box-shadow: 0 0 8px rgba(255,153,0,0.4);
+        }
+        .band-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            border-bottom: 2px solid;
+            padding-bottom: 3px;
+        }
+        .band-num {
+            background: #111;
+            color: white;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            margin-right: 5px;
+            border-radius: 3px;
+            font-weight: 800;
+        }
+        .band-name { font-size: 11px; font-weight: 800; color: #ffffff; }
+
+        .band-param { display: flex; justify-content: space-between; margin-bottom: 3px; align-items: center; }
+        .param-lbl { font-size: 11px; color: #8a8e98; }
+        .param-val-box {
+            background: #d8dbe2;
+            color: #000;
+            border: 1px solid #111;
+            border-radius: 3px;
+            font-size: 11px;
+            padding: 2px 4px;
+            width: 50px;
+            text-align: right;
+            font-weight: 800;
+            outline: none;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .param-val-box:focus {
+            background: #fff;
+            border-color: #ff9900;
+            box-shadow: 0 0 4px #ff9900;
+        }
+
+        /* Bottom Controls Row */
         .eq-bottom-row {
-            display: flex; flex-wrap: wrap; background: #323338; border: 1px solid #1c1c1c; border-radius: 6px;
-            padding: 10px; gap: 12px; align-items: center; justify-content: space-around;
+            display: flex;
+            flex-wrap: wrap;
+            background: #262830;
+            border: 1px solid #1c1d22;
+            border-radius: 8px;
+            padding: 10px;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-around;
         }
         .knob-container {
-            display: flex; flex-direction: column; align-items: center; gap: 6px; touch-action: none; user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            touch-action: none;
+            user-select: none;
         }
-        .knob-lbl { font-size: 12px; color: #CCC; text-align: center; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; }
+        .knob-lbl {
+            font-size: 11px;
+            color: #a0a6b2;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
         .knob {
-            width: 52px; height: 52px; border-radius: 50%; background: #1c1d20; border: 2.5px solid #111;
-            position: relative; cursor: pointer;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #18191d;
+            border: 2.5px solid #111;
+            position: relative;
+            cursor: pointer;
             box-shadow: inset 0 3px 6px rgba(255,255,255,0.15), 0 4px 8px rgba(0,0,0,0.6);
         }
         .knob-indicator {
-            position: absolute; top: 5px; left: 23px; width: 4px; height: 16px; background: #FF9900;
-            transform-origin: center 21px; border-radius: 2px;
+            position: absolute;
+            top: 5px;
+            left: 22px;
+            width: 4px;
+            height: 15px;
+            background: #ff9900;
+            transform-origin: center 20px;
+            border-radius: 2px;
         }
         .knob-stepper-wrap {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .knob-val {
-            background: white; color: black; font-size: 12px; font-weight: bold; padding: 4px 6px;
-            border-radius: 4px; border: 1px solid #000; text-align: center; min-width: 58px;
-        }
-
-        .ch-selector-row {
             display: flex;
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            align-items: center;
+            justify-content: center;
             gap: 6px;
-            margin-bottom: 10px;
-            padding: 8px;
-            background: #161718;
+        }
+        .step-btn {
+            width: 38px;
+            height: 38px;
+            background: #333640;
+            border: 1px solid #484d5c;
             border-radius: 6px;
-            border: 1px solid #111;
-            -webkit-overflow-scrolling: touch;
-        }
-        .ch-selector-row::-webkit-scrollbar {
-            height: 4px;
-        }
-        .ch-selector-row::-webkit-scrollbar-thumb {
-            background: #444; border-radius: 2px;
-        }
-        .ch-btn {
-            flex: 0 0 auto;
-            min-width: 44px;
-            height: 40px;
-            padding: 0 10px;
-            background: #303135;
-            border: 1.5px solid #555;
-            border-radius: 6px;
-            color: #FFF;
-            font-size: 13px;
-            font-weight: bold;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 800;
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
-            transition: transform 0.05s, background 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
         }
-        .ch-btn:active  { transform: scale(0.95); background: #555; }
-        .ch-btn.active {
-            background: #FF9900;
+        .step-btn:hover { background: #3f4350; }
+        .step-btn:active {
+            transform: scale(0.92);
+            background: #ff9900;
             color: #000;
-            border-color: #FF9900;
-            box-shadow: 0 0 10px rgba(255,153,0,0.6);
+        }
+        .knob-val {
+            background: #ffffff;
+            color: #000000;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #000;
+            text-align: center;
+            min-width: 58px;
         }
 
         .b1 .band-header { border-color: #00FFFF; } .b1 .band-num { color: #00FFFF; border: 1px solid #00FFFF;}
@@ -934,18 +1058,113 @@
         .b5 .band-header { border-color: #FF0000; } .b5 .band-num { color: #FF0000; border: 1px solid #FF0000;}
         .b6 .band-header { border-color: #FF8800; } .b6 .band-num { color: #FF8800; border: 1px solid #FF8800;}
 
-        /* Media Queries para Celular (Renderização Otimizada para Mobile) */
+        /* ========================================================
+           Mobile Responsive Optimizations (Celular Portrait & Landscape)
+           ======================================================== */
         @media (max-width: 768px) {
+            .app-header {
+                padding: 0 8px;
+                height: 44px;
+            }
+            .mixer-logo {
+                font-size: 16px;
+            }
+            .mixer-title {
+                font-size: 11px;
+                letter-spacing: 0.8px;
+            }
+
+            /* Compact Mobile Audio Player Bar */
+            .audio-player-bar {
+                padding: 2px 4px;
+                gap: 4px;
+                max-width: 170px;
+            }
+            .player-load-btn span { font-size: 12px; }
+            .player-load-btn {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+            .player-demo-btn {
+                display: none;
+            }
+            .player-play-btn {
+                width: 24px;
+                height: 22px;
+                font-size: 10px;
+            }
+            .player-info-container {
+                display: none;
+            }
+            .player-progress-bar {
+                display: none;
+            }
+
+            .sync-badge {
+                padding: 3px 7px;
+                font-size: 10px;
+                gap: 4px;
+            }
+            .status-dot {
+                width: 6px;
+                height: 6px;
+            }
+
+            /* Channel Navigation Ribbon no Celular */
+            .channel-nav-ribbon {
+                padding: 5px 8px;
+                gap: 5px;
+            }
+            .ribbon-pill {
+                min-width: 40px;
+                height: 32px;
+                padding: 0 8px;
+                font-size: 11px;
+            }
+
+            /* Mixer & Channels no Celular */
+            .mixer-wrapper {
+                padding: 6px;
+            }
+            .mixer-container {
+                padding: 6px;
+                gap: 5px;
+                min-height: 380px;
+            }
             .channel-strip {
                 width: 88px;
             }
-            .app-header {
-                padding: 0 10px;
+            .eq-display {
+                height: 34px;
+                margin: 3px 3px 0 3px;
             }
-            .mixer-title {
-                font-size: 12px;
-                letter-spacing: 1px;
+            .mute-btn {
+                height: 28px;
+                font-size: 10px;
+                margin: 3px 3px 2px 3px;
             }
+            .fader-vol-readout {
+                font-size: 9.5px;
+                margin: 1px 3px;
+                padding: 1px 0;
+            }
+            .fader-area {
+                margin: 2px 3px;
+                min-height: 180px;
+            }
+            .channel-label-container {
+                height: 44px;
+                padding: 2px;
+            }
+            .channel-number {
+                font-size: 9px;
+            }
+            .channel-input {
+                font-size: 10px;
+                padding: 2px;
+            }
+
+            /* EQ Modal no Celular */
             .modal-overlay {
                 padding-top: 0;
                 align-items: stretch;
@@ -954,14 +1173,10 @@
                 width: 100%;
                 min-height: 100vh;
                 min-height: 100dvh;
-                height: auto;
                 max-width: none;
                 border-radius: 0;
                 margin: 0;
                 padding: 8px 6px;
-                display: flex;
-                flex-direction: column;
-                box-sizing: border-box;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
             }
@@ -972,7 +1187,6 @@
             }
             .modal-header h3 {
                 font-size: 14px !important;
-                font-weight: bold;
             }
             .close-btn {
                 height: 32px;
@@ -1000,9 +1214,9 @@
                 flex-shrink: 0;
             }
             .modal-fader-panel {
-                width: 50px;
+                width: 48px;
                 min-height: 165px;
-                padding: 4px 2px 4px;
+                padding: 4px 2px;
                 gap: 2px;
                 flex-shrink: 0;
             }
@@ -1010,19 +1224,19 @@
                 font-size: 8px;
             }
             .modal-fader-val {
-                font-size: 9px;
+                font-size: 8.5px;
                 min-width: 38px;
                 padding: 1px 2px;
             }
             .modal-fader-cap {
-                width: 28px;
-                height: 52px;
+                width: 26px;
+                height: 48px;
             }
             .modal-fader-scale {
                 font-size: 7px;
                 width: 14px;
             }
-            /* Toolbar de Ações Rápidas no Celular */
+
             .eq-actions-row {
                 display: flex;
                 flex-wrap: nowrap;
@@ -1036,26 +1250,25 @@
             .eq-on-btn {
                 flex: 1 0 auto;
                 height: 32px;
-                min-width: 56px;
+                min-width: 54px;
                 padding: 0 6px;
                 font-size: 11px;
                 border-radius: 5px;
-                margin-right: 0 !important;
                 white-space: nowrap;
             }
             .eq-on-btn.reset-btn {
                 flex: 0 0 50px;
                 min-width: 50px;
             }
-            /* Carrossel Horizontal das Bandas no Celular */
+
             .eq-bands-row {
                 display: flex;
                 flex-wrap: nowrap;
                 overflow-x: auto;
-                gap: 6px;
+                gap: 5px;
                 margin-bottom: 6px;
                 flex-shrink: 0;
-                padding-bottom: 4px;
+                padding-bottom: 3px;
                 -webkit-overflow-scrolling: touch;
             }
             .eq-bands-row::-webkit-scrollbar {
@@ -1066,11 +1279,9 @@
                 border-radius: 2px;
             }
             .band-box {
-                flex: 0 0 96px;
-                min-width: 96px;
-                padding: 4px 6px;
-                border-radius: 6px;
-                box-sizing: border-box;
+                flex: 0 0 94px;
+                min-width: 94px;
+                padding: 4px 5px;
             }
             .band-header {
                 margin-bottom: 2px;
@@ -1096,81 +1307,88 @@
                 width: 44px;
                 padding: 1px 3px;
             }
-            .hpf-toggle-btn {
-                font-size: 9px;
-                padding: 1px 5px;
-            }
-            .hpf-slope-btn {
-                font-size: 9px;
-                width: 44px;
-                padding: 1px 2px;
-            }
-            /* Controles de Freq, Gain, Q alinhados em 3 colunas no Celular */
+
             .eq-bottom-row {
                 display: grid;
                 grid-template-columns: 1fr 1fr 1fr;
                 gap: 4px;
                 padding: 6px 4px;
-                background: #1a1b1f;
-                border: 1px solid #111;
-                border-radius: 6px;
+                background: #191b20;
                 flex-shrink: 0;
             }
             .knob-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
                 gap: 3px;
                 width: 100%;
-                touch-action: none;
             }
             .knob-lbl {
                 font-size: 10px;
-                font-weight: 800;
-                color: #AAA;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                margin-bottom: 1px;
             }
             .knob {
-                width: 38px;
-                height: 38px;
+                width: 40px;
+                height: 40px;
                 border-width: 2px;
             }
             .knob-indicator {
-                left: 17px;
+                left: 18px;
                 top: 3px;
                 width: 3px;
-                height: 12px;
-                transform-origin: center 16px;
+                height: 13px;
+                transform-origin: center 17px;
             }
             .knob-stepper-wrap {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 2px;
+                gap: 3px;
                 width: 100%;
             }
             .step-btn {
-                width: 26px;
-                height: 26px;
-                font-size: 15px;
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
                 border-radius: 4px;
-                background: #2b2c32;
-                border: 1px solid #444;
                 flex-shrink: 0;
             }
             .knob-val {
                 font-size: 10px;
-                font-weight: bold;
                 padding: 3px 2px;
-                min-width: 40px;
-                max-width: 50px;
-                text-align: center;
-                border-radius: 4px;
-                background: #FFF;
-                color: #000;
-                box-sizing: border-box;
+                min-width: 42px;
+                max-width: 52px;
+            }
+        }
+
+        /* Landscape Mobile Mode */
+        @media (orientation: landscape) and (max-height: 520px) {
+            .app-header {
+                height: 36px;
+            }
+            .mixer-logo {
+                font-size: 15px;
+            }
+            .mixer-title {
+                font-size: 11px;
+            }
+            .channel-nav-ribbon {
+                padding: 3px 8px;
+            }
+            .ribbon-pill {
+                height: 28px;
+                font-size: 10.5px;
+                padding: 0 6px;
+            }
+            .mixer-container {
+                min-height: 260px;
+                padding: 4px;
+            }
+            .fader-area {
+                min-height: 130px;
+            }
+            .eq-display {
+                height: 28px;
+            }
+            .mute-btn {
+                height: 24px;
+                font-size: 9px;
+            }
+            .channel-label-container {
+                height: 38px;
             }
         }
     </style>
@@ -3255,12 +3473,25 @@
         }, { passive: false });
 
 
-        // ── Drawing Mini EQ Curves ────────────────────────────────────
+        // ── Drawing Mini EQ Curves (Retina / Mobile Crisp) ─────────
         function drawMiniEQ(chIdx) {
             const data = channelStripsData[chIdx];
             if (!data) return;
+            const canvas = data.eqCanvas;
             const ctx = data.eqCtx;
+            if (!canvas || !ctx) return;
+
             const w = 70, h = 32;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
+            const tw = Math.round(w * dpr);
+            const th = Math.round(h * dpr);
+            if (canvas.width !== tw || canvas.height !== th) {
+                canvas.width = tw;
+                canvas.height = th;
+            }
+            if (ctx.resetTransform) ctx.resetTransform();
+            else ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
             ctx.clearRect(0, 0, w, h);
 
             const bands = channelEQState[chIdx] || defaultBands;
@@ -3304,6 +3535,9 @@
             if (!data) return;
             const clamped = Math.max(0, Math.min(100, valPct));
             data.faderCap.style.bottom = clamped + '%';
+            if (data.volReadout && typeof pctToDbStr === 'function') {
+                data.volReadout.textContent = pctToDbStr(clamped);
+            }
             
             // Atualiza o ganho do fader no grafo de áudio do mixer
             updateChannelFaderGain(idx);
@@ -3325,10 +3559,12 @@
                 data.muteBtn.classList.add('muted');
                 data.meterFill.classList.add('muted');
                 if (data.pill) data.pill.classList.add('is-muted');
+                if (data.volReadout) data.volReadout.classList.add('muted');
             } else {
                 data.muteBtn.classList.remove('muted');
                 data.meterFill.classList.remove('muted');
                 if (data.pill) data.pill.classList.remove('is-muted');
+                if (data.volReadout) data.volReadout.classList.remove('muted');
             }
             
             // Atualiza o ganho do fader considerando o mute
@@ -3385,6 +3621,7 @@
                     <canvas class="eq-canvas" width="70" height="32"></canvas>
                 </div>
                 <button class="mute-btn">Mute</button>
+                <div class="fader-vol-readout" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
                 <div class="fader-area">
                     <div class="meter-bg">
                         <div class="meter-clip line1"></div>
@@ -3411,7 +3648,7 @@
                 </div>
                 <div class="channel-label-container">
                     <span class="channel-number">${channelNumber}</span>
-                    <input type="text" class="channel-input" value="${defaultName}" ${isInput ? 'readonly' : ''} maxlength="8">
+                    <input type="text" class="channel-input" value="${defaultName}" ${isInput ? 'readonly' : ''} maxlength="10">
                 </div>
             `;
             
@@ -3419,12 +3656,14 @@
             const meterFill = strip.querySelector('.meter-fill');
             const eqDisplay = strip.querySelector('.eq-display');
             const eqCanvas = strip.querySelector('.eq-canvas');
+            const faderArea = strip.querySelector('.fader-area');
             const faderTouch = strip.querySelector('.fader-track-touch');
             const faderCap = strip.querySelector('.fader-cap');
+            const volReadout = strip.querySelector('.fader-vol-readout');
             const channelInput = strip.querySelector('.channel-input');
             const ctx = eqCanvas.getContext('2d');
 
-            // Quick channel ribbon pill (para navegação ágil no celular)
+            // Quick channel ribbon pill (navegação rápida no celular e desktop)
             const ribbon = document.getElementById('channel-ribbon');
             let pill = null;
             if (ribbon) {
@@ -3436,6 +3675,7 @@
                 pill.onclick = () => {
                     strip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                     document.querySelectorAll('.ribbon-pill').forEach((p, idx) => p.classList.toggle('active', idx === i));
+                    document.querySelectorAll('.channel-strip').forEach((s, idx) => s.classList.toggle('active-focused', idx === i));
                 };
                 ribbon.appendChild(pill);
             }
@@ -3445,8 +3685,10 @@
                 pill,
                 muteBtn,
                 meterFill,
+                volReadout,
                 faderCap,
                 faderTouch,
+                faderArea,
                 channelInput,
                 eqCanvas,
                 eqCtx: ctx
@@ -3466,6 +3708,14 @@
                 applyMute(i, willBeMuted);
                 sendSync({ type: 'mute', channel: i, value: willBeMuted });
             });
+
+            // Toque no display de dB reseta para Unity Gain (0.0 dB / 70%)
+            if (volReadout) {
+                volReadout.addEventListener('click', () => {
+                    applyVolume(i, 70);
+                    sendVolumeSync(i, 70, true);
+                });
+            }
             
             function getTouchY(e) {
                 if (e.touches && e.touches.length > 0) return e.touches[0].clientY;
@@ -3484,21 +3734,21 @@
 
             let isDraggingFader = false;
 
-            // Touch events específicos para telas de celular (evita rolagem da página)
-            faderTouch.addEventListener('touchstart', (e) => {
+            // Touch events específicos para telas de celular em toda a coluna do fader
+            faderArea.addEventListener('touchstart', (e) => {
                 isDraggingFader = true;
                 e.preventDefault();
                 updateFaderFromY(getTouchY(e), false);
             }, { passive: false });
 
-            faderTouch.addEventListener('touchmove', (e) => {
+            faderArea.addEventListener('touchmove', (e) => {
                 if (isDraggingFader) {
                     e.preventDefault();
                     updateFaderFromY(getTouchY(e), false);
                 }
             }, { passive: false });
 
-            faderTouch.addEventListener('touchend', (e) => {
+            faderArea.addEventListener('touchend', (e) => {
                 if (isDraggingFader) {
                     isDraggingFader = false;
                     e.preventDefault();
@@ -3506,29 +3756,29 @@
                 }
             }, { passive: false });
 
-            faderTouch.addEventListener('touchcancel', () => {
+            faderArea.addEventListener('touchcancel', () => {
                 isDraggingFader = false;
             });
 
             // Pointer / Mouse events para computador
-            faderTouch.addEventListener('pointerdown', (e) => {
+            faderArea.addEventListener('pointerdown', (e) => {
                 if (e.pointerType === 'touch') return;
                 isDraggingFader = true;
-                faderTouch.setPointerCapture(e.pointerId);
+                faderArea.setPointerCapture(e.pointerId);
                 updateFaderFromY(e.clientY, false);
             });
-            faderTouch.addEventListener('pointermove', (e) => {
+            faderArea.addEventListener('pointermove', (e) => {
                 if (e.pointerType === 'touch') return;
                 if (isDraggingFader) updateFaderFromY(e.clientY, false);
             });
-            faderTouch.addEventListener('pointerup', (e) => {
+            faderArea.addEventListener('pointerup', (e) => {
                 if (e.pointerType === 'touch') return;
                 if (isDraggingFader) {
                     isDraggingFader = false;
                     updateFaderFromY(e.clientY, true);
                 }
             });
-            faderTouch.addEventListener('pointercancel', () => {
+            faderArea.addEventListener('pointercancel', () => {
                 isDraggingFader = false;
             });
 
