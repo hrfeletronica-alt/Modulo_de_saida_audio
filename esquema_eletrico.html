@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esquema Elétrico e Pinagem • Módulo de Saída de Áudio (ESP32-S3)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0b0e;
+            --bg-card: #12141a;
+            --bg-card-hover: #181b22;
+            --border: #222631;
+            --border-highlight: #343a4a;
+            --text-main: #f0f3f8;
+            --text-muted: #8a93a5;
+            --accent-orange: #ff9900;
+            --accent-cyan: #00d2ff;
+            --accent-green: #00e676;
+            --accent-purple: #b388ff;
+            --accent-red: #ff5252;
+            --accent-yellow: #ffd600;
+            --accent-blue: #448aff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .header-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .system-badge {
+            background: linear-gradient(135deg, #ff9900, #ff6600);
+            color: #000;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #1a1d26;
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .btn:hover {
+            background: #242936;
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            color: #000;
+            border-color: var(--accent-orange);
+            font-weight: 700;
+        }
+
+        .btn-primary:hover {
+            background: #ffa726;
+            color: #000;
+        }
+
+        /* Bus filter chips */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-right: 6px;
+        }
+
+        .filter-chip {
+            background: #1a1d26;
+            border: 1px solid #2e3342;
+            color: #b0b7c7;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip:hover {
+            color: #fff;
+            border-color: #4f576e;
+        }
+
+        .filter-chip.active {
+            background: #fff;
+            color: #000;
+            font-weight: 700;
+            border-color: #fff;
+        }
+
+        .chip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* Architecture Overview Grid */
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .arch-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .arch-card:hover {
+            border-color: var(--border-highlight);
+        }
+
+        .arch-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .arch-card.mcu::before { background: var(--accent-orange); }
+        .arch-card.adc::before { background: var(--accent-cyan); }
+        .arch-card.dac::before { background: var(--accent-green); }
+        .arch-card.eth::before { background: var(--accent-purple); }
+
+        .arch-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .arch-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .arch-type {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #1c202a;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .arch-specs {
+            font-size: 11px;
+            color: #9aa2b4;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .arch-pins-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: #0d0f14;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #1a1e28;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        .arch-pin-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pin-tag {
+            background: #1e222e;
+            color: #e2e7f3;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .pin-arrow {
+            color: #555c6e;
+            font-size: 10px;
+        }
+
+        .gpio-tag {
+            color: var(--accent-orange);
+            font-weight: 700;
+        }
+
+        /* SVG Schematic Diagram Canvas */
+        .diagram-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .diagram-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .diagram-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .diagram-legend {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-line {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .svg-container {
+            width: 100%;
+            min-width: 1000px;
+            background: #0d0e13;
+            border: 1px solid #1c1f28;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        svg text {
+            font-family: 'JetBrains Mono', monospace;
+            user-select: none;
+        }
+
+        /* Master Pinout Table */
+        .table-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .search-box {
+            background: #0d0e13;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            width: 240px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: var(--accent-orange);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #161922;
+            color: #8c96ab;
+            font-weight: 700;
+            padding: 10px 14px;
+            text-transform: uppercase;
+            font-size: 10.5px;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #181b24;
+            color: #cfd5e3;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #161924;
+        }
+
+        .cell-mcu {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--accent-orange);
+        }
+
+        .cell-module-pin {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .bus-pill {
+            display: inline-block;
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .bus-i2s-rx { background: rgba(0, 210, 255, 0.15); color: var(--accent-cyan); border: 1px solid rgba(0, 210, 255, 0.3); }
+        .bus-i2s-tx { background: rgba(0, 230, 118, 0.15); color: var(--accent-green); border: 1px solid rgba(0, 230, 118, 0.3); }
+        .bus-spi    { background: rgba(179, 136, 255, 0.15); color: var(--accent-purple); border: 1px solid rgba(179, 136, 255, 0.3); }
+        .bus-i2c    { background: rgba(255, 214, 0, 0.15); color: var(--accent-yellow); border: 1px solid rgba(255, 214, 0, 0.3); }
+        .bus-mute   { background: rgba(255, 82, 82, 0.15); color: var(--accent-red); border: 1px solid rgba(255, 82, 82, 0.3); }
+        .bus-power  { background: rgba(68, 138, 255, 0.15); color: var(--accent-blue); border: 1px solid rgba(68, 138, 255, 0.3); }
+
+        /* Power and Grounding Best Practices Box */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .info-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 12px;
+            color: #a4adc1;
+        }
+
+        .info-list li {
+            position: relative;
+            padding-left: 16px;
+            line-height: 1.5;
+        }
+
+        .info-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent-orange);
+            font-weight: bold;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #5d6577;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        @media print {
+            body { background: #fff; color: #000; padding: 10px; }
+            .header-actions, .filter-bar, .search-box { display: none; }
+            .arch-card, .diagram-section, .table-section, .info-card { border-color: #ccc; background: #fff; color: #000; }
+            .svg-container { background: #fafafa; border-color: #ddd; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Header -->
+    <header class="header">
+        <div class="header-title-wrap">
+            <span class="system-badge">Hardware Schematic</span>
+            <div>
+                <h1>Esquema Elétrico e Conexão de Pinos</h1>
+                <div class="subtitle">ESP32-S3 • Entrada ADC PCM1808 • 5 × DAC PCM5102A (10 Canais) • Ethernet W5500 SPI</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+            <a href="preview.html" class="btn btn-primary">🎛️ Abrir Mixer de Áudio</a>
+        </div>
+    </header>
+
+    <!-- Interactive Bus Filters -->
+    <div class="filter-bar">
+        <span class="filter-label">Filtrar Barramento:</span>
+        <button class="filter-chip active" onclick="filterBus('all', this)">
+            <span class="chip-dot" style="background:#fff;"></span> Todos
+        </button>
+        <button class="filter-chip" onclick="filterBus('i2s-rx', this)">
+            <span class="chip-dot" style="background:var(--accent-cyan);"></span> I2S RX (Entrada ADC)
+        </button>
+        <button class="filter-chip" onclick="filterBus('i2s-tx', this)">
+            <span class="chip-dot" style="background:var(--accent-green);"></span> I2S TX (Saídas DACs)
+        </button>
+        <button class="filter-chip" onclick="filterBus('spi', this)">
+            <span class="chip-dot" style="background:var(--accent-purple);"></span> SPI (Rede W5500)
+        </button>
+        <button class="filter-chip" onclick="filterBus('i2c', this)">
+            <span class="chip-dot" style="background:var(--accent-yellow);"></span> I2C (Controle Digital)
+        </button>
+        <button class="filter-chip" onclick="filterBus('mute', this)">
+            <span class="chip-dot" style="background:var(--accent-red);"></span> Mute GPIOs (10x)
+        </button>
+        <button class="filter-chip" onclick="filterBus('power', this)">
+            <span class="chip-dot" style="background:var(--accent-blue);"></span> Alimentação & Terra
+        </button>
+    </div>
+
+    <!-- Architecture Overview Cards -->
+    <div class="arch-grid">
+        <!-- ESP32-S3 -->
+        <div class="arch-card mcu">
+            <div class="arch-header">
+                <div>
+                    <div class="arch-name">ESP32-S3 (MCU Central)</div>
+                    <div style="font-size:11px; color:#ff9900;">Dual-Core 240MHz • 8MB PSRAM</div>
+                </div>
+                <span class="arch-type">Controlador</span>
+            </div>
+            <div class="arch-specs">
+                Processamento DSP de áudio em ponto flutuante, roteamento I2S via DMA, servidor HTTP/WebSocket e sincronização de 10 canais.
+            </div>
+            <div class="arch-pins-list">
+                <div class="arch-pin-row"><span>I2S0 (RX):</span><span class="gpio-tag">GPIO 25, 26, 27</span></div>
+                <div class="arch-pin-row"><span>I2S1 (TX):</span><span class="gpio-tag">GPIO 14, 15, 16</span></div>
+                <div class="arch-pin-row"><span>SPI (W5500):</span><span class="gpio-tag">GPIO 5, 18, 19, 23</span></div>
+                <div class="arch-pin-row"><span>I2C Master:</span><span class="gpio-tag">GPIO 21 (SDA), 22 (SCL)</span></div>
+                <div class="arch-pin-row"><span>Mute Saídas 1-10:</span><span class="gpio-tag">GPIO 2,4,12,13,14..32</span></div>
+            </div>
+        </div>
+
+        <!-- PCM1808 ADC -->
+        <div class="arch-card adc">
+            <div class="arch-header">
+                <div>
+                    <div class="arch-name">PCM1808 (ADC Estéreo)</div>
+                    <div style="font-size:11px; color:#00d2ff;">24-Bit 96kHz • 99 dB SNR</div>
+                </div>
+                <span class="arch-type">Entrada Áudio</span>
+            </div>
+            <div class="arch-specs">
+                Converte o áudio analógico estéreo/mono da entrada externa em dados digitais I2S de 24 bits a 48 kHz para o mixer.
+            </div>
+            <div class="arch-pins-list">
+                <div class="arch-pin-row"><span class="pin-tag">BCK</span><span class="pin-arrow">→</span><span class="gpio-tag">GPIO 26 (I2S0_BCK)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">LRCK</span><span class="pin-arrow">→</span><span class="gpio-tag">GPIO 25 (I2S0_WS)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">DOUT</span><span class="pin-arrow">→</span><span class="gpio-tag">GPIO 27 (I2S0_DIN)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">VCC / VDD</span><span class="pin-arrow">→</span><span>5V (Analógico) / 3.3V (Digital)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">FMT / MD</span><span class="pin-arrow">→</span><span>GND (Formato I2S Padrão)</span></div>
+            </div>
+        </div>
+
+        <!-- 5x PCM5102A DACs -->
+        <div class="arch-card dac">
+            <div class="arch-header">
+                <div>
+                    <div class="arch-name">5 × PCM5102A (DACs Estéreo)</div>
+                    <div style="font-size:11px; color:#00e676;">32-Bit 384kHz • 112 dB SNR</div>
+                </div>
+                <span class="arch-type">10 Saídas Mono</span>
+            </div>
+            <div class="arch-specs">
+                Cada placa gera 2 canais de saída independentes (5 módulos = 10 saídas mono). PLL integrado dispensa clock MCLK mestre.
+            </div>
+            <div class="arch-pins-list">
+                <div class="arch-pin-row"><span class="pin-tag">BCK (Barramento)</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIO 14</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">LRCK (Barramento)</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIO 15</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">DIN (Barramento)</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIO 16 (TDM)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">SCK (PLL Int.)</span><span class="pin-arrow">→</span><span>GND (Clock interno ativo)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">XSMT (Mute)</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIOs dedicados 1 a 10</span></div>
+            </div>
+        </div>
+
+        <!-- W5500 Ethernet -->
+        <div class="arch-card eth">
+            <div class="arch-header">
+                <div>
+                    <div class="arch-name">W5500 (Rede Ethernet SPI)</div>
+                    <div style="font-size:11px; color:#b388ff;">10/100 Mbps • TCP/IP HW</div>
+                </div>
+                <span class="arch-type">Interface Web</span>
+            </div>
+            <div class="arch-specs">
+                Comunicação com latência ultrabaixa para controle pelo mixer Web em computadores, tablets e celulares na rede local.
+            </div>
+            <div class="arch-pins-list">
+                <div class="arch-pin-row"><span class="pin-tag">MOSI</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIO 23</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">MISO</span><span class="pin-arrow">→</span><span class="gpio-tag">GPIO 19</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">SCLK</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIO 18</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">CS (SCSn)</span><span class="pin-arrow">←</span><span class="gpio-tag">GPIO 5</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">VCC / GND</span><span class="pin-arrow">→</span><span>3.3V / GND Comum</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive SVG Schematic Diagram -->
+    <div class="diagram-section">
+        <div class="diagram-title-row">
+            <div class="diagram-title">
+                <span>⚡ Diagrama Esquemático de Interligação Geral</span>
+            </div>
+            <div class="diagram-legend">
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-cyan);"></span> I2S RX (Entrada)</div>
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-green);"></span> I2S TX (Saídas)</div>
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-purple);"></span> SPI (Ethernet)</div>
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-yellow);"></span> I2C (Controle)</div>
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-red);"></span> Mute / DEEM</div>
+                <div class="legend-item"><span class="legend-line" style="background:var(--accent-blue);"></span> Power / VCC</div>
+            </div>
+        </div>
+
+        <div class="svg-container">
+            <svg viewBox="0 0 1080 620" width="100%" height="560">
+                <defs>
+                    <linearGradient id="mcuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#1f2330"/>
+                        <stop offset="100%" stop-color="#13161f"/>
+                    </linearGradient>
+                    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#00d2ff" flood-opacity="0.6"/>
+                    </filter>
+                    <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#00e676" flood-opacity="0.6"/>
+                    </filter>
+                    <filter id="glowOrange" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff9900" flood-opacity="0.5"/>
+                    </filter>
+                </defs>
+
+                <!-- Grid de Fundo -->
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#141722" stroke-width="0.7"/>
+                </pattern>
+                <rect width="1080" height="620" fill="url(#grid)" />
+
+                <!-- ══════════════ 1. BLOCO CENTRAL: ESP32-S3 ══════════════ -->
+                <rect x="420" y="70" width="240" height="480" rx="12" fill="url(#mcuGrad)" stroke="#ff9900" stroke-width="2" filter="url(#glowOrange)"/>
+                <rect x="435" y="85" width="210" height="34" rx="6" fill="#0c0e14" stroke="#2a3040"/>
+                <text x="540" y="106" fill="#ff9900" font-size="14" font-weight="bold" text-anchor="middle">ESP32-S3 SOC</text>
+                <text x="540" y="135" fill="#8892a4" font-size="10" text-anchor="middle">DMA Audio Processor & Web Server</text>
+
+                <!-- Pinos do ESP32 Lado Esquerdo -->
+                <!-- I2S RX -->
+                <circle cx="420" cy="180" r="4" fill="#00d2ff"/>
+                <text x="430" y="184" fill="#00d2ff" font-size="11" font-weight="bold">GPIO 26</text>
+                <text x="480" y="184" fill="#6c768a" font-size="9">(I2S0 BCK)</text>
+
+                <circle cx="420" cy="210" r="4" fill="#00d2ff"/>
+                <text x="430" y="214" fill="#00d2ff" font-size="11" font-weight="bold">GPIO 25</text>
+                <text x="480" y="214" fill="#6c768a" font-size="9">(I2S0 WS/LRCK)</text>
+
+                <circle cx="420" cy="240" r="4" fill="#00d2ff"/>
+                <text x="430" y="244" fill="#00d2ff" font-size="11" font-weight="bold">GPIO 27</text>
+                <text x="480" y="244" fill="#6c768a" font-size="9">(I2S0 DIN)</text>
+
+                <!-- SPI W5500 -->
+                <circle cx="420" cy="320" r="4" fill="#b388ff"/>
+                <text x="430" y="324" fill="#b388ff" font-size="11" font-weight="bold">GPIO 23</text>
+                <text x="480" y="324" fill="#6c768a" font-size="9">(SPI MOSI)</text>
+
+                <circle cx="420" cy="350" r="4" fill="#b388ff"/>
+                <text x="430" y="354" fill="#b388ff" font-size="11" font-weight="bold">GPIO 19</text>
+                <text x="480" y="354" fill="#6c768a" font-size="9">(SPI MISO)</text>
+
+                <circle cx="420" cy="380" r="4" fill="#b388ff"/>
+                <text x="430" y="384" fill="#b388ff" font-size="11" font-weight="bold">GPIO 18</text>
+                <text x="480" y="384" fill="#6c768a" font-size="9">(SPI SCLK)</text>
+
+                <circle cx="420" cy="410" r="4" fill="#b388ff"/>
+                <text x="430" y="414" fill="#b388ff" font-size="11" font-weight="bold">GPIO 5</text>
+                <text x="475" y="414" fill="#6c768a" font-size="9">(SPI CS)</text>
+
+                <!-- I2C -->
+                <circle cx="420" cy="470" r="4" fill="#ffd600"/>
+                <text x="430" y="474" fill="#ffd600" font-size="11" font-weight="bold">GPIO 21</text>
+                <text x="480" y="474" fill="#6c768a" font-size="9">(I2C SDA)</text>
+
+                <circle cx="420" cy="500" r="4" fill="#ffd600"/>
+                <text x="430" y="504" fill="#ffd600" font-size="11" font-weight="bold">GPIO 22</text>
+                <text x="480" y="504" fill="#6c768a" font-size="9">(I2C SCL)</text>
+
+                <!-- Pinos do ESP32 Lado Direito -->
+                <!-- I2S TX -->
+                <circle cx="660" cy="180" r="4" fill="#00e676"/>
+                <text x="590" y="184" fill="#00e676" font-size="11" font-weight="bold">GPIO 14</text>
+                <text x="540" y="184" fill="#6c768a" font-size="9">(TX BCK)</text>
+
+                <circle cx="660" cy="210" r="4" fill="#00e676"/>
+                <text x="590" y="214" fill="#00e676" font-size="11" font-weight="bold">GPIO 15</text>
+                <text x="540" y="214" fill="#6c768a" font-size="9">(TX LRCK)</text>
+
+                <circle cx="660" cy="240" r="4" fill="#00e676"/>
+                <text x="590" y="244" fill="#00e676" font-size="11" font-weight="bold">GPIO 16</text>
+                <text x="540" y="244" fill="#6c768a" font-size="9">(TX DATA)</text>
+
+                <!-- Mute GPIOs -->
+                <circle cx="660" cy="330" r="4" fill="#ff5252"/>
+                <text x="560" y="334" fill="#ff5252" font-size="11" font-weight="bold">MUTE 1..10</text>
+                <text x="530" y="350" fill="#6c768a" font-size="8.5">GPIO 2,4,12,13,14...</text>
+
+
+                <!-- ══════════════ 2. MÓDULO PCM1808 (ADC ENTRADA) ══════════════ -->
+                <rect x="40" y="140" width="220" height="150" rx="8" fill="#141722" stroke="#00d2ff" stroke-width="1.8" filter="url(#glowCyan)"/>
+                <rect x="50" y="150" width="200" height="26" rx="4" fill="#0a0c12"/>
+                <text x="150" y="167" fill="#00d2ff" font-size="12" font-weight="bold" text-anchor="middle">MÓDULO PCM1808 (ADC)</text>
+                <text x="150" y="195" fill="#8892a4" font-size="9.5" text-anchor="middle">Entrada Analógica Estéreo (L / R)</text>
+
+                <!-- Pinos do PCM1808 -->
+                <circle cx="260" cy="210" r="4" fill="#00d2ff"/>
+                <text x="250" y="214" fill="#fff" font-size="10" text-anchor="end">BCK</text>
+
+                <circle cx="260" cy="235" r="4" fill="#00d2ff"/>
+                <text x="250" y="239" fill="#fff" font-size="10" text-anchor="end">LRCK</text>
+
+                <circle cx="260" cy="260" r="4" fill="#00d2ff"/>
+                <text x="250" y="264" fill="#fff" font-size="10" text-anchor="end">DOUT</text>
+
+                <!-- Linhas I2S RX -->
+                <path d="M 260 210 L 340 210 L 340 180 L 420 180" fill="none" stroke="#00d2ff" stroke-width="2" stroke-dasharray="4,2"/>
+                <path d="M 260 235 L 360 235 L 360 210 L 420 210" fill="none" stroke="#00d2ff" stroke-width="2"/>
+                <path d="M 260 260 L 380 260 L 380 240 L 420 240" fill="none" stroke="#00d2ff" stroke-width="2"/>
+
+
+                <!-- ══════════════ 3. MÓDULO W5500 ETHERNET ══════════════ -->
+                <rect x="40" y="340" width="220" height="170" rx="8" fill="#141722" stroke="#b388ff" stroke-width="1.8"/>
+                <rect x="50" y="350" width="200" height="26" rx="4" fill="#0a0c12"/>
+                <text x="150" y="367" fill="#b388ff" font-size="12" font-weight="bold" text-anchor="middle">W5500 ETHERNET (SPI)</text>
+                <text x="150" y="392" fill="#8892a4" font-size="9.5" text-anchor="middle">RJ45 • 10/100 Mbps</text>
+
+                <!-- Pinos W5500 -->
+                <circle cx="260" cy="410" r="4" fill="#b388ff"/>
+                <text x="250" y="414" fill="#fff" font-size="10" text-anchor="end">MOSI</text>
+
+                <circle cx="260" cy="435" r="4" fill="#b388ff"/>
+                <text x="250" y="439" fill="#fff" font-size="10" text-anchor="end">MISO</text>
+
+                <circle cx="260" cy="460" r="4" fill="#b388ff"/>
+                <text x="250" y="464" fill="#fff" font-size="10" text-anchor="end">SCLK</text>
+
+                <circle cx="260" cy="485" r="4" fill="#b388ff"/>
+                <text x="250" y="489" fill="#fff" font-size="10" text-anchor="end">SCSn (CS)</text>
+
+                <!-- Linhas SPI -->
+                <path d="M 260 410 L 330 410 L 330 320 L 420 320" fill="none" stroke="#b388ff" stroke-width="2"/>
+                <path d="M 260 435 L 350 435 L 350 350 L 420 350" fill="none" stroke="#b388ff" stroke-width="2"/>
+                <path d="M 260 460 L 370 460 L 370 380 L 420 380" fill="none" stroke="#b388ff" stroke-width="2"/>
+                <path d="M 260 485 L 390 485 L 390 410 L 420 410" fill="none" stroke="#b388ff" stroke-width="2"/>
+
+
+                <!-- ══════════════ 4. BLOCO DE SAÍDAS (5 × PCM5102A) ══════════════ -->
+                <!-- DAC 1 (Saída 1 e 2) -->
+                <g id="dac-mod-1">
+                    <rect x="820" y="70" width="220" height="75" rx="6" fill="#141722" stroke="#00e676" stroke-width="1.5" filter="url(#glowGreen)"/>
+                    <text x="830" y="92" fill="#00e676" font-size="11" font-weight="bold">DAC 1 • PCM5102A</text>
+                    <text x="1030" y="92" fill="#fff" font-size="10" text-anchor="end">Saída 1 &amp; 2</text>
+                    <text x="830" y="112" fill="#8892a4" font-size="9">BCK, LRCK, DIN, SCK=GND</text>
+                    <text x="830" y="130" fill="#ff5252" font-size="9">MUTE CH1 (GPIO2) / CH2 (GPIO4)</text>
+                    <circle cx="820" cy="107" r="4" fill="#00e676"/>
+                </g>
+
+                <!-- DAC 2 (Saída 3 e 4) -->
+                <g id="dac-mod-2">
+                    <rect x="820" y="160" width="220" height="75" rx="6" fill="#141722" stroke="#00e676" stroke-width="1.5"/>
+                    <text x="830" y="182" fill="#00e676" font-size="11" font-weight="bold">DAC 2 • PCM5102A</text>
+                    <text x="1030" y="182" fill="#fff" font-size="10" text-anchor="end">Saída 3 &amp; 4</text>
+                    <text x="830" y="202" fill="#8892a4" font-size="9">BCK, LRCK, DIN, SCK=GND</text>
+                    <text x="830" y="220" fill="#ff5252" font-size="9">MUTE CH3 (GPIO12) / CH4 (GPIO13)</text>
+                    <circle cx="820" cy="197" r="4" fill="#00e676"/>
+                </g>
+
+                <!-- DAC 3 (Saída 5 e 6) -->
+                <g id="dac-mod-3">
+                    <rect x="820" y="250" width="220" height="75" rx="6" fill="#141722" stroke="#00e676" stroke-width="1.5"/>
+                    <text x="830" y="272" fill="#00e676" font-size="11" font-weight="bold">DAC 3 • PCM5102A</text>
+                    <text x="1030" y="272" fill="#fff" font-size="10" text-anchor="end">Saída 5 &amp; 6</text>
+                    <text x="830" y="292" fill="#8892a4" font-size="9">BCK, LRCK, DIN, SCK=GND</text>
+                    <text x="830" y="310" fill="#ff5252" font-size="9">MUTE CH5 / CH6</text>
+                    <circle cx="820" cy="287" r="4" fill="#00e676"/>
+                </g>
+
+                <!-- DAC 4 (Saída 7 e 8) -->
+                <g id="dac-mod-4">
+                    <rect x="820" y="340" width="220" height="75" rx="6" fill="#141722" stroke="#00e676" stroke-width="1.5"/>
+                    <text x="830" y="362" fill="#00e676" font-size="11" font-weight="bold">DAC 4 • PCM5102A</text>
+                    <text x="1030" y="362" fill="#fff" font-size="10" text-anchor="end">Saída 7 &amp; 8</text>
+                    <text x="830" y="382" fill="#8892a4" font-size="9">BCK, LRCK, DIN, SCK=GND</text>
+                    <text x="830" y="400" fill="#ff5252" font-size="9">MUTE CH7 / CH8</text>
+                    <circle cx="820" cy="377" r="4" fill="#00e676"/>
+                </g>
+
+                <!-- DAC 5 (Saída 9 e 10) -->
+                <g id="dac-mod-5">
+                    <rect x="820" y="430" width="220" height="75" rx="6" fill="#141722" stroke="#00e676" stroke-width="1.5"/>
+                    <text x="830" y="452" fill="#00e676" font-size="11" font-weight="bold">DAC 5 • PCM5102A</text>
+                    <text x="1030" y="452" fill="#fff" font-size="10" text-anchor="end">Saída 9 &amp; 10</text>
+                    <text x="830" y="472" fill="#8892a4" font-size="9">BCK, LRCK, DIN, SCK=GND</text>
+                    <text x="830" y="490" fill="#ff5252" font-size="9">MUTE CH9 / CH10 (GPIO32)</text>
+                    <circle cx="820" cy="467" r="4" fill="#00e676"/>
+                </g>
+
+                <!-- Barramento I2S TX Tronco Compartilhado -->
+                <!-- BCK Line -->
+                <path d="M 660 180 L 740 180 L 740 100 L 820 100" fill="none" stroke="#00e676" stroke-width="2"/>
+                <!-- Taps para os outros 4 DACs -->
+                <path d="M 740 190 L 820 190" fill="none" stroke="#00e676" stroke-width="1.8"/>
+                <path d="M 740 280 L 820 280" fill="none" stroke="#00e676" stroke-width="1.8"/>
+                <path d="M 740 370 L 820 370" fill="none" stroke="#00e676" stroke-width="1.8"/>
+                <path d="M 740 460 L 820 460" fill="none" stroke="#00e676" stroke-width="1.8"/>
+
+                <!-- Linha tronco vertical I2S compartilhada -->
+                <line x1="740" y1="100" x2="740" y2="460" stroke="#00e676" stroke-width="3" stroke-linecap="round"/>
+                <text x="748" y="270" fill="#00e676" font-size="9.5" font-weight="bold" transform="rotate(90 748,270)">BARRAMENTO I2S TX (BCK, LRCK, DIN)</text>
+
+                <!-- Linha MUTE Bundle -->
+                <path d="M 660 330 L 780 330 L 780 480 L 820 480" fill="none" stroke="#ff5252" stroke-width="2" stroke-dasharray="3,3"/>
+                <line x1="780" y1="120" x2="780" y2="480" stroke="#ff5252" stroke-width="2" stroke-dasharray="3,3"/>
+                <path d="M 780 120 L 820 120" fill="none" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="2,2"/>
+                <path d="M 780 210 L 820 210" fill="none" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="2,2"/>
+                <path d="M 780 300 L 820 300" fill="none" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="2,2"/>
+                <path d="M 780 390 L 820 390" fill="none" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="2,2"/>
+
+                <!-- Indicador de Alimentação Fonte 5V / 3.3V -->
+                <rect x="420" y="565" width="240" height="36" rx="6" fill="#0c0e14" stroke="#448aff" stroke-width="1.5"/>
+                <text x="540" y="587" fill="#448aff" font-size="11" font-weight="bold" text-anchor="middle">FONTE 5V REGULADA + LDO 3.3V (STAR GROUND)</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Master Pinout Table -->
+    <div class="table-section">
+        <div class="section-header">
+            <div class="section-title">📋 Tabela Mestra de Pinagem e Interligações</div>
+            <input type="text" class="search-box" id="tableSearch" placeholder="🔍 Buscar pino, módulo ou função..." onkeyup="searchTable()">
+        </div>
+
+        <div class="table-wrap">
+            <table id="pinoutTable">
+                <thead>
+                    <tr>
+                        <th>Pino ESP32</th>
+                        <th>Barramento / Função</th>
+                        <th>Módulo Destino</th>
+                        <th>Pino do Módulo</th>
+                        <th>Nível Lógico</th>
+                        <th>Descrição Técnica</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- I2S RX (PCM1808) -->
+                    <tr data-bus="i2s-rx">
+                        <td class="cell-mcu">GPIO 26</td>
+                        <td><span class="bus-pill bus-i2s-rx">I2S0 RX</span></td>
+                        <td><strong>PCM1808 (ADC)</strong></td>
+                        <td class="cell-module-pin">BCK</td>
+                        <td>3.3V (Input/Output)</td>
+                        <td>Bit Clock de áudio para amostragem estéreo de 24-bit 48kHz</td>
+                    </tr>
+                    <tr data-bus="i2s-rx">
+                        <td class="cell-mcu">GPIO 25</td>
+                        <td><span class="bus-pill bus-i2s-rx">I2S0 RX</span></td>
+                        <td><strong>PCM1808 (ADC)</strong></td>
+                        <td class="cell-module-pin">LRCK / OUTR</td>
+                        <td>3.3V (Input/Output)</td>
+                        <td>Word Clock (Left/Right clock) a 48 kHz</td>
+                    </tr>
+                    <tr data-bus="i2s-rx">
+                        <td class="cell-mcu">GPIO 27</td>
+                        <td><span class="bus-pill bus-i2s-rx">I2S0 RX</span></td>
+                        <td><strong>PCM1808 (ADC)</strong></td>
+                        <td class="cell-module-pin">DOUT</td>
+                        <td>3.3V (Input)</td>
+                        <td>Linha serial de dados PCM capturados da entrada analógica</td>
+                    </tr>
+
+                    <!-- I2S TX (PCM5102A) -->
+                    <tr data-bus="i2s-tx">
+                        <td class="cell-mcu">GPIO 14</td>
+                        <td><span class="bus-pill bus-i2s-tx">I2S1 TX</span></td>
+                        <td><strong>5 × PCM5102A (DACs)</strong></td>
+                        <td class="cell-module-pin">BCK (Compartilhado)</td>
+                        <td>3.3V (Output)</td>
+                        <td>Bit Clock compartilhado em paralelo para todos os 5 DACs</td>
+                    </tr>
+                    <tr data-bus="i2s-tx">
+                        <td class="cell-mcu">GPIO 15</td>
+                        <td><span class="bus-pill bus-i2s-tx">I2S1 TX</span></td>
+                        <td><strong>5 × PCM5102A (DACs)</strong></td>
+                        <td class="cell-module-pin">LRCK (Compartilhado)</td>
+                        <td>3.3V (Output)</td>
+                        <td>Word Clock compartilhado em paralelo para sincronização das saídas</td>
+                    </tr>
+                    <tr data-bus="i2s-tx">
+                        <td class="cell-mcu">GPIO 16</td>
+                        <td><span class="bus-pill bus-i2s-tx">I2S1 TX</span></td>
+                        <td><strong>5 × PCM5102A (DACs)</strong></td>
+                        <td class="cell-module-pin">DIN / DATA</td>
+                        <td>3.3V (Output)</td>
+                        <td>Linha de dados multiplexados em TDM para os 10 canais analógicos</td>
+                    </tr>
+
+                    <!-- SPI W5500 -->
+                    <tr data-bus="spi">
+                        <td class="cell-mcu">GPIO 23</td>
+                        <td><span class="bus-pill bus-spi">SPI Master</span></td>
+                        <td><strong>W5500 Ethernet</strong></td>
+                        <td class="cell-module-pin">MOSI</td>
+                        <td>3.3V (Output)</td>
+                        <td>Master Out Slave In - Envio de pacotes de rede e comandos</td>
+                    </tr>
+                    <tr data-bus="spi">
+                        <td class="cell-mcu">GPIO 19</td>
+                        <td><span class="bus-pill bus-spi">SPI Master</span></td>
+                        <td><strong>W5500 Ethernet</strong></td>
+                        <td class="cell-module-pin">MISO</td>
+                        <td>3.3V (Input)</td>
+                        <td>Master In Slave Out - Recepção de pacotes e status do buffer</td>
+                    </tr>
+                    <tr data-bus="spi">
+                        <td class="cell-mcu">GPIO 18</td>
+                        <td><span class="bus-pill bus-spi">SPI Master</span></td>
+                        <td><strong>W5500 Ethernet</strong></td>
+                        <td class="cell-module-pin">SCLK</td>
+                        <td>3.3V (Output)</td>
+                        <td>Clock serial de barramento SPI até 14 MHz / 33 MHz</td>
+                    </tr>
+                    <tr data-bus="spi">
+                        <td class="cell-mcu">GPIO 5</td>
+                        <td><span class="bus-pill bus-spi">SPI Master</span></td>
+                        <td><strong>W5500 Ethernet</strong></td>
+                        <td class="cell-module-pin">SCSn (CS)</td>
+                        <td>3.3V (Output)</td>
+                        <td>Chip Select ativo em nível baixo para habilitação da comunicação</td>
+                    </tr>
+
+                    <!-- I2C -->
+                    <tr data-bus="i2c">
+                        <td class="cell-mcu">GPIO 21</td>
+                        <td><span class="bus-pill bus-i2c">I2C Master</span></td>
+                        <td><strong>Barramento de Controle</strong></td>
+                        <td class="cell-module-pin">SDA</td>
+                        <td>3.3V (Bidirecional)</td>
+                        <td>Linha de dados I2C (Pull-up 4.7kΩ ao 3.3V)</td>
+                    </tr>
+                    <tr data-bus="i2c">
+                        <td class="cell-mcu">GPIO 22</td>
+                        <td><span class="bus-pill bus-i2c">I2C Master</span></td>
+                        <td><strong>Barramento de Controle</strong></td>
+                        <td class="cell-module-pin">SCL</td>
+                        <td>3.3V (Output)</td>
+                        <td>Linha de clock I2C a 200 kHz / 400 kHz</td>
+                    </tr>
+
+                    <!-- MUTE GPIOs -->
+                    <tr data-bus="mute">
+                        <td class="cell-mcu">GPIO 2</td>
+                        <td><span class="bus-pill bus-mute">GPIO Mute</span></td>
+                        <td><strong>DAC 1 (Saída 1)</strong></td>
+                        <td class="cell-module-pin">XSMT / MUTE</td>
+                        <td>3.3V (Output)</td>
+                        <td>Controle de Anti-Pop Mute para o Canal 1 (Saída 1)</td>
+                    </tr>
+                    <tr data-bus="mute">
+                        <td class="cell-mcu">GPIO 4</td>
+                        <td><span class="bus-pill bus-mute">GPIO Mute</span></td>
+                        <td><strong>DAC 1 (Saída 2)</strong></td>
+                        <td class="cell-module-pin">XSMT / MUTE</td>
+                        <td>3.3V (Output)</td>
+                        <td>Controle de Anti-Pop Mute para o Canal 2 (Saída 2)</td>
+                    </tr>
+                    <tr data-bus="mute">
+                        <td class="cell-mcu">GPIO 12</td>
+                        <td><span class="bus-pill bus-mute">GPIO Mute</span></td>
+                        <td><strong>DAC 2 (Saída 3)</strong></td>
+                        <td class="cell-module-pin">XSMT / MUTE</td>
+                        <td>3.3V (Output)</td>
+                        <td>Controle de Anti-Pop Mute para o Canal 3 (Saída 3)</td>
+                    </tr>
+                    <tr data-bus="mute">
+                        <td class="cell-mcu">GPIO 13</td>
+                        <td><span class="bus-pill bus-mute">GPIO Mute</span></td>
+                        <td><strong>DAC 2 (Saída 4)</strong></td>
+                        <td class="cell-module-pin">XSMT / MUTE</td>
+                        <td>3.3V (Output)</td>
+                        <td>Controle de Anti-Pop Mute para o Canal 4 (Saída 4)</td>
+                    </tr>
+                    <tr data-bus="mute">
+                        <td class="cell-mcu">GPIO 32</td>
+                        <td><span class="bus-pill bus-mute">GPIO Mute</span></td>
+                        <td><strong>DAC 5 (Saída 10)</strong></td>
+                        <td class="cell-module-pin">XSMT / MUTE</td>
+                        <td>3.3V (Output)</td>
+                        <td>Controle de Anti-Pop Mute para o Canal 10 (Saída 10)</td>
+                    </tr>
+
+                    <!-- Power & Ground -->
+                    <tr data-bus="power">
+                        <td class="cell-mcu">VIN / 5V</td>
+                        <td><span class="bus-pill bus-power">Power 5V</span></td>
+                        <td><strong>Todos os Módulos</strong></td>
+                        <td class="cell-module-pin">VCC</td>
+                        <td>5.0V DC (Alimentação)</td>
+                        <td>Alimentação principal dos circuitos analógicos (mínimo 2.5A)</td>
+                    </tr>
+                    <tr data-bus="power">
+                        <td class="cell-mcu">3V3</td>
+                        <td><span class="bus-pill bus-power">Power 3.3V</span></td>
+                        <td><strong>ESP32, W5500, VDD</strong></td>
+                        <td class="cell-module-pin">VDD / 3V3</td>
+                        <td>3.3V DC (Lógica)</td>
+                        <td>Alimentação digital dos CIs regulada por LDO dedicado</td>
+                    </tr>
+                    <tr data-bus="power">
+                        <td class="cell-mcu">GND</td>
+                        <td><span class="bus-pill bus-power">Aterramento</span></td>
+                        <td><strong>Todos os Módulos</strong></td>
+                        <td class="cell-module-pin">GND / AGND / DGND</td>
+                        <td>0.0V (Referência)</td>
+                        <td>Topologia de Terra em Estrela (*Star Ground*) para evitar zumbidos</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Power & Layout Guidelines -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-title">⚡ Recomendações de Alimentação & Fontes</div>
+            <ul class="info-list">
+                <li>Utilize fonte chaveada de boa qualidade com <strong>5V DC e no mínimo 2.5A a 3A</strong> para alimentar os DACs, ADC e o regulador do ESP32.</li>
+                <li>Adicione um capacitor eletrolítico de <strong>100µF a 470µF (Low ESR)</strong> em paralelo com um capacitor de <strong>100nF cerâmico</strong> na entrada de alimentação de cada placa DAC PCM5102.</li>
+                <li>Para os módulos PCM5102A, o pino <strong>SCK deve ser conectado diretamente ao GND</strong> para habilitar o PLL interno automático, dispensando o clock mestre externo (MCLK).</li>
+            </ul>
+        </div>
+
+        <div class="info-card">
+            <div class="info-title">🛡️ Aterramento & Imunidade a Ruídos (Star Ground)</div>
+            <ul class="info-list">
+                <li>Adote o aterramento em ponto único (<strong>Star Ground</strong>): puxe trilhas ou fios de GND separados para a parte digital (ESP32, W5500) e analógica (PCM1808, PCM5102).</li>
+                <li>Conecte os terras analógicos (AGND) e digitais (DGND) em um único ponto próximo à saída da fonte para evitar ruídos de clock nos alto-falantes.</li>
+                <li>Mantenha as linhas I2S (BCK, LRCK, DIN) o mais curtas possível (máximo 10 cm a 15 cm) para evitar reflexões e capacitância parasita.</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        Modulo de Saída de Áudio • Sistema Integrado com Firmware ESP-IDF & Mixer Web em Tempo Real
+    </footer>
+
+    <script>
+        // Filtro interativo de barramento
+        function filterBus(busType, el) {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            const rows = document.querySelectorAll('#pinoutTable tbody tr');
+            rows.forEach(r => {
+                if (busType === 'all' || r.getAttribute('data-bus') === busType) {
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        }
+
+        // Busca em tempo real na tabela
+        function searchTable() {
+            const query = document.getElementById('tableSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#pinoutTable tbody tr');
+            rows.forEach(r => {
+                const text = r.textContent.toLowerCase();
+                r.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
