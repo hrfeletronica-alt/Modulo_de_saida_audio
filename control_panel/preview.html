@@ -438,8 +438,8 @@
             min-height: 220px;
             display: flex;
             overflow: hidden;
-            touch-action: none;
-            cursor: pointer;
+            touch-action: pan-x pan-y;
+            cursor: default;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
         }
         .main-strip .fader-area {
@@ -530,9 +530,10 @@
             right: 2px;
             top: 10px;
             bottom: 10px;
-            cursor: pointer;
-            touch-action: none;
+            cursor: default;
+            touch-action: pan-x pan-y;
             user-select: none;
+            pointer-events: none;
             z-index: 5;
         }
 
@@ -575,7 +576,18 @@
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.85)) drop-shadow(0 1px 3px rgba(0,0,0,0.6));
             cursor: grab;
             z-index: 10;
+            pointer-events: auto;
+            touch-action: none;
             transition: filter 0.1s ease;
+        }
+        .fader-cap::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            bottom: -8px;
+            left: -12px;
+            right: -12px;
+            pointer-events: auto;
         }
         .fader-cap:active, .fader-cap.dragging {
             cursor: grabbing;
@@ -3723,63 +3735,103 @@
                 return e.clientY;
             }
 
-            function updateFaderFromY(clientY, isFinal = false) {
-                if (clientY === undefined || clientY === null || isNaN(clientY)) return;
-                const rect = faderTouch.getBoundingClientRect();
-                const pct = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-                const valPct = (1 - pct) * 100;
-                applyVolume(i, valPct);
-                sendVolumeSync(i, valPct, isFinal);
+            let isDraggingFader = false;
+            let startDragY = 0;
+            let startFaderPct = 0;
+
+            function onFaderStart(clientY) {
+                isDraggingFader = true;
+                startDragY = clientY;
+                startFaderPct = parseFloat(faderCap.style.bottom) || 0;
+                faderCap.classList.add('dragging');
             }
 
-            let isDraggingFader = false;
+            function onFaderMove(clientY) {
+                if (!isDraggingFader) return;
+                const rect = faderTouch.getBoundingClientRect();
+                const trackH = rect.height || 200;
+                const dy = startDragY - clientY; // arrastar para cima aumenta ganho
+                const deltaPct = (dy / trackH) * 100;
+                const newPct = Math.max(0, Math.min(100, startFaderPct + deltaPct));
+                applyVolume(i, newPct);
+                sendVolumeSync(i, newPct, false);
+            }
 
-            // Touch events específicos para telas de celular em toda a coluna do fader
-            faderArea.addEventListener('touchstart', (e) => {
-                isDraggingFader = true;
+            function onFaderEnd(clientY) {
+                if (!isDraggingFader) return;
+                isDraggingFader = false;
+                faderCap.classList.remove('dragging');
+                const rect = faderTouch.getBoundingClientRect();
+                const trackH = rect.height || 200;
+                let finalPct = startFaderPct;
+                if (clientY !== undefined && clientY !== null && !isNaN(clientY)) {
+                    const dy = startDragY - clientY;
+                    const deltaPct = (dy / trackH) * 100;
+                    finalPct = Math.max(0, Math.min(100, startFaderPct + deltaPct));
+                }
+                applyVolume(i, finalPct);
+                sendVolumeSync(i, finalPct, true);
+            }
+
+            // O fader modula EXCLUSIVAMENTE ao clicar/arrastar o botão de volume (fader-cap)
+            faderCap.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                updateFaderFromY(getTouchY(e), false);
+                e.stopPropagation();
+                onFaderStart(getTouchY(e));
             }, { passive: false });
 
-            faderArea.addEventListener('touchmove', (e) => {
+            faderCap.addEventListener('touchmove', (e) => {
                 if (isDraggingFader) {
                     e.preventDefault();
-                    updateFaderFromY(getTouchY(e), false);
+                    e.stopPropagation();
+                    onFaderMove(getTouchY(e));
                 }
             }, { passive: false });
 
-            faderArea.addEventListener('touchend', (e) => {
+            faderCap.addEventListener('touchend', (e) => {
                 if (isDraggingFader) {
-                    isDraggingFader = false;
                     e.preventDefault();
-                    updateFaderFromY(getTouchY(e), true);
+                    e.stopPropagation();
+                    onFaderEnd(getTouchY(e));
                 }
             }, { passive: false });
 
-            faderArea.addEventListener('touchcancel', () => {
-                isDraggingFader = false;
-            });
-
-            // Pointer / Mouse events para computador
-            faderArea.addEventListener('pointerdown', (e) => {
-                if (e.pointerType === 'touch') return;
-                isDraggingFader = true;
-                faderArea.setPointerCapture(e.pointerId);
-                updateFaderFromY(e.clientY, false);
-            });
-            faderArea.addEventListener('pointermove', (e) => {
-                if (e.pointerType === 'touch') return;
-                if (isDraggingFader) updateFaderFromY(e.clientY, false);
-            });
-            faderArea.addEventListener('pointerup', (e) => {
-                if (e.pointerType === 'touch') return;
+            faderCap.addEventListener('touchcancel', () => {
                 if (isDraggingFader) {
                     isDraggingFader = false;
-                    updateFaderFromY(e.clientY, true);
+                    faderCap.classList.remove('dragging');
                 }
             });
-            faderArea.addEventListener('pointercancel', () => {
-                isDraggingFader = false;
+
+            // Pointer / Mouse events SOMENTE no botão de volume (fader-cap)
+            faderCap.addEventListener('pointerdown', (e) => {
+                if (e.pointerType === 'touch') return;
+                e.stopPropagation();
+                faderCap.setPointerCapture(e.pointerId);
+                onFaderStart(e.clientY);
+            });
+
+            faderCap.addEventListener('pointermove', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (isDraggingFader) {
+                    onFaderMove(e.clientY);
+                }
+            });
+
+            faderCap.addEventListener('pointerup', (e) => {
+                if (e.pointerType === 'touch') return;
+                if (isDraggingFader) {
+                    try { faderCap.releasePointerCapture(e.pointerId); } catch(err) {}
+                    onFaderEnd(e.clientY);
+                }
+            });
+
+            faderCap.addEventListener('pointercancel', (e) => {
+                if (isDraggingFader) {
+                    isDraggingFader = false;
+                    faderCap.classList.remove('dragging');
+                    try { faderCap.releasePointerCapture(e.pointerId); } catch(err) {}
+                }
             });
 
             channelInput.addEventListener('input', () => {
