@@ -1663,6 +1663,79 @@
         const CLIENT_ID = 'client_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
         const channelGainState = new Array(11).fill(0.0); // Ganho em dB (-18.0 dB a +18.0 dB, padrão 0.0 dB)
 
+        const STORAGE_KEY = 'audio_mixer_state_v1';
+        let localSaveTimer = null;
+
+        function scheduleSaveLocalState(delay = 100) {
+            if (localSaveTimer) clearTimeout(localSaveTimer);
+            localSaveTimer = setTimeout(saveLocalState, delay);
+        }
+
+        function saveLocalState() {
+            try {
+                if (!channelStripsData || channelStripsData.length === 0) return;
+                const state = {
+                    channels: []
+                };
+                for (let i = 0; i < 11; i++) {
+                    const data = channelStripsData[i];
+                    if (!data) continue;
+                    const volPct = parseFloat(data.faderCap.style.bottom) || 70;
+                    const gainDb = (typeof channelGainState !== 'undefined' && channelGainState[i] !== undefined) ? channelGainState[i] : 0.0;
+                    const isMuted = data.muteBtn.classList.contains('muted');
+                    const chName = data.channelInput ? data.channelInput.value : '';
+                    const bands = (typeof channelEQState !== 'undefined' && channelEQState[i]) ? channelEQState[i] : null;
+                    const eqOn = (typeof channelEQEnabled !== 'undefined' && channelEQEnabled[i] !== undefined) ? channelEQEnabled[i] : true;
+                    const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[i]) ? channelHPFState[i] : null;
+
+                    state.channels.push({
+                        id: i,
+                        volume: Math.round(volPct * 10) / 10,
+                        gain: Math.round(gainDb * 10) / 10,
+                        mute: isMuted,
+                        name: chName,
+                        eqEnabled: eqOn,
+                        bands: bands,
+                        hpf: hpf
+                    });
+                }
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                // Modo anônimo ou storage desabilitado
+            }
+        }
+
+        function restoreLocalState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (saved && Array.isArray(saved.channels)) {
+                    saved.channels.forEach((ch, idx) => {
+                        if (channelStripsData[idx]) {
+                            if (ch.gain !== undefined) applyGain(idx, ch.gain);
+                            if (ch.volume !== undefined) applyVolume(idx, ch.volume);
+                            if (ch.mute !== undefined) applyMute(idx, ch.mute);
+                            if (ch.name !== undefined) {
+                                applyName(idx, ch.name);
+                                if (channelStripsData[idx].pill) {
+                                    const textSpan = channelStripsData[idx].pill.querySelector('.ribbon-text') || channelStripsData[idx].pill;
+                                    textSpan.textContent = idx === 0 ? "LR" : `${idx}: ${ch.name}`;
+                                }
+                            }
+                            if (ch.bands && typeof channelEQState !== 'undefined') channelEQState[idx] = ch.bands;
+                            if (ch.eqEnabled !== undefined && typeof channelEQEnabled !== 'undefined') channelEQEnabled[idx] = ch.eqEnabled;
+                            if (ch.hpf && typeof channelHPFState !== 'undefined') channelHPFState[idx] = ch.hpf;
+                            if (typeof drawMiniEQ === 'function') drawMiniEQ(idx);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn("[Storage] Erro ao restaurar estado local:", e);
+            }
+        }
+
+
         function applyGain(idx, gainDb) {
             if (idx === undefined || idx < 0 || idx >= 11) return;
             const clamped = Math.max(-18.0, Math.min(18.0, Math.round(gainDb * 10) / 10));
@@ -1829,6 +1902,7 @@
 
         function sendSync(payload) {
             payload.clientId = CLIENT_ID;
+            if (typeof scheduleSaveLocalState === 'function') scheduleSaveLocalState(150);
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify(payload));
             } else {
@@ -4147,6 +4221,9 @@
             drawMiniEQ(i);
         }
 
+        // Restaura imediatamente o último estado salvo localmente antes do handshake
+        restoreLocalState();
+
         // Inicializa o grafo Web Audio se o contexto já estiver ativo
         if (audioCtx) {
             initMixerAudioGraph();
@@ -4203,9 +4280,11 @@
                             applyName(idx, ch.name);
                             if (ch.bands) channelEQState[idx] = ch.bands;
                             if (ch.hpf) channelHPFState[idx] = ch.hpf;
+                            if (ch.eqEnabled !== undefined) channelEQEnabled[idx] = ch.eqEnabled;
                             drawMiniEQ(idx);
                         }
                     });
+                    if (typeof saveLocalState === 'function') saveLocalState();
                 }
                 return;
             }
@@ -4264,6 +4343,9 @@
                             drawEQGraph();
                         }
                     }
+                }
+                if (typeof scheduleSaveLocalState === 'function') {
+                    scheduleSaveLocalState(150);
                 }
             }
         }

@@ -1,3 +1,4 @@
+import atexit
 import base64
 import hashlib
 import http.server
@@ -34,6 +35,7 @@ server_state = {
             'gain': 0.0,
             'mute': False,
             'eqEnabled': True,
+            'hpf': { 'enabled': False, 'freq': 80, 'slope': 12 },
             'bands': json.loads(json.dumps(DEFAULT_BANDS))
         }
         for i in range(11)
@@ -44,6 +46,49 @@ state_lock = threading.Lock()
 ws_clients = {}
 sse_clients = set()
 clients_lock = threading.Lock()
+
+STATE_FILE = os.path.join(BASE_DIR, 'mixer_state.json')
+_save_timer = None
+_save_timer_lock = threading.Lock()
+
+def load_saved_state():
+    if not os.path.exists(STATE_FILE):
+        return
+    try:
+        with open(STATE_FILE, 'r', encoding='utf-8') as f:
+            saved = json.load(f)
+        if isinstance(saved, dict) and 'channels' in saved and isinstance(saved['channels'], list):
+            with state_lock:
+                for item in saved['channels']:
+                    ch_id = item.get('id')
+                    if ch_id is not None and 0 <= ch_id < len(server_state['channels']):
+                        server_state['channels'][ch_id].update(item)
+            print(f"[Estado] Estado anterior carregado com sucesso de {STATE_FILE}!")
+    except Exception as e:
+        print(f"[Estado] Erro ao carregar {STATE_FILE}: {e}")
+
+def _do_save_state():
+    with state_lock:
+        data = json.dumps(server_state, indent=2)
+    tmp_path = STATE_FILE + '.tmp'
+    try:
+        with open(tmp_path, 'w', encoding='utf-8') as f:
+            f.write(data)
+        os.replace(tmp_path, STATE_FILE)
+    except Exception as e:
+        print(f"[Estado] Erro ao salvar {STATE_FILE}: {e}")
+
+def schedule_save_state(delay=0.3):
+    global _save_timer
+    with _save_timer_lock:
+        if _save_timer and _save_timer.is_alive():
+            _save_timer.cancel()
+        _save_timer = threading.Timer(delay, _do_save_state)
+        _save_timer.daemon = True
+        _save_timer.start()
+
+load_saved_state()
+atexit.register(_do_save_state)
 
 WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
@@ -143,7 +188,10 @@ def apply_sync_payload(payload):
                     ch['bands'] = payload['bands']
                 if 'enabled' in payload:
                     ch['eqEnabled'] = bool(payload['enabled'])
+                if 'hpf' in payload:
+                    ch['hpf'] = payload['hpf']
 
+    schedule_save_state()
     broadcast('update', payload)
 
 class AudioMixerHandler(http.server.SimpleHTTPRequestHandler):
@@ -151,6 +199,12 @@ class AudioMixerHandler(http.server.SimpleHTTPRequestHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
+
+    def handle(self):
+        try:
+            super().handle()
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, socket.error):
+            pass
 
     def do_GET(self):
         # 1. WebSocket Upgrade no mesmo endpoint/porta
@@ -397,7 +451,8 @@ def run():
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\nServidor encerrado.")
+            _do_save_state()
+            print("\nServidor encerrado. Estado salvo.")
 
 if __name__ == '__main__':
     run()

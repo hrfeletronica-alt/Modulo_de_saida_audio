@@ -1,0 +1,763 @@
+{
+  "channels": [
+    {
+      "id": 0,
+      "name": "Entrada",
+      "volume": 80.0,
+      "gain": 4.5,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Vocal",
+      "volume": 60.0,
+      "gain": -2.0,
+      "mute": true,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ch 2",
+      "volume": 75.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Ch 3",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Ch 4",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Guitarra",
+      "volume": 90.0,
+      "gain": 6.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Ch 6",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Ch 7",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Ch 8",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Ch 9",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Ch 10",
+      "volume": 0.0,
+      "gain": 0.0,
+      "mute": false,
+      "eqEnabled": true,
+      "hpf": {
+        "enabled": false,
+        "freq": 80,
+        "slope": 12
+      },
+      "bands": [
+        {
+          "id": 1,
+          "name": "Low",
+          "color": "#00FFFF",
+          "freq": 80,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "LShv"
+        },
+        {
+          "id": 2,
+          "name": "Low 2",
+          "color": "#00FF00",
+          "freq": 160,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 3,
+          "name": "Low Mid",
+          "color": "#FFFF00",
+          "freq": 500,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 4,
+          "name": "High Mid",
+          "color": "#FF00FF",
+          "freq": 1720,
+          "gain": 0,
+          "q": 1.4,
+          "mode": "PEQ"
+        },
+        {
+          "id": 5,
+          "name": "High 2",
+          "color": "#FF0000",
+          "freq": 4370,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "PEQ"
+        },
+        {
+          "id": 6,
+          "name": "High",
+          "color": "#FF8800",
+          "freq": 10000,
+          "gain": 0,
+          "q": 2.0,
+          "mode": "HShv"
+        }
+      ]
+    }
+  ]
+}
