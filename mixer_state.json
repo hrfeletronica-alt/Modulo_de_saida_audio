@@ -78,7 +78,7 @@
       "eqEnabled": true,
       "hpf": {
         "enabled": false,
-        "freq": 80,
+        "freq": 20,
         "slope": 12
       },
       "bands": [
@@ -86,7 +86,7 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 80,
+          "freq": 79.23614176278403,
           "gain": 0,
           "q": 2,
           "mode": "LShv"
@@ -122,8 +122,8 @@
           "id": 5,
           "name": "High 2",
           "color": "#FF0000",
-          "freq": 4370,
-          "gain": 0,
+          "freq": 4086.154375400143,
+          "gain": -0.13761467889908197,
           "q": 2,
           "mode": "PEQ"
         },
@@ -131,8 +131,8 @@
           "id": 6,
           "name": "High",
           "color": "#FF8800",
-          "freq": 10000,
-          "gain": 0,
+          "freq": 12115.276586285901,
+          "gain": -0.41284403669724773,
           "q": 2,
           "mode": "HShv"
         }

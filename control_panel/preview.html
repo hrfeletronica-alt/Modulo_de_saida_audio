@@ -3781,7 +3781,6 @@
             const sampleRate = audioCtx ? audioCtx.sampleRate : 48000;
             const nyquist = sampleRate / 2;
             const binCount = rtaFreqData.length;
-            const rawLevels = new Float32Array(numBars);
 
             for (let b = 0; b < numBars; b++) {
                 if (hasAudioSignal && activeAnalyser && !isMuted && faderPct > 1.0) {
@@ -3806,17 +3805,14 @@
                         currentBands.forEach(band => {
                             if (band.gain === 0) return;
                             if (band.mode === 'HShv') {
-                                // High Shelf: atua em toda a faixa de agudos até 20 kHz
                                 const oct = Math.log2(curF / band.freq);
                                 const factor = 1 / (1 + Math.exp(-oct * 2.2));
                                 eqDb += band.gain * factor;
                             } else if (band.mode === 'LShv') {
-                                // Low Shelf: atua em toda a faixa de graves
                                 const oct = Math.log2(curF / band.freq);
                                 const factor = 1 / (1 + Math.exp(oct * 2.2));
                                 eqDb += band.gain * factor;
                             } else {
-                                // PEQ / Bell
                                 const octDiff = Math.log2(curF / band.freq);
                                 const bw = 1 / Math.max(0.1, band.q);
                                 eqDb += band.gain * Math.exp(-Math.pow(octDiff, 2) / (2 * Math.pow(bw, 2)));
@@ -3824,66 +3820,57 @@
                         });
                     }
 
-                    // === 1. RUÍDO ROSA: curva plana modulada pelo EQ + ganho do potenciômetro ===
+                    // === 1. RUÍDO ROSA: espectro sintetizado calibrado para RTA ===
                     if (isPinkNoise) {
                         const jitterDb = Math.sin(b * 13.7 + Date.now() * 0.005) * 0.25 + (Math.random() - 0.5) * 0.3;
                         const totalDb = eqDb + potDb + jitterDb;
                         normLevel = Math.max(0, Math.min(1, 0.50 + (totalDb / 30)));
-                        rawLevels[b] = normLevel;
                     }
-                    // === 2. ÁUDIO REAL (PLAYER OU MICROFONE): espectro FFT modulado pelo EQ e ganho do potenciômetro ===
+                    // === 2. ÁUDIO REAL (PLAYER OU MICROFONE): atua exclusivamente nas frequências existentes no áudio ===
                     else {
-                        // Mapeia toda a faixa [fStart, fEnd] para a faixa de bins FFT
-                        const binStart = Math.max(0, Math.min(binCount - 1, Math.floor((fStart / nyquist) * binCount)));
-                        const binEnd   = Math.max(binStart, Math.min(binCount - 1, Math.ceil((fEnd / nyquist) * binCount)));
+                        // Se a frequência da barra ultrapassa a frequência de Nyquist do dispositivo de áudio, não há dados reais
+                        if (fStart >= nyquist) {
+                            normLevel = 0;
+                        } else {
+                            const binStart = Math.max(0, Math.min(binCount - 1, Math.floor((fStart / nyquist) * binCount)));
+                            const binEnd   = Math.max(binStart, Math.min(binCount - 1, Math.ceil((fEnd / nyquist) * binCount)));
 
-                        let maxBinVal = 0;
-                        let sumBinVal = 0;
-                        let count = 0;
-                        for (let k = binStart; k <= binEnd; k++) {
-                            const v = rtaFreqData[k];
-                            if (v > maxBinVal) maxBinVal = v;
-                            sumBinVal += v;
-                            count++;
-                        }
-                        const avgBinVal = count > 0 ? (sumBinVal / count) : 0;
-                        let bandVal = (maxBinVal * 0.65 + avgBinVal * 0.35) / 255.0;
+                            let maxBinVal = 0;
+                            let sumBinVal = 0;
+                            let count = 0;
+                            for (let k = binStart; k <= binEnd; k++) {
+                                const v = rtaFreqData[k];
+                                if (v > maxBinVal) maxBinVal = v;
+                                sumBinVal += v;
+                                count++;
+                            }
+                            const avgBinVal = count > 0 ? (sumBinVal / count) : 0;
+                            let bandVal = (maxBinVal * 0.70 + avgBinVal * 0.30) / 255.0;
 
-                        // Compensação de inclinação espectral ISO RTA (+3.5 dB/oitava acima de 1 kHz para resposta balanceada)
-                        if (curF > 1000) {
-                            const tilt = Math.pow(curF / 1000, 0.28);
-                            bandVal = Math.min(1.0, bandVal * tilt);
-                        }
+                            // Compensação de inclinação espectral (+3.2 dB/oitava acima de 1 kHz para resposta sonora natural)
+                            if (curF > 1000 && bandVal > 0.002) {
+                                const tilt = Math.pow(curF / 1000, 0.25);
+                                bandVal = Math.min(1.0, bandVal * tilt);
+                            }
 
-                        // Continuidade acústica natural das frequências ultra-altas (Air Band: 16 kHz a 20 kHz)
-                        // Garante que arquivos com corte brickwall de codecs (MP3/AAC cortados a 16-17 kHz) não fiquem com barras mortas
-                        if (b >= 58 && b > 0) {
-                            const prevLevel = rawLevels[b - 1];
-                            if (prevLevel > 0.02) {
-                                const rolloff = (b === 63 ? 0.72 : (b === 62 ? 0.80 : 0.88));
-                                const acousticFloor = prevLevel * rolloff;
-                                if (bandVal < acousticFloor) {
-                                    bandVal = acousticFloor;
-                                }
+                            // Atua estritamente nas frequências presentes no áudio:
+                            // Se a banda não tiver energia mensurável no sinal, a barra zera completamente
+                            if (bandVal < 0.005) {
+                                normLevel = 0;
+                            } else {
+                                const scaledSignal = bandVal * 0.70;
+                                const potOffset = (potDb / 30);
+                                const eqOffset = (eqDb / 30);
+                                const presence = Math.min(1.0, scaledSignal * 2.2);
+
+                                normLevel = Math.max(0, Math.min(1, scaledSignal + (potOffset * 0.30) + (eqOffset * presence)));
                             }
                         }
-
-                        // FFT medido no Analyser pós-fader
-                        const scaledSignal = bandVal * 0.70;
-                        rawLevels[b] = scaledSignal;
-
-                        // Modulação adicional proporcional ao ganho do potenciômetro e EQ
-                        const potOffset = (potDb / 30);
-                        const eqOffset = (eqDb / 30);
-                        const presence = Math.min(1.0, scaledSignal * 2.2);
-
-                        normLevel = Math.max(0, Math.min(1, scaledSignal + (potOffset * 0.30) + (eqOffset * presence)));
                     }
 
                     rtaTarget[b] = Math.max(0, Math.min(1, normLevel));
                 } else {
                     // Sem áudio no canal ou potenciômetro fechado/mutado -> barras zeram completamente
-                    rawLevels[b] = 0;
                     rtaTarget[b] = 0;
                 }
 
