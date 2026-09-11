@@ -9,7 +9,7 @@
       "eqEnabled": true,
       "hpf": {
         "enabled": false,
-        "freq": 80,
+        "freq": 44,
         "slope": 12
       },
       "bands": [
@@ -17,45 +17,45 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 80,
-          "gain": 0,
-          "q": 2.0,
+          "freq": 79.99999999999999,
+          "gain": 2.3394495412844036,
+          "q": 2,
           "mode": "LShv"
         },
         {
           "id": 2,
           "name": "Low 2",
           "color": "#00FF00",
-          "freq": 160,
-          "gain": 0,
-          "q": 2.0,
+          "freq": 201.4280658870667,
+          "gain": 2.201834862385322,
+          "q": 2,
           "mode": "PEQ"
         },
         {
           "id": 3,
           "name": "Low Mid",
           "color": "#FFFF00",
-          "freq": 500,
-          "gain": 0,
-          "q": 2.0,
+          "freq": 539.8875811638546,
+          "gain": 7.155963302752294,
+          "q": 4,
           "mode": "PEQ"
         },
         {
           "id": 4,
           "name": "High Mid",
           "color": "#FF00FF",
-          "freq": 1720,
-          "gain": 0,
-          "q": 1.4,
+          "freq": 1719.999999999999,
+          "gain": 2.2018348623853212,
+          "q": 3,
           "mode": "PEQ"
         },
         {
           "id": 5,
           "name": "High 2",
           "color": "#FF0000",
-          "freq": 4370,
-          "gain": 0,
-          "q": 2.0,
+          "freq": 4286.94689461646,
+          "gain": 9.63302752293578,
+          "q": 2.960000000000001,
           "mode": "PEQ"
         },
         {
@@ -64,15 +64,15 @@
           "color": "#FF8800",
           "freq": 10000,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "HShv"
         }
       ]
     },
     {
       "id": 1,
-      "name": "Ch 1",
-      "volume": 65.2,
+      "name": "Saida 1",
+      "volume": 67.2,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -140,7 +140,7 @@
     },
     {
       "id": 2,
-      "name": "Ch 2",
+      "name": "Saida 2",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -209,7 +209,7 @@
     },
     {
       "id": 3,
-      "name": "Ch 3",
+      "name": "Saida 3",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -278,7 +278,7 @@
     },
     {
       "id": 4,
-      "name": "Ch 4",
+      "name": "Saida 4",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -347,7 +347,7 @@
     },
     {
       "id": 5,
-      "name": "Guitarra",
+      "name": "Saida 5",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -416,7 +416,7 @@
     },
     {
       "id": 6,
-      "name": "Ch 6",
+      "name": "Saida 6",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -485,7 +485,7 @@
     },
     {
       "id": 7,
-      "name": "Ch 7",
+      "name": "Saida 7",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -554,7 +554,7 @@
     },
     {
       "id": 8,
-      "name": "Ch 8",
+      "name": "Saida 8",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -623,7 +623,7 @@
     },
     {
       "id": 9,
-      "name": "Ch 9",
+      "name": "Saida 9",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -692,7 +692,7 @@
     },
     {
       "id": 10,
-      "name": "Ch 10",
+      "name": "Saida 10",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
