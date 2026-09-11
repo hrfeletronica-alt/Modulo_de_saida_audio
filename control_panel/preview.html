@@ -188,94 +188,103 @@
         .eq-canvas { width: 100%; height: 100%; pointer-events: none; }
 
         .mute-btn {
-            background-color: #DEDEDE; border: 2px solid black; border-radius: 4px;
-            color: black; font-weight: bold; font-size: 12px; height: 35px;
-            margin: 4px; cursor: pointer;
+            background: linear-gradient(180deg, #32353c 0%, #222429 100%);
+            border: 1px solid #141518;
+            border-radius: 4px;
+            color: #9da2ad;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            height: 32px;
+            margin: 6px 4px 4px 4px;
+            cursor: pointer;
             touch-action: manipulation;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
         }
-        .mute-btn.muted { background-color: red; color: white; }
+        .mute-btn:hover {
+            background: linear-gradient(180deg, #3c4049 0%, #2b2e35 100%);
+            color: #c0c6d2;
+        }
+        .mute-btn:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+        }
+        .mute-btn.muted {
+            background: linear-gradient(180deg, #d3202f 0%, #990f1b 100%);
+            color: #ffffff;
+            border-color: #59080e;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 12px rgba(230, 32, 47, 0.7);
+            text-shadow: 0 0 4px rgba(255,255,255,0.7);
+        }
         
         .fader-area {
-            background-color: black; border: 1px solid black; border-radius: 4px;
-            margin: 2px 4px; flex-grow: 1; position: relative; height: 250px;
-            display: flex; overflow: hidden; touch-action: none;
+            background-color: #0b0c10;
+            border: 1px solid #22242a;
+            border-radius: 4px;
+            margin: 2px 4px;
+            flex-grow: 1;
+            position: relative;
+            height: 250px;
+            display: flex;
+            overflow: hidden;
+            touch-action: none;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
         }
-        .main-strip .fader-area { border: 2px solid #FF5500; }
-        
-        .meter-bg { position: absolute; left: 8px; top: 10px; bottom: 10px; width: 12px; background-color: #1A3300; }
-        .meter-fill { position: absolute; left: 8px; bottom: 10px; width: 12px; height: 0%; background-color: #4C9900; transition: height 0.05s; }
-        .meter-fill.muted { background-color: transparent; }
-        
-        .scale-marks {
-            position: absolute; right: 4px; top: 10px; bottom: 10px; width: 20px;
-            display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
-            font-size: 8px; color: white; pointer-events: none;
-        }
-        .fader-track { position: absolute; right: 25px; top: 10px; bottom: 10px; width: 4px; background-color: #111; pointer-events: none; }
-        .fader-track-line { position: absolute; left: 1px; top: 0; bottom: 0; width: 2px; background: #222; }
-        .fader-track-mark-0db { position: absolute; left: -3px; right: -3px; bottom: 70%; height: 2px; background: #FF9900; }
-        
-        .fader-cap {
-            position: absolute; right: 8px; width: 38px; height: 26px;
-            background: #E0E0E0; border: 1px solid black; border-radius: 4px;
-            box-shadow: inset 0 0 0 2px #E0E0E0, 0 2px 5px rgba(0,0,0,0.5);
-            background-image: linear-gradient(90deg, transparent 40%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.6) 60%, transparent 60%);
-            cursor: grab; transform: translateY(50%); z-index: 10;
-        }
-        .fader-cap:active { cursor: grabbing; }
-
-        .fader-touch-area {
-            position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-            touch-action: none; cursor: pointer; z-index: 5;
+        .main-strip .fader-area {
+            border: 2px solid #FF5500;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 0 8px rgba(255,85,0,0.3);
         }
         
-        .channel-label-container {
-            height: 52px; background-color: #999999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; padding: 2px; border-top: 1px solid black;
+        .meter-bg {
+            position: absolute;
+            left: 8px;
+            top: 10px;
+            bottom: 10px;
+            width: 12px;
+            background: linear-gradient(to top, 
+                #00b020 0%, #00d028 55%, 
+                #ffb800 68%, #ff9900 80%, 
+                #ff2a1a 92%, #ff0000 100%);
+            border-radius: 2px;
+            border: 1px solid #111215;
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.9);
+            overflow: hidden;
+            pointer-events: none;
         }
-        .main-strip .channel-label-container { background-color: #552200; }
-        .channel-number { font-size: 10px; font-weight: bold; color: black; margin-bottom: 2px; }
-        .main-strip .channel-number { color: white; }
-        .channel-input {
-            width: 92%; font-size: 11px; font-weight: bold; text-align: center;
-            background-color: rgba(255, 255, 255, 0.9); border: 1px solid #666; border-radius: 2px;
-            padding: 3px 2px; box-sizing: border-box; color: black;
-        }
-        .main-strip .channel-input { background-color: transparent; border: none; color: white; pointer-events: none; }
-        
-        .fader-vol-text {
-            font-size: 10px; font-weight: bold; color: #fff; text-align: center; margin: 2px 0;
-        }
-        
-        .meter-clip.line1 { top: 3px; }
-        .meter-clip.line2 { top: 7px; }
-        
-        /* Cortina escura que desce do TOPO — revela o gradiente fixo abaixo */
         .meter-fill {
             position: absolute;
             left: 0;
             right: 0;
             top: 0;
-            height: 100%;          /* Começa em 100% (cobre tudo = sem sinal) */
-            background: #0a0a0c;   /* mesma cor do fundo da fader-area */
+            height: 100%;
+            background: #0b0c10;
             transition: height 0.04s linear;
         }
         .meter-fill.muted {
-            height: 100% !important; /* cobre tudo quando mutado */
+            height: 100% !important;
         }
-        
-        /* Indicador de Ruído Rosa Ativo no Canal */
-        .channel-strip.pink-noise-active {
-            border-color: #FF0055 !important;
-            box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
+        .meter-clip.line1 {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 3px;
+            height: 1px;
+            background: rgba(0,0,0,0.6);
+            z-index: 2;
         }
-        .ribbon-pill.pink-noise-active {
-            border-color: #FF0055 !important;
-            color: #FF0055 !important;
-        }
-        .ribbon-pill.pink-noise-active .ribbon-dot {
-            background-color: #FF0055 !important;
-            box-shadow: 0 0 6px #FF0055;
+        .meter-clip.line2 {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 7px;
+            height: 1px;
+            background: rgba(0,0,0,0.6);
+            z-index: 2;
         }
         
         .scale-marks {
@@ -285,7 +294,7 @@
             bottom: 10px;
             width: 24px;
             pointer-events: none;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
             color: #FFFFFF;
             font-family: monospace, sans-serif;
@@ -303,27 +312,9 @@
             font-weight: 800 !important;
             text-shadow: 0 0 6px rgba(255, 153, 0, 0.7);
         }
-        .fader-track-mark-0db {
-            position: absolute;
-            left: 8px;
-            right: 8px;
-            height: 2px;
-            background: #FF9900;
-            box-shadow: 0 0 6px rgba(255, 153, 0, 0.8);
-            border-radius: 1px;
-            bottom: 70%; /* 70% do fundo = 0dB exato (Unity Gain) */
-            pointer-events: none;
-            z-index: 2;
-        }
+        
         .fader-track {
-            position: absolute;
-            right: 32px;
-            top: 10px;
-            bottom: 10px;
-            width: 3px;
-            background-color: #2b2c30;
-            border-radius: 1px;
-            pointer-events: none;
+            display: none;
         }
         
         .fader-track-touch {
@@ -337,85 +328,116 @@
             user-select: none;
             z-index: 5;
         }
+        
+        /* Trilha slot vertical profundo */
         .fader-track-line {
             position: absolute;
             left: 23px;
             top: 0;
             bottom: 0;
             width: 4px;
-            background: #1e1f24;
+            background: #050608;
+            border: 1px solid #1a1b20;
             border-radius: 2px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.9);
+            pointer-events: none;
+        }
+        
+        .fader-track-mark-0db {
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            height: 2px;
+            background: #FF9900;
+            box-shadow: 0 0 6px rgba(255, 153, 0, 0.8);
+            border-radius: 1px;
+            bottom: 70%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        /* Botão do Mixer (Fader Cap) formato de console de estúdio */
+        .fader-cap {
+            position: absolute;
+            left: 25px;
+            transform: translate(-50%, 50%);
+            width: 30px;
+            height: 56px;
+            background-image: url('fader_knob.svg');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.85)) drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+            cursor: grab;
+            z-index: 10;
+            transition: filter 0.1s ease;
+        }
+        .fader-cap:active, .fader-cap.dragging {
+            cursor: grabbing;
+            filter: drop-shadow(0 6px 14px rgba(0,0,0,0.95)) drop-shadow(0 0 8px rgba(255, 153, 0, 0.7));
+        }
 
-            print(f"[ESP32 API] Canal {ch_id}: Volume {val_raw} ({val_pct}%)")
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Content-Type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b'OK')
-            return
-
-        if mute_match:
-            ch_id = int(mute_match.group(1))
-            state = bool(data.get('state', 0))
-
-            apply_sync_payload({
-                'type': 'mute',
-                'channel': ch_id,
-                'value': state,
-                'clientId': 'esp32'
-            })
-
-            print(f"[ESP32 API] Canal {ch_id}: Mute alterado para {state}")
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Content-Type', 'text/plain')
-            self.end_headers()
-            self.wfile.write(b'OK')
-            return
-
-        self.send_response(404)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        self.wfile.write(b'Not Found')
-
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
-        super().end_headers()
-
-class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    allow_reuse_address = True
-    daemon_threads = True
-
-def run():
-    with ThreadedTCPServer(("0.0.0.0", PORT), AudioMixerHandler) as httpd:
-        print("==================================================")
-        print("  Servidor Audio Mixer com WEBSOCKET & SSE")
-        print(f"  URL Local:   http://localhost:{PORT}")
-        print(f"  Celular:     http://192.168.31.236:{PORT}")
-        print(f"  Interface:   http://localhost:{PORT}/preview.html")
-        print("==================================================")
-        sys.stdout.flush()
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            border: 1px solid #777;
-            border-radius: 4px;
-            color: #000;
-            font-family: sans-serif;
-            margin-top: 12px;
-            padding: 4px 2px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
-            cursor: text;
+        .channel-label-container {
+            height: 52px;
+            background-color: #999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            border-top: 1px solid black;
+        }
+        .main-strip .channel-label-container {
+            background-color: #552200;
+        }
+        .channel-number {
+            font-size: 10px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 2px;
+        }
+        .main-strip .channel-number {
+            color: white;
+        }
+        .channel-input {
+            width: 92%;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #666;
+            border-radius: 2px;
+            padding: 3px 2px;
+            box-sizing: border-box;
+            color: black;
         }
         .main-strip .channel-input {
             background-color: transparent;
             border: none;
-            color: #FFF;
-            box-shadow: none;
-            cursor: default;
+            color: white;
+            pointer-events: none;
+        }
+        
+        .fader-vol-text {
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            margin: 2px 0;
+        }
+        
+        /* Indicador de Ruído Rosa Ativo no Canal */
+        .channel-strip.pink-noise-active {
+            border-color: #FF0055 !important;
+            box-shadow: 0 0 12px rgba(255, 0, 85, 0.45);
+        }
+        .ribbon-pill.pink-noise-active {
+            border-color: #FF0055 !important;
+            color: #FF0055 !important;
+        }
+        .ribbon-pill.pink-noise-active .ribbon-dot {
+            background-color: #FF0055 !important;
+            box-shadow: 0 0 6px #FF0055;
         }
 
         /* Mobile Optimized EQ Modal Styles */
@@ -669,21 +691,21 @@ def run():
         .modal-fader-cap {
             position: absolute;
             left: 50%;
-            width: 44px;
-            height: 36px;
-            margin-left: -22px;
-            margin-bottom: -18px;
-            border-radius: 4px;
-            background: linear-gradient(180deg, #FFFFFF 0%, #D8D8D8 30%, #A0A0A0 50%, #E0E0E0 75%, #B0B0B0 100%);
-            background-image: linear-gradient(180deg, transparent 40%, #444 40%, #444 60%, transparent 60%);
-            border: 1px solid #000;
-            box-shadow: inset 0 1px 0 #FFFFFF, 0 3px 8px rgba(0,0,0,0.85);
+            transform: translate(-50%, 50%);
+            width: 32px;
+            height: 58px;
+            background-image: url('fader_knob.svg');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.85)) drop-shadow(0 2px 4px rgba(0,0,0,0.6));
             cursor: grab;
-            transition: box-shadow 0.05s;
+            z-index: 10;
+            transition: filter 0.1s ease;
         }
         .modal-fader-cap:active, .modal-fader-cap.dragging {
-            box-shadow: inset 0 1px 0 #FFFFFF, 0 0 12px rgba(255,153,0,0.9);
-            border-color: #ff9900;
+            cursor: grabbing;
+            filter: drop-shadow(0 6px 14px rgba(0,0,0,0.95)) drop-shadow(0 0 10px rgba(255,153,0,0.8));
         }
         
         /* Band Boxes Row */
@@ -926,10 +948,8 @@ def run():
                 padding: 1px 2px;
             }
             .modal-fader-cap {
-                width: 36px;
-                height: 28px;
-                margin-left: -18px;
-                margin-bottom: -14px;
+                width: 28px;
+                height: 52px;
             }
             .modal-fader-scale {
                 font-size: 7px;

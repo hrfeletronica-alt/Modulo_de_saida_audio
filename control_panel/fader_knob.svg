@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 56" width="30" height="56">
+  <defs>
+    <!-- Outer rim / body gradient -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2c2e33" />
+      <stop offset="6%" stop-color="#6e727a" />
+      <stop offset="14%" stop-color="#bcc1cb" />
+      <stop offset="25%" stop-color="#d6dae3" />
+      <stop offset="50%" stop-color="#adb2bb" />
+      <stop offset="75%" stop-color="#d6dae3" />
+      <stop offset="88%" stop-color="#7a7e87" />
+      <stop offset="100%" stop-color="#24262a" />
+    </linearGradient>
+
+    <!-- Top sloped face gradient -->
+    <linearGradient id="topSlope" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3a3c42" />
+      <stop offset="6%" stop-color="#80848e" />
+      <stop offset="14%" stop-color="#dce0e8" />
+      <stop offset="20%" stop-color="#f8fafc" />
+      <stop offset="30%" stop-color="#b8bcc4" />
+      <stop offset="55%" stop-color="#666a74" />
+      <stop offset="85%" stop-color="#464a52" />
+      <stop offset="100%" stop-color="#282a2e" />
+    </linearGradient>
+
+    <!-- Bottom face metallic gradient -->
+    <linearGradient id="bottomFace" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2e3036" />
+      <stop offset="5%" stop-color="#8a8e98" />
+      <stop offset="14%" stop-color="#e2e6ee" />
+      <stop offset="35%" stop-color="#f2f5fa" />
+      <stop offset="60%" stop-color="#d0d4dc" />
+      <stop offset="85%" stop-color="#9aa0aa" />
+      <stop offset="95%" stop-color="#4c4f56" />
+      <stop offset="100%" stop-color="#24262a" />
+    </linearGradient>
+
+    <!-- Center white marker line gradient -->
+    <linearGradient id="centerLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c5c9d2" />
+      <stop offset="10%" stop-color="#ffffff" />
+      <stop offset="90%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#c5c9d2" />
+    </linearGradient>
+
+    <!-- Side chamfer gradients for 3D curved feel -->
+    <linearGradient id="leftRim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#151618" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+
+    <linearGradient id="rightRim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="60%" stop-color="#18191c" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#0b0c0e" stop-opacity="0.9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Base outer knob casing -->
+  <rect x="0.5" y="0.5" width="29" height="55" rx="3.5" ry="3.5" fill="url(#bodyGrad)" stroke="#16171a" stroke-width="0.75" />
+
+  <!-- Top sloped tier -->
+  <path d="M 2 4 C 2 2.5 3 1.5 4.5 1.5 L 25.5 1.5 C 27 1.5 28 2.5 28 4 L 28 26 L 2 26 Z" fill="url(#topSlope)" />
+
+  <!-- Top specular highlight arc -->
+  <path d="M 4 2.5 Q 15 1.2 26 2.5" stroke="#ffffff" stroke-width="1" stroke-linecap="round" stroke-opacity="0.9" fill="none" />
+  <path d="M 3.5 4.5 Q 15 3.5 26.5 4.5" stroke="#f6f8fc" stroke-width="1.2" stroke-opacity="0.95" fill="none" />
+
+  <!-- Upper grip grooves -->
+  <!-- Groove 1 -->
+  <line x1="3.5" y1="12" x2="26.5" y2="12" stroke="#1d1e22" stroke-width="1.3" />
+  <line x1="3.5" y1="13.2" x2="26.5" y2="13.2" stroke="#8c909b" stroke-width="0.8" stroke-opacity="0.7" />
+
+  <!-- Groove 2 -->
+  <line x1="3.5" y1="17.5" x2="26.5" y2="17.5" stroke="#1d1e22" stroke-width="1.3" />
+  <line x1="3.5" y1="18.7" x2="26.5" y2="18.7" stroke="#8c909b" stroke-width="0.8" stroke-opacity="0.7" />
+
+  <!-- Groove 3 -->
+  <line x1="3.5" y1="23" x2="26.5" y2="23" stroke="#1d1e22" stroke-width="1.3" />
+  <line x1="3.5" y1="24.2" x2="26.5" y2="24.2" stroke="#8c909b" stroke-width="0.8" stroke-opacity="0.7" />
+
+  <!-- Center step / recessed line -->
+  <rect x="1.5" y="26" width="27" height="1.8" fill="#18191c" />
+
+  <!-- Center white index marker line -->
+  <rect x="1.5" y="27.5" width="27" height="2" fill="url(#centerLineGrad)" />
+  <line x1="1.5" y1="29.8" x2="28.5" y2="29.8" stroke="#1a1b1f" stroke-width="0.8" />
+
+  <!-- Lower tier face -->
+  <path d="M 2 30.5 L 28 30.5 L 28 52 C 28 53.5 27 54.5 25.5 54.5 L 4.5 54.5 C 3 54.5 2 53.5 2 52 Z" fill="url(#bottomFace)" />
+
+  <!-- Lower horizontal grip grooves -->
+  <!-- Groove 4 -->
+  <line x1="3.5" y1="36" x2="26.5" y2="36" stroke="#484a52" stroke-width="1.2" />
+  <line x1="3.5" y1="37.2" x2="26.5" y2="37.2" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.85" />
+
+  <!-- Groove 5 -->
+  <line x1="3.5" y1="41.8" x2="26.5" y2="41.8" stroke="#484a52" stroke-width="1.2" />
+  <line x1="3.5" y1="43" x2="26.5" y2="43" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.85" />
+
+  <!-- Groove 6 -->
+  <line x1="3.5" y1="47.5" x2="26.5" y2="47.5" stroke="#484a52" stroke-width="1.2" />
+  <line x1="3.5" y1="48.7" x2="26.5" y2="48.7" stroke="#ffffff" stroke-width="0.8" stroke-opacity="0.85" />
+
+  <!-- Bottom chamfer shadow -->
+  <path d="M 4 54 Q 15 54.8 26 54" stroke="#121316" stroke-width="1.5" stroke-linecap="round" fill="none" />
+
+  <!-- 3D lateral rims -->
+  <rect x="0.8" y="1" width="2.8" height="54" rx="2" fill="url(#leftRim)" pointer-events="none" />
+  <rect x="26.4" y="1" width="2.8" height="54" rx="2" fill="url(#rightRim)" pointer-events="none" />
+</svg>
