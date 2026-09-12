@@ -43,19 +43,38 @@
         .header-brand {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .brand-logo-img {
+            height: 34px;
+            width: 34px;
+            border-radius: 7px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 153, 0, 0.45);
+            box-shadow: 0 0 8px rgba(255, 153, 0, 0.35);
             flex-shrink: 0;
         }
-        .mixer-logo {
-            font-size: 18px;
-            filter: drop-shadow(0 0 4px rgba(255, 153, 0, 0.4));
+        .brand-text-wrap {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.15;
         }
-        .mixer-title {
+        .brand-name {
             font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            color: #eeeeee;
-            white-space: nowrap;
+            font-weight: 900;
+            letter-spacing: 1.8px;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+        .brand-sub {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ff9900;
+            text-transform: uppercase;
         }
 
         /* Sync Status Badge */
@@ -2007,8 +2026,11 @@
     <!-- Header Superior com Logo e Status de Conexão -->
     <header class="app-header">
         <div class="header-brand">
-            <span class="mixer-logo">🎛️</span>
-            <span class="mixer-title">AUDIO MIXER 1/10</span>
+            <img src="bercame_logo_dark.jpg" alt="BERCAME" class="brand-logo-img">
+            <div class="brand-text-wrap">
+                <span class="brand-name">BERCAME</span>
+                <span class="brand-sub">PRO AUDIO • MIXER 1/10</span>
+            </div>
         </div>
 
         <!-- Player Provisório para Carregar Áudio do PC -->

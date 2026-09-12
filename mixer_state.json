@@ -105,8 +105,8 @@
     },
     {
       "id": 1,
-      "name": "Saida 1",
-      "volume": 42.1,
+      "name": "Saida",
+      "volume": 56.3,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
@@ -203,12 +203,12 @@
         0.0,
         0.0,
         0.0,
-        0.0
+        -0.6
       ]
     },
     {
       "id": 2,
-      "name": "Saida 2",
+      "name": "Saida ",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -311,7 +311,7 @@
     },
     {
       "id": 3,
-      "name": "Saida 3",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -414,7 +414,7 @@
     },
     {
       "id": 4,
-      "name": "Saida 4",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -517,7 +517,7 @@
     },
     {
       "id": 5,
-      "name": "Saida 5",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -620,7 +620,7 @@
     },
     {
       "id": 6,
-      "name": "Saida 6",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -723,7 +723,7 @@
     },
     {
       "id": 7,
-      "name": "Saida 7",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -826,7 +826,7 @@
     },
     {
       "id": 8,
-      "name": "Saida 8",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -929,7 +929,7 @@
     },
     {
       "id": 9,
-      "name": "Saida 9",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
@@ -1032,7 +1032,7 @@
     },
     {
       "id": 10,
-      "name": "Saida 10",
+      "name": "Saida",
       "volume": 0.0,
       "gain": 0.0,
       "mute": false,
