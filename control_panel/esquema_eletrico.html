@@ -639,6 +639,27 @@
                 <div class="arch-pin-row"><span class="pin-tag">VCC / GND</span><span class="pin-arrow">→</span><span>3.3V / GND Comum</span></div>
             </div>
         </div>
+
+        <!-- Fonte Chaveada Colmeia 5V 5A -->
+        <div class="arch-card psu" style="border-color: rgba(255, 179, 0, 0.4);">
+            <div class="arch-header">
+                <div>
+                    <div class="arch-name" style="color: #ffb300;">Fonte Colmeia 5V 5A (25W)</div>
+                    <div style="font-size:11px; color:#ffd54f;">SMPS Metálica • Chassi Gaiola de Faraday</div>
+                </div>
+                <span class="arch-type" style="background: rgba(255, 179, 0, 0.15); color: #ffb300; border-color: rgba(255, 179, 0, 0.3);">Alimentação Master</span>
+            </div>
+            <div class="arch-specs">
+                Alimenta todo o conjunto com &gt;75% de folga térmica (consumo real de ~1.2A). Blindagem contra EMI e filtragem capacitiva de saída.
+            </div>
+            <div class="arch-pins-list">
+                <div class="arch-pin-row"><span class="pin-tag">L / N (Bornes AC)</span><span class="pin-arrow">←</span><span>110V / 220V AC (Rede Elétrica)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">FG / ⏚ (Terra AC)</span><span class="pin-arrow">→</span><span>Carcaça metálica e Chassi do Gabinete</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">+5V (DC Out)</span><span class="pin-arrow">→</span><span class="gpio-tag" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border-color: rgba(0, 230, 118, 0.3);">Filtro 2200µF Low-ESR + 100nF</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">GND (DC Out)</span><span class="pin-arrow">→</span><span>Ponto Central Star Ground (0.0V)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">Posicionamento</span><span class="pin-arrow">⇄</span><span>Isolada no canto, longe dos DACs</span></div>
+            </div>
+        </div>
     </div>
 
     <!-- Interactive SVG Schematic Diagram -->
@@ -1038,9 +1059,18 @@
                 <rect x="777" y="66" width="28" height="15" rx="3" fill="#0e131d" stroke="#ff5252" stroke-width="1"/>
                 <text x="791" y="77" fill="#ff5252" font-size="7.5" font-weight="bold" text-anchor="middle">MUTE</text>
 
-                <!-- Indicador de Alimentação Fonte 5V / 3.3V -->
-                <rect x="420" y="565" width="240" height="36" rx="6" fill="#0c0e14" stroke="#448aff" stroke-width="1.5"/>
-                <text x="540" y="587" fill="#448aff" font-size="11" font-weight="bold" text-anchor="middle">FONTE 5V REGULADA + LDO 3.3V (STAR GROUND)</text>
+                <!-- Bloco Fonte Chaveada Colmeia 5V 5A & Filtragem Anti-Ruído -->
+                <g id="fonte-colmeia-5v">
+                    <rect x="340" y="555" width="400" height="52" rx="8" fill="#121622" stroke="#ffb300" stroke-width="1.8" filter="url(#glowGreen)"/>
+                    <rect x="348" y="561" width="145" height="18" rx="4" fill="#2d2200"/>
+                    <text x="355" y="574" fill="#ffd54f" font-size="9" font-weight="bold">FONTE COLMEIA 5V 5A (25W)</text>
+                    <text x="555" y="574" fill="#8892a4" font-size="8.5">Entrada AC: 110V/220V (L, N, ⏚ FG)</text>
+                    <text x="730" y="574" fill="#00e676" font-size="8.5" font-weight="bold" text-anchor="end">Folga 4A • Fria</text>
+                    
+                    <line x1="348" y1="585" x2="732" y2="585" stroke="#252c3d" stroke-width="1"/>
+                    <text x="355" y="598" fill="#00e676" font-size="8.5">Saída DC: +5V Filtrado (Capacitor 2200µF Low-ESR + 100nF Cerâmico)</text>
+                    <text x="730" y="598" fill="#448aff" font-size="8.5" font-weight="bold" text-anchor="end">GND Star Ground</text>
+                </g>
             </svg>
         </div>
     </div>
@@ -1211,14 +1241,30 @@
                         <td>Anti-Pop Mute por hardware para o DAC 5 (Canais 9 e 10 simultâneos)</td>
                     </tr>
 
-                    <!-- Power & Ground -->
+                    <!-- Power & Ground (Fonte Chaveada Colmeia 5V 5A) -->
                     <tr data-bus="power">
-                        <td class="cell-mcu">VIN / 5V</td>
-                        <td><span class="bus-pill bus-power">Power 5V</span></td>
-                        <td><strong>Todos os Módulos</strong></td>
-                        <td class="cell-module-pin">VCC</td>
-                        <td>5.0V DC (Alimentação)</td>
-                        <td>Alimentação principal dos circuitos analógicos (mínimo 2.5A)</td>
+                        <td class="cell-mcu">L / N (AC)</td>
+                        <td><span class="bus-pill bus-power" style="border-color: #ffb300; color: #ffd54f;">Rede AC</span></td>
+                        <td><strong>Fonte Colmeia 5V 5A</strong></td>
+                        <td class="cell-module-pin">Bornes AC (L / N)</td>
+                        <td>110V / 220V AC</td>
+                        <td>Entrada de energia com tampa protetora de acrílico e terminais isolados</td>
+                    </tr>
+                    <tr data-bus="power">
+                        <td class="cell-mcu">FG / ⏚ (Terra)</td>
+                        <td><span class="bus-pill bus-power" style="border-color: #00e676; color: #00e676;">Terra / PE</span></td>
+                        <td><strong>Carcaça e Gabinete</strong></td>
+                        <td class="cell-module-pin">Borne ⏚ (FG)</td>
+                        <td>Terra Físico (0V)</td>
+                        <td>Aterramento da carcaça metálica da fonte para blindagem contra ruídos EMI (Gaiola de Faraday)</td>
+                    </tr>
+                    <tr data-bus="power">
+                        <td class="cell-mcu">+5V (DC Out)</td>
+                        <td><span class="bus-pill bus-power">Power 5V (5A)</span></td>
+                        <td><strong>Todos os Módulos (DACs, ADC, ESP32)</strong></td>
+                        <td class="cell-module-pin">VCC / VIN</td>
+                        <td>5.0V DC (Filtrado)</td>
+                        <td>Alimentação 5V 5A com capacitor eletrolítico 2200µF Low-ESR + 100nF cerâmico anti-ripple na saída</td>
                     </tr>
                     <tr data-bus="power">
                         <td class="cell-mcu">3V3</td>
@@ -1229,12 +1275,12 @@
                         <td>Alimentação digital dos CIs regulada por LDO dedicado</td>
                     </tr>
                     <tr data-bus="power">
-                        <td class="cell-mcu">GND</td>
+                        <td class="cell-mcu">GND (DC Out)</td>
                         <td><span class="bus-pill bus-power">Aterramento</span></td>
                         <td><strong>Todos os Módulos</strong></td>
                         <td class="cell-module-pin">GND / AGND / DGND</td>
                         <td>0.0V (Referência)</td>
-                        <td>Topologia de Terra em Estrela (*Star Ground*) para evitar zumbidos</td>
+                        <td>Topologia de Terra em Estrela (*Star Ground*) partindo diretamente do borne negativo da fonte</td>
                     </tr>
                 </tbody>
             </table>
@@ -1260,20 +1306,22 @@
         </div>
 
         <div class="info-card">
-            <div class="info-title">⚡ Recomendações de Alimentação & Fontes</div>
+            <div class="info-title">⚡ Fonte Chaveada Colmeia 5V 5A & Montagem no Gabinete</div>
             <ul class="info-list">
-                <li>Utilize fonte chaveada de boa qualidade com <strong>5V DC e no mínimo 2.5A a 3A</strong> para alimentar os DACs, ADC e o regulador do ESP32.</li>
-                <li>Adicione um capacitor eletrolítico de <strong>100µF a 470µF (Low ESR)</strong> em paralelo com um capacitor de <strong>100nF cerâmico</strong> na entrada de alimentação de cada placa DAC PCM5102.</li>
-                <li>Para os módulos PCM5102A, o pino <strong>SCK deve ser conectado diretamente ao GND</strong> para habilitar o PLL interno automático, dispensando o clock mestre externo (MCLK).</li>
+                <li><strong>Capacidade &amp; Temperatura:</strong> A fonte de <strong>5V 5A (25W)</strong> é ideal! O consumo total do sistema (ESP32, W5500, ADC e 5 DACs) é de aproximadamente <strong>800 mA a 1.2 A</strong>, operando com mais de 75% de folga, fria e estável.</li>
+                <li><strong>Posicionamento no Gabinete:</strong> Instale a fonte no <strong>canto oposto</strong> do gabinete, o mais distante possível dos módulos DAC PCM5102 e das saídas de áudio analógicas (RCA/XLR), evitando interferência eletromagnética (EMI).</li>
+                <li><strong>Filtragem Anti-Ruído Obrigatória:</strong> Instale um capacitor eletrolítico de <strong>1000 µF a 2200 µF (Low-ESR)</strong> em paralelo com um <strong>100 nF cerâmico</strong> na saída de 5V da fonte para eliminar o ripple de chaveamento (50 kHz – 100 kHz).</li>
+                <li><strong>Aterramento da Carcaça (Blindagem):</strong> Conecte o pino <strong>Terra (⏚ / FG)</strong> da tomada à carcaça metálica perfurada da fonte e ao chassi metálico do gabinete (Gaiola de Faraday contra ruídos de rádio e indução).</li>
+                <li><strong>Segurança nos Bornes AC:</strong> Mantenha a capa plástica protetora sobre os bornes <code>L</code> e <code>N</code> (110V/220V) e use terminais forquilha isolados nos fios para evitar qualquer risco de choque.</li>
             </ul>
         </div>
 
         <div class="info-card">
             <div class="info-title">🛡️ Aterramento & Imunidade a Ruídos (Star Ground)</div>
             <ul class="info-list">
-                <li>Adote o aterramento em ponto único (<strong>Star Ground</strong>): puxe trilhas ou fios de GND separados para a parte digital (ESP32, W5500) e analógica (PCM1808, PCM5102).</li>
-                <li>Conecte os terras analógicos (AGND) e digitais (DGND) em um único ponto próximo à saída da fonte para evitar ruídos de clock nos alto-falantes.</li>
-                <li>Mantenha as linhas I2S (BCK, LRCK, DIN) o mais curtas possível (máximo 10 cm a 15 cm) para evitar reflexões e capacitância parasita.</li>
+                <li>Adote o aterramento em ponto único (<strong>Star Ground</strong>): puxe fios de GND individuais partindo do borne negativo da fonte para cada módulo (evite ligação de terra em cascata/"daisy chain").</li>
+                <li>Separe os cabos dentro do gabinete: mantenha a fiação de <strong>110V/220V AC em um lado</strong> e a fiação de <strong>áudio analógico de baixo nível no lado oposto</strong>.</li>
+                <li>Mantenha as linhas I2S (BCK, LRCK, DIN) o mais curtas possível (máximo 10 cm a 15 cm) para evitar reflexões digitais e capacitância parasita.</li>
             </ul>
         </div>
     </div>
