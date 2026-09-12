@@ -653,11 +653,11 @@
                 Alimenta todo o conjunto com &gt;75% de folga térmica (consumo real de ~1.2A). Blindagem contra EMI e filtragem capacitiva de saída.
             </div>
             <div class="arch-pins-list">
-                <div class="arch-pin-row"><span class="pin-tag">L / N (Bornes AC)</span><span class="pin-arrow">←</span><span>110V / 220V AC (Rede Elétrica)</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">FG / ⏚ (Terra AC)</span><span class="pin-arrow">→</span><span>Carcaça metálica e Chassi do Gabinete</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">+5V (DC Out)</span><span class="pin-arrow">→</span><span class="gpio-tag" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border-color: rgba(0, 230, 118, 0.3);">Filtro 2200µF Low-ESR + 100nF</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">GND (DC Out)</span><span class="pin-arrow">→</span><span>Ponto Central Star Ground (0.0V)</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">Posicionamento</span><span class="pin-arrow">⇄</span><span>Isolada no canto, longe dos DACs</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">L / N (AC)</span><span class="pin-arrow">←</span><span>110V / 220V (Rede AC)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">FG / ⏚</span><span class="pin-arrow">→</span><span>Carcaça e Chassi Metálico</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">+5V (DC)</span><span class="pin-arrow">→</span><span class="gpio-tag" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border-color: rgba(0, 230, 118, 0.3);">2200µF Low-ESR + 100nF</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">GND (DC)</span><span class="pin-arrow">→</span><span>Ponto Central Star Ground</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">Montagem</span><span class="pin-arrow">⇄</span><span>No canto, distante dos DACs</span></div>
             </div>
         </div>
     </div>
@@ -1061,15 +1061,28 @@
 
                 <!-- Bloco Fonte Chaveada Colmeia 5V 5A & Filtragem Anti-Ruído -->
                 <g id="fonte-colmeia-5v">
-                    <rect x="340" y="555" width="400" height="52" rx="8" fill="#121622" stroke="#ffb300" stroke-width="1.8" filter="url(#glowGreen)"/>
-                    <rect x="348" y="561" width="145" height="18" rx="4" fill="#2d2200"/>
-                    <text x="355" y="574" fill="#ffd54f" font-size="9" font-weight="bold">FONTE COLMEIA 5V 5A (25W)</text>
-                    <text x="555" y="574" fill="#8892a4" font-size="8.5">Entrada AC: 110V/220V (L, N, ⏚ FG)</text>
-                    <text x="730" y="574" fill="#00e676" font-size="8.5" font-weight="bold" text-anchor="end">Folga 4A • Fria</text>
+                    <rect x="295" y="542" width="495" height="68" rx="8" fill="#121622" stroke="#ffb300" stroke-width="1.8"/>
                     
-                    <line x1="348" y1="585" x2="732" y2="585" stroke="#252c3d" stroke-width="1"/>
-                    <text x="355" y="598" fill="#00e676" font-size="8.5">Saída DC: +5V Filtrado (Capacitor 2200µF Low-ESR + 100nF Cerâmico)</text>
-                    <text x="730" y="598" fill="#448aff" font-size="8.5" font-weight="bold" text-anchor="end">GND Star Ground</text>
+                    <!-- Linha 1: Título e Status de Potência -->
+                    <rect x="305" y="547" width="165" height="17" rx="4" fill="#2d2200" stroke="#ffb300" stroke-width="0.8"/>
+                    <text x="387" y="559" fill="#ffd54f" font-size="9" font-weight="bold" text-anchor="middle">⚡ FONTE COLMEIA 5V 5A (25W)</text>
+                    <text x="780" y="559" fill="#00e676" font-size="8.5" font-weight="bold" text-anchor="end">Consumo: ~1.2A • Folga &gt;75% (Fria)</text>
+                    
+                    <line x1="305" y1="567" x2="780" y2="567" stroke="#252c3d" stroke-width="1"/>
+                    
+                    <!-- Linha 2: Entrada AC e Aterramento da Carcaça -->
+                    <circle cx="312" cy="576" r="2.5" fill="#ffd54f"/>
+                    <text x="320" y="579" fill="#8892a4" font-size="8.5">Entrada AC: <tspan fill="#d0d7de">110V / 220V (Bornes L, N)</tspan></text>
+                    <circle cx="530" cy="576" r="2.5" fill="#448aff"/>
+                    <text x="538" y="579" fill="#8892a4" font-size="8.5">Blindagem: <tspan fill="#82b1ff">Borne ⏚ (FG) → Chassi Gabinete</tspan></text>
+                    
+                    <line x1="305" y1="587" x2="780" y2="587" stroke="#1c2230" stroke-width="0.8"/>
+                    
+                    <!-- Linha 3: Saída DC Filtrada e Star Ground -->
+                    <circle cx="312" cy="597" r="2.5" fill="#00e676"/>
+                    <text x="320" y="600" fill="#a4f4c7" font-size="8.5"><tspan fill="#00e676" font-weight="bold">+5V DC Filtrado:</tspan> 2200µF Low-ESR + 100nF Cerâmico</text>
+                    <circle cx="650" cy="597" r="2.5" fill="#00d2ff"/>
+                    <text x="658" y="600" fill="#82b1ff" font-size="8.5" font-weight="bold">GND Star Ground (0V)</text>
                 </g>
             </svg>
         </div>
