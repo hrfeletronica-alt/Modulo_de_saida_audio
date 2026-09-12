@@ -640,24 +640,24 @@
             </div>
         </div>
 
-        <!-- Fonte Chaveada Colmeia 5V 5A -->
+        <!-- Fonte Chaveada Mini S-10-5 (5V 2A) -->
         <div class="arch-card psu" style="border-color: rgba(255, 179, 0, 0.4);">
             <div class="arch-header">
                 <div>
-                    <div class="arch-name" style="color: #ffb300;">Fonte Colmeia 5V 5A (25W)</div>
-                    <div style="font-size:11px; color:#ffd54f;">SMPS Metálica • Chassi Gaiola de Faraday</div>
+                    <div class="arch-name" style="color: #ffb300;">Fonte Mini S-10-5 (5V 2A / 10W)</div>
+                    <div style="font-size:11px; color:#ffd54f;">SMPS Metálica Compacta • Ajuste Fino ADJ</div>
                 </div>
-                <span class="arch-type" style="background: rgba(255, 179, 0, 0.15); color: #ffb300; border-color: rgba(255, 179, 0, 0.3);">Alimentação Master</span>
+                <span class="arch-type" style="background: rgba(255, 179, 0, 0.15); color: #ffb300; border-color: rgba(255, 179, 0, 0.3);">Ultra-Compacta (10W)</span>
             </div>
             <div class="arch-specs">
-                Alimenta todo o conjunto com &gt;75% de folga térmica (consumo real de ~1.2A). Blindagem contra EMI e filtragem capacitiva de saída.
+                Ideal para uso com Ethernet cabeada (Wi-Fi desligado). Consumo real de apenas ~0.5A (2.5W), com 75% de folga e operação fria dentro do gabinete.
             </div>
             <div class="arch-pins-list">
-                <div class="arch-pin-row"><span class="pin-tag">L / N (AC)</span><span class="pin-arrow">←</span><span>110V / 220V (Rede AC)</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">FG / ⏚</span><span class="pin-arrow">→</span><span>Carcaça e Chassi Metálico</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">+5V (DC)</span><span class="pin-arrow">→</span><span class="gpio-tag" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border-color: rgba(0, 230, 118, 0.3);">2200µF Low-ESR + 100nF</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">GND (DC)</span><span class="pin-arrow">→</span><span>Ponto Central Star Ground</span></div>
-                <div class="arch-pin-row"><span class="pin-tag">Montagem</span><span class="pin-arrow">⇄</span><span>No canto, distante dos DACs</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">AC Input</span><span class="pin-arrow">←</span><span>110/240V ±15% (Rede Elétrica)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">ADJ (Trimpot)</span><span class="pin-arrow">⚙️</span><span>Calibração fina da saída (~5.05V)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">+5V (V+)</span><span class="pin-arrow">→</span><span class="gpio-tag" style="background: rgba(0, 230, 118, 0.15); color: #00e676; border-color: rgba(0, 230, 118, 0.3);">Filtro 1000µF Low-ESR + 100nF</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">GND (V-)</span><span class="pin-arrow">→</span><span>Ponto Central Star Ground (0.0V)</span></div>
+                <div class="arch-pin-row"><span class="pin-tag">Formato</span><span class="pin-arrow">⇄</span><span>Mini metálica blindada (~70x40mm)</span></div>
             </div>
         </div>
     </div>
@@ -1059,30 +1059,30 @@
                 <rect x="777" y="66" width="28" height="15" rx="3" fill="#0e131d" stroke="#ff5252" stroke-width="1"/>
                 <text x="791" y="77" fill="#ff5252" font-size="7.5" font-weight="bold" text-anchor="middle">MUTE</text>
 
-                <!-- Bloco Fonte Chaveada Colmeia 5V 5A & Filtragem Anti-Ruído -->
+                <!-- Bloco Fonte Chaveada Mini S-10-5 (5V 2A / 10W) -->
                 <g id="fonte-colmeia-5v">
                     <rect x="295" y="542" width="495" height="68" rx="8" fill="#121622" stroke="#ffb300" stroke-width="1.8"/>
                     
                     <!-- Linha 1: Título e Status de Potência -->
-                    <rect x="305" y="547" width="165" height="17" rx="4" fill="#2d2200" stroke="#ffb300" stroke-width="0.8"/>
-                    <text x="387" y="559" fill="#ffd54f" font-size="9" font-weight="bold" text-anchor="middle">⚡ FONTE COLMEIA 5V 5A (25W)</text>
-                    <text x="780" y="559" fill="#00e676" font-size="8.5" font-weight="bold" text-anchor="end">Consumo: ~1.2A • Folga &gt;75% (Fria)</text>
+                    <rect x="305" y="547" width="180" height="17" rx="4" fill="#2d2200" stroke="#ffb300" stroke-width="0.8"/>
+                    <text x="395" y="559" fill="#ffd54f" font-size="9" font-weight="bold" text-anchor="middle">⚡ FONTE MINI S-10-5 (5V 2A / 10W)</text>
+                    <text x="780" y="559" fill="#00e676" font-size="8.5" font-weight="bold" text-anchor="end">Consumo: ~0.5A (Ethernet) • Folga 75% (Fria)</text>
                     
                     <line x1="305" y1="567" x2="780" y2="567" stroke="#252c3d" stroke-width="1"/>
                     
-                    <!-- Linha 2: Entrada AC e Aterramento da Carcaça -->
+                    <!-- Linha 2: Entrada AC e Trimpot de Calibração ADJ -->
                     <circle cx="312" cy="576" r="2.5" fill="#ffd54f"/>
-                    <text x="320" y="579" fill="#8892a4" font-size="8.5">Entrada AC: <tspan fill="#d0d7de">110V / 220V (Bornes L, N)</tspan></text>
-                    <circle cx="530" cy="576" r="2.5" fill="#448aff"/>
-                    <text x="538" y="579" fill="#8892a4" font-size="8.5">Blindagem: <tspan fill="#82b1ff">Borne ⏚ (FG) → Chassi Gabinete</tspan></text>
+                    <text x="320" y="579" fill="#8892a4" font-size="8.5">Entrada AC: <tspan fill="#d0d7de">110/240V ±15% (L, N)</tspan></text>
+                    <circle cx="530" cy="576" r="2.5" fill="#ff9100"/>
+                    <text x="538" y="579" fill="#8892a4" font-size="8.5">Calibração: <tspan fill="#ffb74d">Trimpot ADJ (Ajustar em ~5.05V DC)</tspan></text>
                     
                     <line x1="305" y1="587" x2="780" y2="587" stroke="#1c2230" stroke-width="0.8"/>
                     
                     <!-- Linha 3: Saída DC Filtrada e Star Ground -->
                     <circle cx="312" cy="597" r="2.5" fill="#00e676"/>
-                    <text x="320" y="600" fill="#a4f4c7" font-size="8.5"><tspan fill="#00e676" font-weight="bold">+5V DC Filtrado:</tspan> 2200µF Low-ESR + 100nF Cerâmico</text>
+                    <text x="320" y="600" fill="#a4f4c7" font-size="8.5"><tspan fill="#00e676" font-weight="bold">Saída +5V (V+):</tspan> Filtro 1000µF Low-ESR + 100nF Cerâmico</text>
                     <circle cx="650" cy="597" r="2.5" fill="#00d2ff"/>
-                    <text x="658" y="600" fill="#82b1ff" font-size="8.5" font-weight="bold">GND Star Ground (0V)</text>
+                    <text x="658" y="600" fill="#82b1ff" font-size="8.5" font-weight="bold">GND / V- (Star Ground 0V)</text>
                 </g>
             </svg>
         </div>
@@ -1254,30 +1254,30 @@
                         <td>Anti-Pop Mute por hardware para o DAC 5 (Canais 9 e 10 simultâneos)</td>
                     </tr>
 
-                    <!-- Power & Ground (Fonte Chaveada Colmeia 5V 5A) -->
+                    <!-- Power & Ground (Fonte Mini S-10-5 5V 2A) -->
                     <tr data-bus="power">
-                        <td class="cell-mcu">L / N (AC)</td>
+                        <td class="cell-mcu">AC Input</td>
                         <td><span class="bus-pill bus-power" style="border-color: #ffb300; color: #ffd54f;">Rede AC</span></td>
-                        <td><strong>Fonte Colmeia 5V 5A</strong></td>
+                        <td><strong>Fonte Mini S-10-5 (5V 2A)</strong></td>
                         <td class="cell-module-pin">Bornes AC (L / N)</td>
-                        <td>110V / 220V AC</td>
-                        <td>Entrada de energia com tampa protetora de acrílico e terminais isolados</td>
+                        <td>110V / 240V ±15%</td>
+                        <td>Entrada de energia bivolt automática em bornes de parafuso</td>
                     </tr>
                     <tr data-bus="power">
-                        <td class="cell-mcu">FG / ⏚ (Terra)</td>
-                        <td><span class="bus-pill bus-power" style="border-color: #00e676; color: #00e676;">Terra / PE</span></td>
-                        <td><strong>Carcaça e Gabinete</strong></td>
-                        <td class="cell-module-pin">Borne ⏚ (FG)</td>
-                        <td>Terra Físico (0V)</td>
-                        <td>Aterramento da carcaça metálica da fonte para blindagem contra ruídos EMI (Gaiola de Faraday)</td>
+                        <td class="cell-mcu">ADJ (Trimpot)</td>
+                        <td><span class="bus-pill bus-power" style="border-color: #ff9100; color: #ffb74d;">Calibração</span></td>
+                        <td><strong>Fonte Mini S-10-5</strong></td>
+                        <td class="cell-module-pin">Trimpot Laranja</td>
+                        <td>Ajuste 4.8V - 5.3V</td>
+                        <td>Calibração de precisão da saída DC para ~5.05V com multímetro</td>
                     </tr>
                     <tr data-bus="power">
-                        <td class="cell-mcu">+5V (DC Out)</td>
-                        <td><span class="bus-pill bus-power">Power 5V (5A)</span></td>
+                        <td class="cell-mcu">+5V (V+)</td>
+                        <td><span class="bus-pill bus-power">Power 5V (2A)</span></td>
                         <td><strong>Todos os Módulos (DACs, ADC, ESP32)</strong></td>
-                        <td class="cell-module-pin">VCC / VIN</td>
-                        <td>5.0V DC (Filtrado)</td>
-                        <td>Alimentação 5V 5A com capacitor eletrolítico 2200µF Low-ESR + 100nF cerâmico anti-ripple na saída</td>
+                        <td class="cell-module-pin">Borne Verde V+</td>
+                        <td>5.0V DC (10W)</td>
+                        <td>Alimentação 5V 2A com capacitor eletrolítico 1000µF Low-ESR + 100nF cerâmico anti-ripple</td>
                     </tr>
                     <tr data-bus="power">
                         <td class="cell-mcu">3V3</td>
@@ -1288,12 +1288,12 @@
                         <td>Alimentação digital dos CIs regulada por LDO dedicado</td>
                     </tr>
                     <tr data-bus="power">
-                        <td class="cell-mcu">GND (DC Out)</td>
+                        <td class="cell-mcu">GND (V-)</td>
                         <td><span class="bus-pill bus-power">Aterramento</span></td>
                         <td><strong>Todos os Módulos</strong></td>
-                        <td class="cell-module-pin">GND / AGND / DGND</td>
+                        <td class="cell-module-pin">Borne Verde V-</td>
                         <td>0.0V (Referência)</td>
-                        <td>Topologia de Terra em Estrela (*Star Ground*) partindo diretamente do borne negativo da fonte</td>
+                        <td>Topologia de Terra em Estrela (*Star Ground*) partindo diretamente do borne V- da fonte</td>
                     </tr>
                 </tbody>
             </table>
@@ -1319,13 +1319,13 @@
         </div>
 
         <div class="info-card">
-            <div class="info-title">⚡ Fonte Chaveada Colmeia 5V 5A & Montagem no Gabinete</div>
+            <div class="info-title">⚡ Fonte Mini Colmeia S-10-5 (5V 2A) & Montagem no Gabinete</div>
             <ul class="info-list">
-                <li><strong>Capacidade &amp; Temperatura:</strong> A fonte de <strong>5V 5A (25W)</strong> é ideal! O consumo total do sistema (ESP32, W5500, ADC e 5 DACs) é de aproximadamente <strong>800 mA a 1.2 A</strong>, operando com mais de 75% de folga, fria e estável.</li>
-                <li><strong>Posicionamento no Gabinete:</strong> Instale a fonte no <strong>canto oposto</strong> do gabinete, o mais distante possível dos módulos DAC PCM5102 e das saídas de áudio analógicas (RCA/XLR), evitando interferência eletromagnética (EMI).</li>
-                <li><strong>Filtragem Anti-Ruído Obrigatória:</strong> Instale um capacitor eletrolítico de <strong>1000 µF a 2200 µF (Low-ESR)</strong> em paralelo com um <strong>100 nF cerâmico</strong> na saída de 5V da fonte para eliminar o ripple de chaveamento (50 kHz – 100 kHz).</li>
-                <li><strong>Aterramento da Carcaça (Blindagem):</strong> Conecte o pino <strong>Terra (⏚ / FG)</strong> da tomada à carcaça metálica perfurada da fonte e ao chassi metálico do gabinete (Gaiola de Faraday contra ruídos de rádio e indução).</li>
-                <li><strong>Segurança nos Bornes AC:</strong> Mantenha a capa plástica protetora sobre os bornes <code>L</code> e <code>N</code> (110V/220V) e use terminais forquilha isolados nos fios para evitar qualquer risco de choque.</li>
+                <li><strong>Capacidade &amp; Temperatura:</strong> A fonte mini <strong>S-10-5 (5V 2A / 10W)</strong> é perfeita para o projeto! Com conexão cabeada (Wi-Fi desligado), o consumo total do sistema é de apenas <strong>~400 mA a 500 mA (2,5W)</strong>, garantindo <strong>75% de folga</strong> e operação fria dentro do gabinete.</li>
+                <li><strong>Formato Ultra-Compacto (~70 × 40 mm):</strong> Economiza espaço no gabinete, facilitando o layout e mantendo uma distância segura dos módulos analógicos PCM5102.</li>
+                <li><strong>Calibração no Trimpot ADJ:</strong> Utilize um multímetro na saída <code>V+</code> / <code>V-</code> e ajuste delicadamente o trimpot laranja (ADJ) para calibrar a tensão em <strong>5.05V a 5.10V</strong>, compensando qualquer queda de tensão nos cabos.</li>
+                <li><strong>Filtragem Anti-Ripple nos Bornes Verdes:</strong> Instale um capacitor eletrolítico de <strong>1000 µF (Low-ESR)</strong> em paralelo com um <strong>100 nF cerâmico</strong> diretamente nos bornes <code>V+</code> e <code>V-</code> para garantir silêncio absoluto no áudio.</li>
+                <li><strong>Carcaça Metálica Blindada:</strong> A carcaça de metal da mini fonte ajuda na blindagem contra ruídos eletromagnéticos. Fixe-a firmemente ao chassi do gabinete.</li>
             </ul>
         </div>
 
