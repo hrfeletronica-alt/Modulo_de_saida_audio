@@ -3,14 +3,14 @@
     {
       "id": 0,
       "name": "Entrada",
-      "volume": 67.7,
-      "gain": 0.0,
+      "volume": 69.7,
+      "gain": 3.6,
       "mute": false,
       "eqEnabled": true,
       "eqMode": "peq",
       "hpf": {
         "enabled": false,
-        "freq": 80,
+        "freq": 35,
         "slope": 12
       },
       "bands": [
@@ -18,18 +18,18 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 80,
+          "freq": 76.98805011184717,
           "gain": 0,
-          "q": 2,
+          "q": 8.159999999999998,
           "mode": "LShv"
         },
         {
           "id": 2,
           "name": "Low 2",
           "color": "#00FF00",
-          "freq": 160,
-          "gain": 0,
-          "q": 2,
+          "freq": 190.16035638992275,
+          "gain": 0.5504587155963303,
+          "q": 8.16,
           "mode": "PEQ"
         },
         {
@@ -106,11 +106,11 @@
     {
       "id": 1,
       "name": "Saida 1",
-      "volume": 71.1,
+      "volume": 42.1,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
-      "eqMode": "geq",
+      "eqMode": "peq",
       "hpf": {
         "enabled": false,
         "freq": 23,
@@ -121,25 +121,25 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 83.93117833090476,
-          "gain": -0.13761467889908258,
-          "q": 6.960000000000004,
+          "freq": 79.23614176278416,
+          "gain": 0,
+          "q": 8.560000000000006,
           "mode": "LShv"
         },
         {
           "id": 2,
           "name": "Low 2",
           "color": "#00FF00",
-          "freq": 160,
+          "freq": 184.76511755031302,
           "gain": 0,
-          "q": 2,
+          "q": 9.840000000000003,
           "mode": "PEQ"
         },
         {
           "id": 3,
           "name": "Low Mid",
           "color": "#FFFF00",
-          "freq": 500,
+          "freq": 485.8139757885528,
           "gain": 0,
           "q": 2,
           "mode": "PEQ"
