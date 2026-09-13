@@ -4,13 +4,13 @@
       "id": 0,
       "name": "Entrada",
       "volume": 69.7,
-      "gain": 3.6,
+      "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
       "eqMode": "peq",
       "hpf": {
         "enabled": false,
-        "freq": 35,
+        "freq": 80,
         "slope": 12
       },
       "bands": [
@@ -18,18 +18,18 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 76.98805011184717,
+          "freq": 80,
           "gain": 0,
-          "q": 8.159999999999998,
+          "q": 2,
           "mode": "LShv"
         },
         {
           "id": 2,
           "name": "Low 2",
           "color": "#00FF00",
-          "freq": 190.16035638992275,
-          "gain": 0.5504587155963303,
-          "q": 8.16,
+          "freq": 160,
+          "gain": 0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
@@ -106,7 +106,7 @@
     {
       "id": 1,
       "name": "Saida",
-      "volume": 0.0,
+      "volume": 24.7,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
