@@ -5360,7 +5360,7 @@
                 for (let px = 0; px <= w; px++) {
                     const bin = miniBinMap[px];
                     const rawVal = miniFreqData[bin] || 0;
-                    const target = rawVal > 12 ? Math.min(1.0, (rawVal - 12) / 215) : 0;
+                    const target = rawVal > 14 ? Math.min(1.0, (rawVal - 14) / 220) : 0;
                     const speed = target > rtaArr[px] ? 0.8 : 0.22;
                     rtaArr[px] += (target - rtaArr[px]) * speed;
                     if (rtaArr[px] > 0.01) hasRTA = true;
@@ -5370,9 +5370,9 @@
                 const vuRatio = vuSmooth[chIdx] / 100;
                 const time = performance.now() * 0.007;
                 for (let px = 0; px <= w; px++) {
-                    const fFactor = 1.0 - (px / w) * 0.4;
-                    const wave = Math.sin(px * 0.28 + time) * 0.12 + Math.cos(px * 0.5 - time * 0.7) * 0.08;
-                    const target = Math.max(0, Math.min(1.0, (vuRatio * fFactor + wave * vuRatio) * 0.95));
+                    const fFactor = 1.0 - (px / w) * 0.35;
+                    const wave = Math.sin(px * 0.28 + time) * 0.10 + Math.cos(px * 0.5 - time * 0.7) * 0.06;
+                    const target = Math.max(0, Math.min(1.0, (vuRatio * fFactor + wave * vuRatio) * 0.88));
                     const speed = target > rtaArr[px] ? 0.75 : 0.25;
                     rtaArr[px] += (target - rtaArr[px]) * speed;
                     if (rtaArr[px] > 0.01) hasRTA = true;
@@ -5387,18 +5387,20 @@
             }
             miniChannelActiveRTA[chIdx] = hasRTA;
 
-            // 2. Renderização do Espectro RTA no fundo do display
+            // 2. Renderização do Espectro RTA calibrado na linha de 0 dB (h/2)
             if (hasRTA) {
-                const rtaGrad = ctx.createLinearGradient(0, 0, 0, h);
-                rtaGrad.addColorStop(0.0, "rgba(0, 240, 255, 0.65)");  // Ciano neon brilhante no topo
-                rtaGrad.addColorStop(0.45, "rgba(255, 170, 0, 0.40)"); // Âmbar BERCAME no meio
-                rtaGrad.addColorStop(1.0, "rgba(255, 100, 0, 0.12)");  // Base âmbar translúcida
+                const zeroDbH = h / 2; // Linha laranja (0 dB) está exatamente em h/2 (16px)
+                const maxRtaCeiling = h * 0.52; // Teto calibrado na linha laranja
+                const rtaGrad = ctx.createLinearGradient(0, zeroDbH, 0, h);
+                rtaGrad.addColorStop(0.0, "rgba(0, 240, 255, 0.60)");  // Ciano neon nos picos
+                rtaGrad.addColorStop(0.5, "rgba(255, 170, 0, 0.35)"); // Âmbar BERCAME no meio
+                rtaGrad.addColorStop(1.0, "rgba(255, 100, 0, 0.10)");  // Base translúcida
 
                 ctx.fillStyle = rtaGrad;
                 ctx.beginPath();
                 ctx.moveTo(0, h);
                 for (let px = 0; px <= w; px++) {
-                    const rtaH = rtaArr[px] * (h - 2);
+                    const rtaH = Math.min(maxRtaCeiling, rtaArr[px] * zeroDbH);
                     ctx.lineTo(px, h - rtaH);
                 }
                 ctx.lineTo(w, h);
@@ -5409,9 +5411,11 @@
                 ctx.strokeStyle = "rgba(0, 240, 255, 0.55)";
                 ctx.lineWidth = 1.0;
                 ctx.beginPath();
-                ctx.moveTo(0, h - rtaArr[0] * (h - 2));
+                const initH = Math.min(maxRtaCeiling, rtaArr[0] * zeroDbH);
+                ctx.moveTo(0, h - initH);
                 for (let px = 1; px <= w; px++) {
-                    ctx.lineTo(px, h - rtaArr[px] * (h - 2));
+                    const rtaH = Math.min(maxRtaCeiling, rtaArr[px] * zeroDbH);
+                    ctx.lineTo(px, h - rtaH);
                 }
                 ctx.stroke();
             }

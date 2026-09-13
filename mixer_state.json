@@ -106,14 +106,14 @@
     {
       "id": 1,
       "name": "Saida",
-      "volume": 28.7,
+      "volume": 0.0,
       "gain": 0.0,
       "mute": false,
       "eqEnabled": true,
       "eqMode": "peq",
       "hpf": {
         "enabled": false,
-        "freq": 23,
+        "freq": 80,
         "slope": 12
       },
       "bands": [
@@ -121,25 +121,25 @@
           "id": 1,
           "name": "Low",
           "color": "#00FFFF",
-          "freq": 79.23614176278416,
+          "freq": 80,
           "gain": 0,
-          "q": 8.560000000000006,
+          "q": 2,
           "mode": "LShv"
         },
         {
           "id": 2,
           "name": "Low 2",
           "color": "#00FF00",
-          "freq": 184.76511755031302,
+          "freq": 160,
           "gain": 0,
-          "q": 9.840000000000003,
+          "q": 2,
           "mode": "PEQ"
         },
         {
           "id": 3,
           "name": "Low Mid",
           "color": "#FFFF00",
-          "freq": 485.8139757885528,
+          "freq": 500,
           "gain": 0,
           "q": 2,
           "mode": "PEQ"
@@ -226,7 +226,7 @@
           "color": "#00FFFF",
           "freq": 80,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "LShv"
         },
         {
@@ -235,7 +235,7 @@
           "color": "#00FF00",
           "freq": 160,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
@@ -244,7 +244,7 @@
           "color": "#FFFF00",
           "freq": 500,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
@@ -262,7 +262,7 @@
           "color": "#FF0000",
           "freq": 4370,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "PEQ"
         },
         {
@@ -271,7 +271,7 @@
           "color": "#FF8800",
           "freq": 10000,
           "gain": 0,
-          "q": 2.0,
+          "q": 2,
           "mode": "HShv"
         }
       ],
