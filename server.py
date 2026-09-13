@@ -231,6 +231,10 @@ class AudioMixerHandler(http.server.SimpleHTTPRequestHandler):
         # 2. Roteamento de páginas com cabeçalhos rigorosos Anti-Cache
         if self.path in ('/', '/index.html'):
             self.path = '/preview.html'
+        elif self.path in ('/manual', '/manual.html'):
+            self.path = '/manual_do_usuario.html'
+        elif self.path in ('/manual.pdf', '/pdf'):
+            self.path = '/manual_do_usuario_bercame.pdf'
 
         # 3. Server-Sent Events (SSE) como fallback
         if self.path == '/events':

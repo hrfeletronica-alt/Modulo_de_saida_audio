@@ -77,6 +77,46 @@
             text-transform: uppercase;
         }
 
+        /* Right Group in Header */
+        .header-right-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .manual-guide-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, rgba(255, 153, 0, 0.15), rgba(255, 102, 0, 0.12));
+            border: 1px solid rgba(255, 153, 0, 0.5);
+            color: #ffb03a;
+            border-radius: 14px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+            white-space: nowrap;
+            user-select: none;
+            cursor: pointer;
+        }
+        .manual-guide-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 153, 0, 0.3), rgba(255, 102, 0, 0.25));
+            border-color: #ff9900;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.45);
+            transform: translateY(-1px);
+        }
+        .manual-guide-btn:active {
+            transform: translateY(0);
+        }
+        .manual-icon {
+            font-size: 12px;
+            line-height: 1;
+        }
+
         /* Sync Status Badge */
         .sync-badge {
             display: flex;
@@ -1667,6 +1707,18 @@
                 display: none;
             }
 
+            .header-right-group {
+                gap: 5px;
+            }
+            .manual-guide-btn {
+                padding: 3px 7px;
+                font-size: 10px;
+                gap: 4px;
+            }
+            .manual-text-desktop {
+                display: none;
+            }
+
             .sync-badge {
                 padding: 3px 7px;
                 font-size: 10px;
@@ -2053,9 +2105,15 @@
             <audio id="local-audio-element" preload="auto"></audio>
         </div>
 
-        <div id="sync-badge" class="sync-badge" title="Sincronização em tempo real PC/Celular">
-            <span class="status-dot"></span>
-            <span id="sync-text">Sincronizado</span>
+        <div class="header-right-group">
+            <a href="manual_do_usuario.html" target="_blank" class="manual-guide-btn" title="Abrir Guia e Manual de Operação do Usuário">
+                <span class="manual-icon">📖</span>
+                <span class="manual-text">Guia<span class="manual-text-desktop"> do Usuário</span></span>
+            </a>
+            <div id="sync-badge" class="sync-badge" title="Sincronização em tempo real PC/Celular">
+                <span class="status-dot"></span>
+                <span id="sync-text">Sincronizado</span>
+            </div>
         </div>
     </header>
 
