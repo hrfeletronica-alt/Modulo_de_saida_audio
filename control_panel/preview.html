@@ -2632,6 +2632,21 @@
         let mixerMasterBus    = null;    // barramento mestre interno do mixer
         let masterLimiter     = null;    // compressor/limiter de proteção na saída
 
+        // ── RTA em Tempo Real nos Displays de Cada Canal ─────────────
+        const MINI_RTA_BINS = 512;
+        const miniFreqData = new Uint8Array(MINI_RTA_BINS);
+        const miniChannelRTA = Array.from({length: 11}, () => new Float32Array(71));
+        const miniChannelActiveRTA = new Array(11).fill(false);
+        const miniBinMap = new Int32Array(71);
+        const miniMinLogF = Math.log10(20);
+        const miniMaxLogF = Math.log10(20000);
+
+        for (let px = 0; px <= 70; px++) {
+            const curLogF = miniMinLogF + (px / 70) * (miniMaxLogF - miniMinLogF);
+            const curF = Math.pow(10, curLogF);
+            miniBinMap[px] = Math.min(MINI_RTA_BINS - 1, Math.max(0, Math.round((curF / 24000) * MINI_RTA_BINS)));
+        }
+
         function ensureAudioCtx() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -3393,6 +3408,11 @@
                 // A cortina escura cobre o medidor: 100% = apagado (silêncio)
                 // Quanto maior o sinal, menor a cortina (revela o gradiente verde/amarelo/vermelho)
                 data.meterFill.style.height = (100 - vuSmooth[i]) + '%';
+
+                // RTA em tempo real no display do canal (atualiza quando há áudio ou decaimento suave)
+                if (typeof drawMiniEQ === 'function' && (vuSmooth[i] > 0 || miniChannelActiveRTA[i])) {
+                    drawMiniEQ(i);
+                }
             }
         }
 
@@ -5299,7 +5319,7 @@
         });
 
 
-        // ── Drawing Mini EQ Curves (Retina / Mobile Crisp) ─────────
+        // ── Drawing Mini EQ Curves & Real-time Channel RTA (Retina / Mobile Crisp) ──
         function drawMiniEQ(chIdx) {
             const data = channelStripsData[chIdx];
             if (!data) return;
@@ -5320,6 +5340,83 @@
             ctx.scale(dpr, dpr);
             ctx.clearRect(0, 0, w, h);
 
+            // 1. Processamento e Interpolação do RTA em Tempo Real
+            let hasRTA = false;
+            const rtaArr = miniChannelRTA[chIdx];
+            const isMuted = data.muteBtn ? data.muteBtn.classList.contains('muted') : false;
+            const faderPct = data.faderCap ? (parseFloat(data.faderCap.style.bottom) || 0) : 0;
+            const hasSignal = !isMuted && faderPct > 1.0 && (vuSmooth[chIdx] > 0.35 || (chIdx > 0 && data.noiseEnabled));
+
+            let maxRaw = 0;
+            if (hasSignal && data.rtaAnalyser && audioCtx && audioCtx.state === 'running') {
+                data.rtaAnalyser.getByteFrequencyData(miniFreqData);
+                for (let k = 0; k < 64; k += 4) {
+                    if (miniFreqData[k] > maxRaw) maxRaw = miniFreqData[k];
+                }
+            }
+
+            if (hasSignal && maxRaw > 12) {
+                // Áudio Real via FFT do Analisador Web Audio
+                for (let px = 0; px <= w; px++) {
+                    const bin = miniBinMap[px];
+                    const rawVal = miniFreqData[bin] || 0;
+                    const target = rawVal > 12 ? Math.min(1.0, (rawVal - 12) / 215) : 0;
+                    const speed = target > rtaArr[px] ? 0.8 : 0.22;
+                    rtaArr[px] += (target - rtaArr[px]) * speed;
+                    if (rtaArr[px] > 0.01) hasRTA = true;
+                }
+            } else if (hasSignal && vuSmooth[chIdx] > 0.5) {
+                // Modo Reativo Suave para dispositivos móveis ou ruído rosa
+                const vuRatio = vuSmooth[chIdx] / 100;
+                const time = performance.now() * 0.007;
+                for (let px = 0; px <= w; px++) {
+                    const fFactor = 1.0 - (px / w) * 0.4;
+                    const wave = Math.sin(px * 0.28 + time) * 0.12 + Math.cos(px * 0.5 - time * 0.7) * 0.08;
+                    const target = Math.max(0, Math.min(1.0, (vuRatio * fFactor + wave * vuRatio) * 0.95));
+                    const speed = target > rtaArr[px] ? 0.75 : 0.25;
+                    rtaArr[px] += (target - rtaArr[px]) * speed;
+                    if (rtaArr[px] > 0.01) hasRTA = true;
+                }
+            } else {
+                // Decaimento suave até 0 quando em silêncio
+                for (let px = 0; px <= w; px++) {
+                    rtaArr[px] *= 0.72;
+                    if (rtaArr[px] < 0.01) rtaArr[px] = 0;
+                    else hasRTA = true;
+                }
+            }
+            miniChannelActiveRTA[chIdx] = hasRTA;
+
+            // 2. Renderização do Espectro RTA no fundo do display
+            if (hasRTA) {
+                const rtaGrad = ctx.createLinearGradient(0, 0, 0, h);
+                rtaGrad.addColorStop(0.0, "rgba(0, 240, 255, 0.65)");  // Ciano neon brilhante no topo
+                rtaGrad.addColorStop(0.45, "rgba(255, 170, 0, 0.40)"); // Âmbar BERCAME no meio
+                rtaGrad.addColorStop(1.0, "rgba(255, 100, 0, 0.12)");  // Base âmbar translúcida
+
+                ctx.fillStyle = rtaGrad;
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                for (let px = 0; px <= w; px++) {
+                    const rtaH = rtaArr[px] * (h - 2);
+                    ctx.lineTo(px, h - rtaH);
+                }
+                ctx.lineTo(w, h);
+                ctx.closePath();
+                ctx.fill();
+
+                // Linha de contorno neon dos picos de frequência
+                ctx.strokeStyle = "rgba(0, 240, 255, 0.55)";
+                ctx.lineWidth = 1.0;
+                ctx.beginPath();
+                ctx.moveTo(0, h - rtaArr[0] * (h - 2));
+                for (let px = 1; px <= w; px++) {
+                    ctx.lineTo(px, h - rtaArr[px] * (h - 2));
+                }
+                ctx.stroke();
+            }
+
+            // 3. Renderização da Curva de Equalização Sobreposta
             const bands = channelEQState[chIdx] || defaultBands;
             const hpf = (typeof channelHPFState !== 'undefined' && channelHPFState[chIdx]) 
                 ? channelHPFState[chIdx] : null;
@@ -5327,9 +5424,8 @@
                 ? channelEQEnabled[chIdx] : true;
             const minF = Math.log10(20), maxF = Math.log10(20000);
 
-            ctx.fillStyle = "rgba(255, 136, 0, 0.2)";
-            ctx.strokeStyle = "#FF8800";
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = isEqOn ? "#FF9900" : "#777777";
+            ctx.lineWidth = 1.6;
 
             ctx.beginPath();
             ctx.moveTo(0, h/2);
@@ -5467,7 +5563,7 @@
                         <div class="gain-val" title="Toque para resetar para 0.0 dB">+0.0 dB</div>
                     </div>
                 </div>
-                <div class="eq-display" title="Abrir EQ Eight">
+                <div class="eq-display" title="EQ Eight & RTA em Tempo Real (Toque para abrir)">
                     <canvas class="eq-canvas" width="70" height="32"></canvas>
                 </div>
                 <button class="mute-btn">Mute</button>
