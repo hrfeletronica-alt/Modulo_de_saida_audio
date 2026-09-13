@@ -56,7 +56,7 @@ class _MixerScreenState extends State<MixerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: List.generate(totalChannels, (index) {
               final isInput = index == 0;
-              final channelNumber = isInput ? 'LR' : '$index';
+              final channelNumber = isInput ? '' : '$index';
               final defaultName = isInput ? 'Entrada' : 'Ch $index';
               
               return Padding(
@@ -369,14 +369,15 @@ class _ChannelStripState extends State<ChannelStrip> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  widget.channelNumber,
-                  style: TextStyle(
-                    color: widget.isInput ? Colors.white : Colors.black,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                if (!widget.isInput)
+                  Text(
+                    widget.channelNumber,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: Container(

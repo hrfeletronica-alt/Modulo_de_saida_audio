@@ -756,6 +756,8 @@
             color: #ffaa33;
             pointer-events: none;
             font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
 
         .channel-strip.pink-noise-active {
@@ -2297,7 +2299,7 @@
                                 applyName(idx, ch.name);
                                 if (channelStripsData[idx].pill) {
                                     const textSpan = channelStripsData[idx].pill.querySelector('.ribbon-text') || channelStripsData[idx].pill;
-                                    textSpan.textContent = idx === 0 ? "LR" : `${idx}: ${ch.name}`;
+                                    textSpan.textContent = idx === 0 ? "Entrada" : `${idx}: ${ch.name}`;
                                 }
                             }
                             if (ch.bands && typeof channelEQState !== 'undefined') channelEQState[idx] = ch.bands;
@@ -3506,11 +3508,11 @@
                 const btn = document.createElement('button');
                 btn.className = `ch-btn ${i === channelIdx ? 'active' : ''}`;
                 
-                let labelName = i === 0 ? 'LR' : `${i}`;
+                let labelName = i === 0 ? 'Entrada' : `${i}`;
                 if (channelStrips[i]) {
                     const inp = channelStrips[i].querySelector('.channel-input');
                     if (inp && inp.value.trim() !== '') {
-                        labelName = i === 0 ? 'LR' : `${i}: ${inp.value.trim()}`;
+                        labelName = i === 0 ? 'Entrada' : `${i}: ${inp.value.trim()}`;
                     }
                 }
                 btn.textContent = labelName;
@@ -5388,10 +5390,10 @@
             }
         }
 
-        // Generate mixer channels (LR Entrada + Ch 1 to Ch 10 Saídas)
+        // Generate mixer channels (Entrada + Ch 1 to Ch 10 Saídas)
         for (let i = 0; i < 11; i++) {
             const isInput = i === 0;
-            const channelNumber = isInput ? "LR" : `${i}`;
+            const channelNumber = isInput ? "" : `${i}`;
             const defaultName = isInput ? "Entrada" : `Ch ${i}`;
             
             const strip = document.createElement('div');
@@ -5437,7 +5439,7 @@
                     </div>
                 </div>
                 <div class="channel-label-container">
-                    <span class="channel-number">${channelNumber}</span>
+                    ${isInput ? '' : `<span class="channel-number">${channelNumber}</span>`}
                     <input type="text" class="channel-input" value="${defaultName}" ${isInput ? 'readonly' : ''} maxlength="10">
                 </div>
             `;
@@ -5465,7 +5467,7 @@
                 pill = document.createElement('button');
                 pill.className = `ribbon-pill ${isInput ? 'active' : ''}`;
                 pill.setAttribute('data-ch', i);
-                const labelText = isInput ? "LR" : `${channelNumber}: ${defaultName}`;
+                const labelText = isInput ? "Entrada" : `${channelNumber}: ${defaultName}`;
                 pill.innerHTML = `<span class="ribbon-dot"></span><span class="ribbon-text">${labelText}</span>`;
                 pill.onclick = () => {
                     strip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -5623,7 +5625,7 @@
             channelInput.addEventListener('input', () => {
                 if (pill) {
                     const textSpan = pill.querySelector('.ribbon-text') || pill;
-                    textSpan.textContent = isInput ? "LR" : `${channelNumber}: ${channelInput.value}`;
+                    textSpan.textContent = isInput ? "Entrada" : `${channelNumber}: ${channelInput.value}`;
                 }
                 if (modal.style.display === 'flex') {
                     if (activeChannelIdx === i) {
