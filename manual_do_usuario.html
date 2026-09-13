@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual do Usuário - BERCAME Pro Audio Mixer 1/10</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 18mm 15mm 18mm 15mm;
+            @bottom-right {
+                content: counter(page);
+                font-family: 'Inter', sans-serif;
+                font-size: 9pt;
+                color: #888;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #1e2229;
+            background: #ffffff;
+            font-size: 10pt;
+            line-height: 1.55;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* ─── Capa ─── */
+        .cover-page {
+            height: 100vh;
+            min-height: 250mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-after: always;
+            padding: 20mm 10mm 10mm 10mm;
+            background: linear-gradient(145deg, #0e1015 0%, #171a22 100%);
+            color: #ffffff;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-page::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(255, 153, 0, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .cover-page::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(0, 210, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .cover-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .cover-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 14px;
+            border: 2px solid rgba(255, 153, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 153, 0, 0.4);
+            object-fit: cover;
+        }
+
+        .cover-brand-title {
+            font-size: 26pt;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .cover-brand-sub {
+            font-size: 11pt;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #ff9900;
+            text-transform: uppercase;
+        }
+
+        .cover-center {
+            margin: auto 0;
+            z-index: 2;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff9900, #ff6600);
+            color: #000;
+            font-weight: 800;
+            font-size: 10pt;
+            letter-spacing: 1px;
+            padding: 6px 14px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+
+        .cover-main-title {
+            font-size: 30pt;
+            font-weight: 800;
+            line-height: 1.15;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+            margin-bottom: 14px;
+        }
+
+        .cover-subtitle {
+            font-size: 13pt;
+            color: #a0aec0;
+            max-width: 580px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .cover-spec-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .cover-spec-pill {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 9pt;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .cover-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 8.5pt;
+            color: #718096;
+            z-index: 2;
+        }
+
+        .cover-bottom strong {
+            color: #cbd5e0;
+        }
+
+        /* ─── Estrutura das Páginas ─── */
+        .page-break {
+            page-break-before: always;
+        }
+
+        .header-rule {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .header-rule .brand {
+            color: #d97706;
+            font-weight: 800;
+        }
+
+        h1 {
+            font-size: 18pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 22px;
+            background: #ff9900;
+            border-radius: 2px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 4px;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #334155;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 12px;
+            color: #334155;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* ─── Caixas de Destaque / Callouts ─── */
+        .callout {
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 14px 0;
+            font-size: 9.5pt;
+            border-left: 4px solid;
+        }
+
+        .callout-info {
+            background: #f0f9ff;
+            border-color: #0284c7;
+            color: #0369a1;
+        }
+
+        .callout-warning {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            color: #b45309;
+        }
+
+        .callout-tip {
+            background: #f0fdf4;
+            border-color: #16a34a;
+            color: #15803d;
+        }
+
+        .callout-title {
+            font-weight: 800;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ─── Tabelas Técnicas ─── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0 18px 0;
+            font-size: 9pt;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 8pt;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 7.5pt;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-orange { background: #ffedd5; color: #c2410c; }
+        .badge-cyan   { background: #e0f2fe; color: #0369a1; }
+        .badge-green  { background: #dcfce7; color: #15803d; }
+        .badge-purple { background: #f3e8ff; color: #7e22ce; }
+
+        /* ─── Diagrama de Fluxo / Signal Flow ─── */
+        .signal-flow {
+            background: #0f172a;
+            color: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8pt;
+        }
+
+        .flow-step {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 8px 12px;
+            text-align: center;
+            flex: 1;
+            min-width: 90px;
+        }
+
+        .flow-step.active {
+            border-color: #ff9900;
+            box-shadow: 0 0 8px rgba(255, 153, 0, 0.4);
+        }
+
+        .flow-arrow {
+            color: #ff9900;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+
+        /* ─── Cartões de Destaque ─── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ─── Código / Terminal ─── */
+        pre, code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 4px;
+            font-size: 8.5pt;
+        }
+
+        code {
+            padding: 2px 5px;
+            background: #f1f5f9;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+        }
+
+        pre {
+            padding: 12px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border-left: 3px solid #ff9900;
+        }
+
+        pre code {
+            padding: 0;
+            background: transparent;
+            color: inherit;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- CAPA DO MANUAL -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="cover-page">
+        <div class="cover-top">
+            <img src="bercame_logo_dark.jpg" alt="BERCAME" class="cover-logo">
+            <div>
+                <div class="cover-brand-title">BERCAME</div>
+                <div class="cover-brand-sub">PRO AUDIO SYSTEMS</div>
+            </div>
+        </div>
+
+        <div class="cover-center">
+            <span class="cover-badge">Manual de Operação & Referência Técnica</span>
+            <div class="cover-main-title">Módulo de Saída de Áudio Digital 1/10</div>
+            <div class="cover-subtitle">
+                Guia completo de instalação, operação da interface gráfica, equalizadores paramétrico e gráfico, análise espectral em tempo real e integração via rede.
+            </div>
+
+            <div class="cover-spec-pills">
+                <span class="cover-spec-pill">DSP ESP32-S3 Dual-Core</span>
+                <span class="cover-spec-pill">Entrada ADC PCM1808 (24-bit / 48 kHz)</span>
+                <span class="cover-spec-pill">5 × DACs Estéreo PCM5102A (10 Saídas)</span>
+                <span class="cover-spec-pill">Ethernet W5500 SPI + WebSockets</span>
+                <span class="cover-spec-pill">PEQ 6 Bandas + HPF Butterworth</span>
+                <span class="cover-spec-pill">GEQ 31 Bandas ISO</span>
+            </div>
+        </div>
+
+        <div class="cover-bottom">
+            <div>
+                <strong>BERCAME Pro Audio</strong> • Engenharia e Desenvolvimento Acústico<br>
+                Documentação Oficial do Sistema • Revisão de Firmware v2.0
+            </div>
+            <div style="text-align: right;">
+                <strong>Modelo:</strong> BRC-MIX10-S3<br>
+                <strong>Data de Emissão:</strong> Setembro / 2026
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PÁGINA 1: VISÃO GERAL & HARDWARE -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page-break"></div>
+    <div class="header-rule">
+        <span><span class="brand">BERCAME</span> Pro Audio • Manual do Usuário</span>
+        <span>Seção 1: Visão Geral e Arquitetura</span>
+    </div>
+
+    <h1>1. Visão Geral do Sistema</h1>
+    <p>
+        O <strong>Módulo de Saída de Áudio Digital BERCAME 1/10</strong> é uma central profissional de distribuição e processamento acústico de alta fidelidade. O sistema é capaz de capturar um sinal estéreo analógico em alta resolução, processá-lo digitalmente através do microcontrolador <strong>ESP32-S3</strong> com aceleração vetorial DSP, e distribuir o áudio de forma independente para até <strong>10 canais de saída analógicos</strong> de ultra-baixo ruído.
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-title">🎛️ Processamento Dedicado por Canal</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Cada um dos 10 canais de saída conta com controle de ganho de entrada (Trim), fader de volume independente, botão de Mute individual, filtro passa-altas (HPF), equalizador paramétrico de 6 bandas e equalizador gráfico ISO de 31 bandas.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">🌐 Conectividade & Controle em Rede</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Equipado com interface Ethernet W5500 SPI cabeada de baixa latência e servidor local WebSocket + SSE integrado. Permite que múltiplos aparelhos (computadores, tablets e smartphones) controlem a mesa simultaneamente e em tempo real.
+            </p>
+        </div>
+    </div>
+
+    <h2>Fluxo do Sinal de Áudio (Signal Flow)</h2>
+    <div class="signal-flow">
+        <div class="flow-step">Entrada Analógica<br><small>PCM1808 (ADC)</small></div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step">I2S RX<br><small>24-bit / 48 kHz</small></div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step active">ESP32-S3 DSP<br><small>Preamp • HPF • EQ</small></div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step">I2S TX TDM<br><small>10 Slots Mono</small></div>
+        <div class="flow-arrow">➔</div>
+        <div class="flow-step">5× PCM5102A<br><small>10 Saídas DAC</small></div>
+    </div>
+
+    <h2>Especificações Técnicas de Engenharia</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Parâmetro</th>
+                <th>Especificação</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Unidade de Processamento (MCU)</strong></td>
+                <td>ESP32-S3 Dual-Core Xtensa LX7 @ 240 MHz</td>
+                <td>Instruções vetoriais aceleradas para DSP de áudio</td>
+            </tr>
+            <tr>
+                <td><strong>Conversão Analógico-Digital (ADC)</strong></td>
+                <td>Texas Instruments PCM1808 (24-bit Delta-Sigma)</td>
+                <td>Taxa de amostragem: 48 kHz • SNR típico: 99 dB</td>
+            </tr>
+            <tr>
+                <td><strong>Conversão Digital-Analógica (DAC)</strong></td>
+                <td>5 × Texas Instruments PCM5102A (32-bit / 384 kHz capable)</td>
+                <td>Total de 10 saídas mono line-out (2.1 Vrms) • SNR: 112 dB</td>
+            </tr>
+            <tr>
+                <td><strong>Comunicação Digital de Áudio</strong></td>
+                <td>Barramento I2S com modo TDM (Time Division Multiplexing)</td>
+                <td>10 slots síncronos de áudio de alta precisão</td>
+            </tr>
+            <tr>
+                <td><strong>Interface de Rede</strong></td>
+                <td>Wiznet W5500 via barramento SPI Master</td>
+                <td>TCP/IP por hardware cabeado para imunidade a interferências</td>
+            </tr>
+            <tr>
+                <td><strong>Controle de Mute Físico</strong></td>
+                <td>10 GPIOs dedicados com circuito anti-pop</td>
+                <td>Pino DEEM / Mute acionado diretamente em corte de energia</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="callout callout-info">
+        <div class="callout-title">ℹ️ Nota de Engenharia: Aterramento em Estrela (Star Ground)</div>
+        Para máxima fidelidade sonora e imunidade a ruídos de chaveamento da fonte ou de redes digitais, todo o plano de terra analógico (AGND) deve convergir em um único ponto com o plano digital (DGND), preferencialmente junto ao conector de entrada de alimentação.
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PÁGINA 2: PINAGEM & INSTALAÇÃO ELÉTRICA -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page-break"></div>
+    <div class="header-rule">
+        <span><span class="brand">BERCAME</span> Pro Audio • Manual do Usuário</span>
+        <span>Seção 2: Conexões Físicas e Pinagem</span>
+    </div>
+
+    <h1>2. Pinagem de Conexão do Hardware</h1>
+    <p>
+        Abaixo estão discriminados os pinos de interconexão entre o microcontrolador ESP32-S3, os conversores de áudio e os módulos auxiliares.
+    </p>
+
+    <h2>Barramento I2S RX (Entrada ADC - PCM1808)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sinal</th>
+                <th>Pino ESP32-S3</th>
+                <th>Pino PCM1808</th>
+                <th>Função / Descrição</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>BCK (Bit Clock)</strong></td>
+                <td><span class="badge badge-cyan">GPIO 16</span></td>
+                <td>BCK (Pino 7)</td>
+                <td>Clock de bits do áudio digital (64 × Fs)</td>
+            </tr>
+            <tr>
+                <td><strong>WS / LRCK</strong></td>
+                <td><span class="badge badge-cyan">GPIO 17</span></td>
+                <td>LRCK (Pino 8)</td>
+                <td>Word Select / Frame Clock (48.0 kHz)</td>
+            </tr>
+            <tr>
+                <td><strong>DATA IN</strong></td>
+                <td><span class="badge badge-cyan">GPIO 18</span></td>
+                <td>DOUT (Pino 9)</td>
+                <td>Fluxo serial de dados digitalizados da entrada estéreo</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Barramento I2S TX (Saídas DACs - 5 × PCM5102A)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sinal</th>
+                <th>Pino ESP32-S3</th>
+                <th>Pinos PCM5102A (1 a 5)</th>
+                <th>Função / Descrição</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>BCK (TX Clock)</strong></td>
+                <td><span class="badge badge-green">GPIO 4</span></td>
+                <td>BCK de todas as 5 placas</td>
+                <td>Clock de transmissão TDM compartilhado</td>
+            </tr>
+            <tr>
+                <td><strong>WS (TX Sync)</strong></td>
+                <td><span class="badge badge-green">GPIO 5</span></td>
+                <td>LCK de todas as 5 placas</td>
+                <td>Sincronismo de quadro multicanal</td>
+            </tr>
+            <tr>
+                <td><strong>DATA OUT</strong></td>
+                <td><span class="badge badge-green">GPIO 6</span></td>
+                <td>DIN de todas as 5 placas</td>
+                <td>Linha serial de áudio digital multiplexada no tempo</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Barramento SPI (Rede Ethernet Cabeada - W5500)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sinal</th>
+                <th>Pino ESP32-S3</th>
+                <th>Módulo W5500</th>
+                <th>Função / Descrição</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>SPI MOSI</strong></td>
+                <td><span class="badge badge-purple">GPIO 11</span></td>
+                <td>MOSI</td>
+                <td>Comunicação Master-Out Slave-In</td>
+            </tr>
+            <tr>
+                <td><strong>SPI MISO</strong></td>
+                <td><span class="badge badge-purple">GPIO 12</span></td>
+                <td>MISO</td>
+                <td>Comunicação Master-In Slave-Out</td>
+            </tr>
+            <tr>
+                <td><strong>SPI SCLK</strong></td>
+                <td><span class="badge badge-purple">GPIO 13</span></td>
+                <td>SCLK</td>
+                <td>Clock serial de barramento (até 40 MHz)</td>
+            </tr>
+            <tr>
+                <td><strong>SPI CS (Chip Select)</strong></td>
+                <td><span class="badge badge-purple">GPIO 10</span></td>
+                <td>CS / SS</td>
+                <td>Habilitação do dispositivo de rede</td>
+            </tr>
+            <tr>
+                <td><strong>RST / INT</strong></td>
+                <td><span class="badge badge-purple">GPIO 9 / 14</span></td>
+                <td>RST / INT</td>
+                <td>Reset por hardware e interrupção de pacotes</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Tabela de Pinos de Mute das 10 Saídas (Anti-Pop)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Canal</th>
+                <th>Pino ESP32-S3</th>
+                <th>Canal</th>
+                <th>Pino ESP32-S3</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Saída 1 (Ch 1)</strong></td>
+                <td><span class="badge badge-orange">GPIO 1</span></td>
+                <td><strong>Saída 6 (Ch 6)</strong></td>
+                <td><span class="badge badge-orange">GPIO 38</span></td>
+            </tr>
+            <tr>
+                <td><strong>Saída 2 (Ch 2)</strong></td>
+                <td><span class="badge badge-orange">GPIO 2</span></td>
+                <td><strong>Saída 7 (Ch 7)</strong></td>
+                <td><span class="badge badge-orange">GPIO 39</span></td>
+            </tr>
+            <tr>
+                <td><strong>Saída 3 (Ch 3)</strong></td>
+                <td><span class="badge badge-orange">GPIO 3</span></td>
+                <td><strong>Saída 8 (Ch 8)</strong></td>
+                <td><span class="badge badge-orange">GPIO 40</span></td>
+            </tr>
+            <tr>
+                <td><strong>Saída 4 (Ch 4)</strong></td>
+                <td><span class="badge badge-orange">GPIO 7</span></td>
+                <td><strong>Saída 9 (Ch 9)</strong></td>
+                <td><span class="badge badge-orange">GPIO 41</span></td>
+            </tr>
+            <tr>
+                <td><strong>Saída 5 (Ch 5)</strong></td>
+                <td><span class="badge badge-orange">GPIO 8</span></td>
+                <td><strong>Saída 10 (Ch 10)</strong></td>
+                <td><span class="badge badge-orange">GPIO 42</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PÁGINA 3: SERVIDOR & INTERFACE GRÁFICA -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page-break"></div>
+    <div class="header-rule">
+        <span><span class="brand">BERCAME</span> Pro Audio • Manual do Usuário</span>
+        <span>Seção 3: Operação da Interface Web</span>
+    </div>
+
+    <h1>3. Inicialização e Conexão em Rede</h1>
+    <p>
+        O controle do mixer é feito através da interface web interativa do sistema, hospedada pelo script servidor <code>server.py</code> ou pelo servidor embarcado no ESP32-S3.
+    </p>
+
+    <h2>Iniciando o Servidor no Computador (Modo Servidor / Ponte)</h2>
+    <p>No terminal (Prompt de Comando ou PowerShell), navegue até o diretório do projeto e execute:</p>
+    <pre><code>python server.py</code></pre>
+
+    <div class="callout callout-tip">
+        <div class="callout-title">✅ Acesso ao Sistema</div>
+        Ao iniciar, o terminal exibirá as URLs de acesso disponíveis:
+        <ul style="margin-top: 6px; margin-bottom: 0;">
+            <li><strong>No Computador Local:</strong> <code>http://localhost:8080/preview.html</code></li>
+            <li><strong>No Celular / Tablet (mesma rede Wi-Fi):</strong> <code>http://[IP-DO-SEU-PC]:8080/preview.html</code></li>
+        </ul>
+    </div>
+
+    <h2>Controles do Painel Principal (Mixer Strips)</h2>
+    <p>A tela principal apresenta 11 canais verticais: <strong>Canal 0 (Entrada LR Master)</strong> e <strong>Canais 1 a 10 (Saídas Analógicas Independentes)</strong>.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-title">🎚️ Fader Vertical de Volume</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Curso suave calibrado em dB analógico. A marca <strong>0U (70%)</strong> representa ganho unitário (0.0 dB). Acima de 70% permite até +6 dB de ganho digital limpo, e abaixo reduz até silêncio absoluto (-∞ dB).
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">🔘 Knob de Ganho (Trim)</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Permite pré-amplificar ou atenuar o canal entre <strong>-18.0 dB e +18.0 dB</strong>. Clique duas vezes no knob para resetar instantaneamente para 0.0 dB.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">🔴 Botão Mute / Desmute</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Silencia o canal instantaneamente com rampa suave de fade-out digital para evitar cliques ou ruídos acústicos indesejados nas caixas de som.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">📊 VU Meter Analógico Reativo</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Medidor estéreo em colunas de LED gradiente (verde até -10dB, amarelo até 0dB e vermelho para picos acima de +3dB). Possui balística com ataque rápido e decaimento balístico natural.
+            </p>
+        </div>
+    </div>
+
+    <h2>Mini-Gráfico de EQ na Faixa do Canal</h2>
+    <p>
+        Cada canal possui uma pequena tela gráfica de curva no topo da sua coluna. Dando um <strong>toque ou clique no mini-gráfico</strong>, a janela modal de equalização profissional do canal é aberta na tela.
+    </p>
+
+    <div class="callout callout-warning">
+        <div class="callout-title">⚠️ Entrada LR vs. Canais de Saída</div>
+        O <strong>Canal 0 (LR Entrada)</strong> alimenta o barramento mestre interno do mixer. Se o Fader da Entrada estiver em silêncio ou em Mute, nenhum áudio chegará às Saídas 1 a 10.
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PÁGINA 4: EQUALIZADORES (PEQ & GEQ) -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page-break"></div>
+    <div class="header-rule">
+        <span><span class="brand">BERCAME</span> Pro Audio • Manual do Usuário</span>
+        <span>Seção 4: Equalizadores PEQ e GEQ</span>
+    </div>
+
+    <h1>4. Sistema de Equalização Profissional</h1>
+    <p>
+        O processamento acústico de cada canal conta com dois poderosos motores de equalização que operam em cascata cumulativa de alta precisão de 64 bits:
+    </p>
+
+    <h2>Equalizador Paramétrico (PEQ Eight)</h2>
+    <p>
+        Permite ajustes cirúrgicos com 6 bandas totalmente configuráveis mais um filtro Passa-Altas (HPF) Butterworth dedicado:
+    </p>
+    <ul>
+        <li><strong>Filtro Passa-Altas (HPF):</strong> Corta frequências sub-graves de 20 Hz a 1000 Hz, com seletor de inclinação de <strong>12 dB/oitava</strong> ou <strong>24 dB/oitava</strong>. Indispensável para proteger alto-falantes contra excursão excessiva de cone e remover ruídos de microfonia e vento.</li>
+        <li><strong>Banda 1 (Low):</strong> Frequência grave de corte configurável com controle de ganho (±15.0 dB) e fator Q.</li>
+        <li><strong>Bandas 2 a 5 (Peaking / Sino):</strong> Filtros paramétricos ideais para atenuar ressonâncias de sala ou reforçar harmônicos com fator Q de 0.1 (largo) até 10.0 (cirúrgico).</li>
+        <li><strong>Banda 6 (High):</strong> Filtro shelving de agudos para controlar o brilho e o ar do áudio acima de 10 kHz.</li>
+    </ul>
+
+    <div class="callout callout-info">
+        <div class="callout-title">🖱️ Interação no Gráfico de PEQ</div>
+        Você pode clicar e arrastar diretamente as bolhas numeradas (1 a 6) sobre o gráfico para alterar simultaneamente a frequência (eixo horizontal) e o ganho (eixo vertical). Dando duplo-clique sobre uma bolha, o ganho dela zera instantaneamente para 0.0 dB.
+    </div>
+
+    <h2>Equalizador Gráfico de 31 Bandas ISO (GEQ)</h2>
+    <p>
+        Padrão de engenharia sonora internacional com 31 frequências normalizadas espaçadas em 1/3 de oitava (de 20 Hz até 20.000 Hz):
+    </p>
+    <ul>
+        <li><strong>Curso de Cada Fader:</strong> Escala profissional de <strong>-12.0 dB até +12.0 dB</strong> com linha central verde de 0 dB.</li>
+        <li><strong>Preenchimento Visual em Tempo Real:</strong> Uma barra vermelha parte do centro para cima (em ganho) ou para baixo (em atenuação), permitindo leitura rápida da curva.</li>
+        <li><strong>RTA Integrado por Coluna:</strong> Cada fader possui uma coluna de espectro translúcida atrás do cap, mostrando a energia exata daquela frequência no momento.</li>
+        <li><strong>Botão Zerar (Flat):</strong> Reseta todas as 31 bandas para 0.0 dB com um único clique.</li>
+    </ul>
+
+    <h2>Tabela de Frequências Padrão ISO (1/3 Oitava)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Região Espectral</th>
+                <th>Frequências Centrais (Hz)</th>
+                <th>Aplicação Prática</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Sub-Graves</strong></td>
+                <td>20, 25, 31.5, 40, 50, 63</td>
+                <td>Peso e vibração física (subwoofers, bumbo e baixo)</td>
+            </tr>
+            <tr>
+                <td><strong>Graves</strong></td>
+                <td>80, 100, 125, 160, 200, 250</td>
+                <td>Corpo e calor dos instrumentos e vozes masculinas</td>
+            </tr>
+            <tr>
+                <td><strong>Médios-Graves</strong></td>
+                <td>315, 400, 500, 630, 800</td>
+                <td>Definição tonal; excessos causam som "oco/caixa"</td>
+            </tr>
+            <tr>
+                <td><strong>Médios</strong></td>
+                <td>1k, 1.25k, 1.6k, 2k, 2.5k</td>
+                <td>Inteligibilidade da voz humana e ataque de instrumentos</td>
+            </tr>
+            <tr>
+                <td><strong>Médios-Agudos</strong></td>
+                <td>3.15k, 4k, 5k, 6.3k, 8k</td>
+                <td>Presença e definição; região crítica para evitar sibilância</td>
+            </tr>
+            <tr>
+                <td><strong>Agudos / Ar</strong></td>
+                <td>10k, 12.5k, 16k, 20k</td>
+                <td>Brilho, pratos de bateria, ambiência e fidelidade acústica</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PÁGINA 5: RTA & SINCRONIZAÇÃO -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div class="page-break"></div>
+    <div class="header-rule">
+        <span><span class="brand">BERCAME</span> Pro Audio • Manual do Usuário</span>
+        <span>Seção 5: Analisador RTA e Sincronização</span>
+    </div>
+
+    <h1>5. Analisador Espectral (RTA) & Ruído Rosa</h1>
+    <p>
+        O modal de equalização conta com um analisador de espectro em tempo real (<strong>RTA - Real Time Analyzer</strong>) com 64 bandas de resolução logarítmica, calibrado para leitura visual imediata da resposta acústica.
+    </p>
+
+    <h2>Características do RTA</h2>
+    <ul>
+        <li><strong>Detecção Fiel Pós-Filtro:</strong> O RTA reflete rigorosamente os cortes e reforços aplicados pelo HPF, PEQ e GEQ, além do nível do fader do canal.</li>
+        <li><strong>Peak Hold:</strong> Marcadores de pico brilhantes no topo das barras seguram visualmente o ponto máximo do sinal com decaimento suave.</li>
+        <li><strong>Filtro de Ruído Rosa Sintetizado:</strong> O botão <strong>`Ruído Rosa: On`</strong> aciona um gerador estocástico interno (algoritmo de Voss-McCartney com declive natural de -3 dB/oitava), permitindo alinhar sistemas de som, medir caixas acústicas e calibrar ambientes sem necessidade de arquivos externos.</li>
+    </ul>
+
+    <h2>Sincronização em Tempo Real (Multi-Aparelhos)</h2>
+    <p>
+        O sistema adota arquitetura mestre-cliente via WebSockets de alta velocidade com reconexão automática:
+    </p>
+
+    <div class="card-grid">
+        <div class="card">
+            <div class="card-title">🟢 Indicador de Status</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                O badge no topo da tela informa: <strong>"Sincronizado (X aparelhos)"</strong> em verde quando há 2 ou mais aparelhos conectados (ex: PC e Celular), permitindo operação colaborativa do som ao mesmo tempo.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">💾 Memória Não-Volátil</div>
+            <p style="font-size: 8.5pt; margin: 0;">
+                Qualquer ajuste de fader, mute, ganho ou equalização é salvo automaticamente no arquivo <code>mixer_state.json</code> e na memória flash do ESP32. Em caso de queda de energia, o sistema restaura o estado exato ao ligar.
+            </p>
+        </div>
+    </div>
+
+    <h2>Guia Rápido de Resolução de Problemas (Troubleshooting)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Sintoma</th>
+                <th>Causa Provável</th>
+                <th>Ação Recomendada</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Celular não conecta</strong></td>
+                <td>Aparelhos em redes Wi-Fi diferentes ou firewall do PC ativo</td>
+                <td>Certifique-se de que PC e celular estão na mesma rede Wi-Fi. Permita a porta 8080 no Firewall do Windows.</td>
+            </tr>
+            <tr>
+                <td><strong>Sem som nas saídas</strong></td>
+                <td>Fader do Canal 0 (Entrada) fechado ou botão Mute ativado</td>
+                <td>Verifique se o Fader do Canal 0 (LR) e os faders dos canais 1 a 10 estão abertos e desmutados.</td>
+            </tr>
+            <tr>
+                <td><strong>Ruído ou chiado contínuo</strong></td>
+                <td>Loop de terra ou fonte de alimentação com ruído excessivo</td>
+                <td>Verifique as conexões de terra (Star Ground). Utilize fonte de alimentação chaveada de boa qualidade (5V com baixo ripple).</td>
+            </tr>
+            <tr>
+                <td><strong>Distorção digital (Clipping)</strong></td>
+                <td>Ganho de pré-amplificação excessivo (+18 dB)</td>
+                <td>Dê duplo-clique no knob de ganho do canal para retornar a 0.0 dB e reduza os reforços de EQ que ultrapassem +6 dB.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px; padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center; font-size: 8.5pt; color: #64748b;">
+        <strong>BERCAME PRO AUDIO</strong> • Suporte Técnico e Engenharia de Hardware<br>
+        Desenvolvido com tecnologia ESP32-S3 e Texas Instruments Burr-Brown DACs.<br>
+        Todos os direitos reservados.
+    </div>
+
+</body>
+</html>
